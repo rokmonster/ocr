@@ -1,0 +1,410 @@
+{
+    "title": "More Info Kills (iPhone 11 Pro (with power))",
+    "author": "Lisauskas Julius",
+    "game_version": "1004516_160511",
+    "width": 2688,
+    "height": 1242,
+    "ocr_schema": {
+        "name": {
+            "callback": 0,
+            "crop": [
+                780,
+                180,
+                400,
+                60
+            ]
+        },
+        "power": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1365,
+                200,
+                300,
+                30
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "kill_points": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1465,
+                266,
+                270,
+                36
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t5_kills": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1380,
+                790,
+                300,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t5_kill_points": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1900,
+                790,
+                250,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t4_kills": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1380,
+                735,
+                300,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t4_kill_points": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1900,
+                735,
+                250,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t3_kills": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1380,
+                670,
+                300,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t3_kill_points": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1900,
+                670,
+                250,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t2_kills": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1380,
+                610,
+                300,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t2_kill_points": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1900,
+                610,
+                250,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t1_kills": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1380,
+                550,
+                300,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t1_kill_points": {
+            "lang": [
+                "eng"
+            ],
+            "callback": [
+                "carmelosantana\\RoKMonster\\Transformer",
+                "strRemoveNonNumeric"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1900,
+                550,
+                250,
+                40
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        }
+    },
+    "fingerprint": "e8f8fcf8f8f8f0f0",
+    "threshold": 2,
+    "oem": 0,
+    "psm": 7,
+    "table": [
+        [
+            "Name",
+            "name",
+            false,
+            "white"
+        ],
+        [
+            "Power",
+            "power",
+            false,
+            "green"
+        ],
+        [
+            "Kill Points",
+            "kill_points",
+            false,
+            "white"
+        ],
+        [
+            "T4 Kills",
+            "t4_kills",
+            false,
+            "white"
+        ],
+        [
+            "T4 Points",
+            "t4_kill_points",
+            false,
+            "white"
+        ],
+        [
+            "T5 Kills",
+            "t5_kills",
+            false,
+            "white"
+        ],
+        [
+            "T5 Points",
+            "t5_kill_points",
+            false,
+            "white"
+        ]
+    ]
+}
