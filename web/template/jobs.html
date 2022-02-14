@@ -1,0 +1,35 @@
+{{template "partials/head.html" .}}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">Jobs</div>
+        <table class="card-table table table-vcenter table-sm table-striped table-hover">
+            <thead>
+                <tr>
+                    <th class="text-nowrap w-1">#</th>
+                    <th class="text-nowrap">JobName</th>
+                    <th class="text-nowrap w-1">Status</th>
+                    <th class="text-nowrap w-1">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range $i, $job := .jobs }}
+                <tr>
+                    <td class="text-nowrap w-1">{{ add $i 1 }}</td>
+                    <td class="text-nowrap">{{ $job }}</td>
+                    <td class="text-nowrap w-1">Pending</td>
+                    <td class="text-nowrap w-1"><a href="#" class="btn btn-primary btn-sm">Edit</a></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+
+        <div class="card-footer">
+            <a href="/jobs/create/" class="btn btn-primary">Create new job</a>
+        </div>
+
+    </div>
+</div>
+
+{{template "partials/foot.html" .}}

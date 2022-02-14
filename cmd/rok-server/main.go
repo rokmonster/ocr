@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/webcontrollers"
 	"github.com/xor22h/rok-monster-ocr-golang/web"
 
 	"github.com/gin-contrib/pprof"
@@ -28,13 +27,13 @@ func main() {
 	// public group, not auth needed for this.
 	public := router.Group("")
 	{
-		public.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "index.html", gin.H{})
-		})
+		(&webcontrollers.JobsController{
+			Router: public.Group("jobs"),
+		}).Setup()
 	}
 
 	router.NoRoute(func(c *gin.Context) {
-		c.HTML(http.StatusNotFound, "index.html", gin.H{})
+		c.Redirect(307, "/jobs")
 	})
 
 	log.Fatal(router.Run(":8080"))

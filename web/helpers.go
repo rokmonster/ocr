@@ -7,10 +7,12 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
+
+	"github.com/Masterminds/sprig/v3"
 )
 
 func CreateTemplateEngine(embedFS embed.FS, subpath string) *template.Template {
-	root := template.New("")
+	root := template.New("").Funcs(sprig.FuncMap())
 	sub, _ := fs.Sub(embedFS, subpath)
 
 	err := fs.WalkDir(sub, ".", func(path string, d fs.DirEntry, err error) error {
