@@ -1,0 +1,31 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: scanner
+    binary: rok-scanner
+    main: ./cmd/rok-scanner
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: server
+    binary: rok-server
+    main: ./cmd/rok-server
+    goos:
+      - linux
+    goarch:
+      - amd64
+    
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
