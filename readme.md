@@ -2,6 +2,7 @@
 
 [![Discord](https://img.shields.io/discord/768180228710465598)](https://discord.gg/drhxwVQ) 
 [![License: MIT](https://img.shields.io/github/license/xor22h/rok-monster-ocr-golang)](https://opensource.org/licenses/MIT)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xor22h/rok-monster-ocr-golang?style=flat-square)](https://goreportcard.com/report/github.com/xor22h/rok-monster-ocr-golang)
 
 
 ---
@@ -48,8 +49,9 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 ```bash
 git clone https://github.com/xor22h/rok-monster-ocr-golang
 cd rok-monster-ocr-golang
-go build .
-./rok-monster-ocr-golang -help
+make # builds all 3 tools
+# all tools are being stored in ./bin/ folder
+./bin/rok-scanner -help
 ```
 
 ## Community

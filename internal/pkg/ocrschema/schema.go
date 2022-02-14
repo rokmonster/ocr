@@ -1,0 +1,78 @@
+package ocrschema
+
+import (
+	"encoding/json"
+	"strconv"
+
+	"github.com/corona10/goimagehash"
+)
+
+type RokOCRTemplate struct {
+	Title       string                  `json:"title,omitempty"`
+	Version     string                  `json:"version,omitempty"`
+	Author      string                  `json:"author,omitempty"`
+	Width       int                     `json:"width,omitempty"`
+	Height      int                     `json:"height,omitempty"`
+	OCRSchema   map[string]ROKOCRSchema `json:"ocr_schema,omitempty"`
+	Fingerprint string                  `json:"fingerprint,omitempty"`
+	Threshold   int                     `json:"threshold,omitempty"`
+	Table       []ROKTableField         `json:"table,omitempty"`
+}
+
+func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {
+	result, _ := strconv.ParseUint(b.Fingerprint, 16, 64)
+	return goimagehash.NewImageHash(uint64(result), goimagehash.DHash)
+}
+
+type ROKOCRSchema struct {
+	Callback  []string      `json:"callback,omitempty"`
+	Languages []string      `json:"lang,omitempty"`
+	OEM       int           `json:"oem,omitempty"`
+	PSM       int           `json:"psm,omitempty"`
+	Crop      OCRCrop       `json:"crop,omitempty"`
+	AllowList []interface{} `json:"allowlist,omitempty"`
+}
+
+type ROKTableField struct {
+	Title string
+	Field string
+	Bold  bool
+	Color string
+}
+
+func (b *ROKTableField) UnmarshalJSON(data []byte) error {
+
+	var v []interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	b.Title, _ = v[0].(string)
+	b.Field, _ = v[1].(string)
+	b.Bold = v[2].(bool)
+	b.Color = v[3].(string)
+
+	return nil
+}
+
+type OCRCrop struct {
+	X int
+	Y int
+	W int
+	H int
+}
+
+func (b *OCRCrop) UnmarshalJSON(data []byte) error {
+
+	var v []interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	b.X = int(v[0].(float64))
+	b.Y = int(v[1].(float64))
+	b.W = int(v[2].(float64))
+	b.H = int(v[3].(float64))
+
+	return nil
+}
