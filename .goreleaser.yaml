@@ -18,7 +18,19 @@ builds:
       - linux
     goarch:
       - amd64
-    
+archives:
+  - id: default
+    format: tar.gz
+    files:
+    - src: license*
+    - src: LICENSE*
+    - src: readme*
+    - src: README*
+    - src: changelog*
+    - src: CHANGELOG*   
+    - media/*.png
+    - templates/*.json
+ 
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -29,3 +41,4 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^ci:'
