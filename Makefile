@@ -1,8 +1,3 @@
-# ########################################################## #
-# Makefile for Golang Project
-# Includes cross-compiling, installation, cleanup
-# ########################################################## #
-
 # Check for required command tools to build or stop immediately
 EXECUTABLES = go find pwd
 K := $(foreach exec,$(EXECUTABLES),\
@@ -10,29 +5,19 @@ K := $(foreach exec,$(EXECUTABLES),\
 
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-VERSION=1.0.0
-PLATFORMS=darwin linux windows
-ARCHITECTURES=amd64 arm64
+default: build
 
-# Setup linker flags option for build that interoperate with variable names in src code
-LDFLAGS=-ldflags "-X main.Version=${VERSION}"
+deps: 
+	go install github.com/goreleaser/goreleaser@latest
 
-default: all
+tessdata:
+	curl -Lo tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
+	curl -Lo tessdata/fra.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata
 
-all: build_all
+build: deps
+	goreleaser build --snapshot --rm-dist --single-target
 
-build_all: build_scanner build_server build_remote
+dev:
+	docker run -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.17
 
-build_scanner:
-	go build ${LDFLAGS} -o ./bin/ ./cmd/rok-scanner
-
-build_server:
-	go build ${LDFLAGS} -o ./bin/ ./cmd/rok-server
-
-build_remote:
-	go build ${LDFLAGS} -o ./bin/ ./cmd/rok-remote
-# # Remove only what we've created
-# clean:
-# 	find ${ROOT_DIR} -name '${BINARY}[-?][a-zA-Z0-9]*[-?][a-zA-Z0-9]*' -delete
-
-.PHONY: check build_all all
+.PHONY: check deps build tessdata

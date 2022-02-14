@@ -2,6 +2,7 @@ package ocrschema
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"strconv"
 
 	"github.com/corona10/goimagehash"
@@ -17,6 +18,13 @@ type RokOCRTemplate struct {
 	Fingerprint string                  `json:"fingerprint,omitempty"`
 	Threshold   int                     `json:"threshold,omitempty"`
 	Table       []ROKTableField         `json:"table,omitempty"`
+}
+
+func LoadTemplate(fileName string) RokOCRTemplate {
+	var t RokOCRTemplate
+	b, _ := ioutil.ReadFile(fileName)
+	json.Unmarshal(b, &t)
+	return t
 }
 
 func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {

@@ -37,7 +37,7 @@ func ParseText(imageFileName string, schema schema.ROKOCRSchema, tessdata string
 
 	text, err := client.Text()
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		log.Fatalf("Error: %s", err)
 		return "", err
 	}
 	return text, nil

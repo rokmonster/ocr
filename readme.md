@@ -26,12 +26,13 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 ## Features
 
 - Character recognition by [Tesseract](https://github.com/tesseract-ocr/tesseract)
+- Easy install with package managers `apt-get` / `yum`
 - Fast hash based image comparison
 - Automated pick of best-match template (based on first image in media directory)
 
 ## Future Plans
 
-- Docker image with all the dependencies (Tesseract libs, and language data files)
+- Automatic download/update of Tesseract data files.
 - Easy to use WebUI. Just open [localhost:8080](http://localhost:8080/), upload files, and get results directly in your browser (with a simple `docker run -d -p 8080:8080 $IMAGE`) 
 - Ability to use multiple templates in single run
 - Discord BOT mode. (Process each image sent to a specific discord channel)
@@ -42,7 +43,8 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 - English language is preferred as coordinate information lines up most accurately with English.
 - No way to merge user information from different screens.
 - Best template is detected automatically, but same template is used for all files in media directory.
-- Requires properly defined template
+- Requires a template defined for proper device (resolution/acpect-ratio/language)
+- Limited number of predefined templates
 
 ## Getting started
 
