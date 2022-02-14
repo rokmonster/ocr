@@ -18,6 +18,26 @@ builds:
       - linux
     goarch:
       - amd64
+
+nfpms:
+  - id: default
+    package_name: rok-monster-ocr
+    file_name_template: "{{ .ConventionalFileName }}"
+
+    vendor: Julius Lisauskas
+    maintainer: Julius Lisauskas <julius@lisauskas.lt>
+
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    dependencies:
+      - libtesseract-dev
+    overrides:
+      rpm:
+        dependencies:
+          - tesseract-devel
+
 archives:
   - id: default
     format: tar.gz
