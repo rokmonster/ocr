@@ -151,12 +151,11 @@ func runRecognition(directory string, template *schema.RokOCRTemplate) []schema.
 		}
 
 		imagehash, _ := goimagehash.DifferenceHash(img)
-		distance, _ := imagehash.Distance(template.Hash())
-		if distance <= template.Threshold {
+		if template.Match(imagehash) {
 			result := rokocr.ParseImage(f, img, template, flags.TmpDirectory, flags.TessdataDirectory)
 			data = append(data, result)
 		} else {
-			log.Warnf("[%s] => hash: %x, distance: %v => SKIPPING", filepath.Base(f), imagehash.GetHash(), distance)
+			log.Warnf("[%s] => hash: %x => SKIPPING", filepath.Base(f), imagehash.GetHash())
 		}
 	}
 

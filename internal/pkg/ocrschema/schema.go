@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/corona10/goimagehash"
+	"github.com/sirupsen/logrus"
 )
 
 type RokOCRTemplate struct {
@@ -30,6 +31,17 @@ func LoadTemplate(fileName string) RokOCRTemplate {
 func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {
 	result, _ := strconv.ParseUint(b.Fingerprint, 16, 64)
 	return goimagehash.NewImageHash(uint64(result), goimagehash.DHash)
+}
+
+func (b *RokOCRTemplate) Match(hash *goimagehash.ImageHash) bool {
+	distance, err := b.Hash().Distance(hash)
+	// if we get error, that means this template is no go...
+	if err != nil {
+		return false
+	}
+
+	logrus.Debugf("hash: %x, distance: %v\n", hash.GetHash(), distance)
+	return distance <= b.Threshold
 }
 
 type ROKOCRSchema struct {
