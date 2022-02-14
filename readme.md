@@ -46,13 +46,12 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 
 ## Getting started
 
+- Download either deb/rpm package from [Latest release](https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/) 
+- Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
+
 ```bash
-git clone https://github.com/xor22h/rok-monster-ocr-golang
-cd rok-monster-ocr-golang
-make # builds all 3 tools
-# all tools are being stored in ./bin/ folder
-./bin/rok-scanner -help
-```
+ rok-scanner -help
+ ```
 
 ## Community
 
