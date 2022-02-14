@@ -1,0 +1,30 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install deps
+      run: sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libtesseract-dev 
+    - uses: actions/checkout@v2
+    
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build Scanner
+      run: go build -o ./bin/ -v ./cmd/rok-scanner/...
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: build
+        path: ./bin/*
