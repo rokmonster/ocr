@@ -92,7 +92,7 @@ func (controller *TemplatesController) Setup() {
 		sessionId := stringutils.Random(12)
 		// handle file upload...
 		file, _ := c.FormFile("image")
-		dst := os.TempDir() + sessionId + filepath.Ext(file.Filename)
+		dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
 		c.SaveUploadedFile(file, dst)
 
 		logrus.Infof("Uploaded file: %s", dst)
