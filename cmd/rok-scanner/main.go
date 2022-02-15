@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,10 +12,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/corona10/goimagehash"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 	rokocr "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
 )
+
+var flags = config.Parse()
 
 func getFilesInDirectory(directory string) []string {
 	files := []string{}
@@ -30,28 +32,6 @@ func getFilesInDirectory(directory string) []string {
 	}
 
 	return files
-}
-
-type ROKOCRConfig struct {
-	MediaDirectory     string
-	TemplatesDirectory string
-	OutputDirectory    string
-	TessdataDirectory  string
-	TmpDirectory       string
-	DeleteTempFiles    bool
-}
-
-var (
-	flags ROKOCRConfig
-)
-
-func init() {
-	flag.StringVar(&flags.MediaDirectory, "media", "./media", "folder where all files to scan is placed")
-	flag.StringVar(&flags.TemplatesDirectory, "templates", "./templates", "templates dir")
-	flag.StringVar(&flags.TessdataDirectory, "tessdata", "./tessdata", "tesseract data files directory")
-	flag.StringVar(&flags.OutputDirectory, "output", "./out", "output dir")
-	flag.StringVar(&flags.TmpDirectory, "tmp", os.TempDir(), "Directory for temporary files (cropped ones)")
-	flag.Parse()
 }
 
 func pickTemplate(hash *goimagehash.ImageHash, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
@@ -80,7 +60,8 @@ func findTemplate(dir string, availableTemplate []schema.RokOCRTemplate) *schema
 		template := pickTemplate(imagehash, availableTemplate)
 		return &template
 	}
-	return nil
+	// pick first template if no images found?
+	return &availableTemplate[0]
 }
 
 func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplate) {

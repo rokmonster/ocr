@@ -16,12 +16,17 @@
                     <div id="areas-table"></div>
 
                     <div class="input-group mb-3">
+                        <select id="area-type-select" class="form-select" style="max-width: 100px;">
+                            <option value="number">Number</option>
+                            <option value="text">Text</option>
+                        </select>
                         <input type="text" id="area-name-input" class="form-control" placeholder="name of area">
                         <button class="btn btn-outline-secondary" type="button" onClick="addArea()">Add area</button>
                     </div>
                       
-                    <!-- <div id="scan-results"></div> -->
                     <button class="btn btn-outline-primary" type="button" onClick="doScanTest()">Scan test</button>
+
+                    <a href="/templates/{{.sessionId}}/export" class="btn btn-primary">Export</a>
 
                 </div>
             </div>
@@ -55,6 +60,7 @@
             contentType: "application/json",
             data: JSON.stringify({
                 name: $("#area-name-input").val(),
+                type: $("#area-type-select").val(),
                 x: lastEvent.x.toFixed(0),
                 y: lastEvent.y.toFixed(0),
                 w: lastEvent.width.toFixed(0),
@@ -63,9 +69,13 @@
         }).then((d, t, r) => {
             $("#area-name-input").val("");
             $("#areas-table").html(`<table class="table table-striped table-bordered table-sm">
-                <tr><th class="w-1">Field</th><th>Area</th><th class="w-1">Value</th><th class="w-1">Actions</th></tr>
+                <tr><th class="w-1">Field</th><th>Area</th><th class="w-1">Value</th></tr>
                 ${$.map(d.schema, (e, n) => {
-                    return `<tr><td class="w-1">${n}</td><td>${JSON.stringify(e.crop)}</td><td class="w-1" id="value-${n}"></td><td class="w-1"></td></tr>`;
+                    return `<tr>
+                                <td class="w-1">${n}</td>
+                                <td>${JSON.stringify(e.crop)}</td>
+                                <td class="w-1" id="value-${n}"></td>
+                            </tr>`;
                 }).join('')}
             </table>`);
         });

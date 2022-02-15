@@ -16,10 +16,13 @@
             <tbody>
                 {{ range $i, $job := .jobs }}
                 <tr>
-                    <td class="text-nowrap w-1">{{ add $i 1 }}</td>
-                    <td class="text-nowrap">{{ $job }}</td>
+                    <td class="text-nowrap w-1">{{ $job.ID }}</td>
+                    <td class="text-nowrap">{{ $job.Name }}</td>
                     <td class="text-nowrap w-1">Pending</td>
-                    <td class="text-nowrap w-1"><a href="#" class="btn btn-primary btn-sm">Edit</a></td>
+                    <td class="text-nowrap w-1">
+                        <a href="/jobs/{{ $job.ID }}" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="/jobs/{{ $job.ID }}/delete" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
                 </tr>
                 {{end}}
             </tbody>

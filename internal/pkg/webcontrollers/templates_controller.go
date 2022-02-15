@@ -1,10 +1,12 @@
 package webcontrollers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
@@ -21,24 +23,61 @@ type TemplateMakerSession struct {
 }
 
 type TemplatesController struct {
-	Router   *gin.RouterGroup
-	sessions map[string]TemplateMakerSession
+	Router       *gin.RouterGroup
+	sessions     map[string]TemplateMakerSession
+	templatesDir string
+	tessdataDir  string
 }
 
-func NewTemplatesController(router *gin.RouterGroup) *TemplatesController {
+func NewTemplatesController(router *gin.RouterGroup, templateDir, tessdataDir string) *TemplatesController {
 	return &TemplatesController{
-		Router:   router,
-		sessions: make(map[string]TemplateMakerSession),
+		Router:       router,
+		sessions:     make(map[string]TemplateMakerSession),
+		templatesDir: templateDir,
+		tessdataDir:  tessdataDir,
 	}
 }
 
 // Binding from JSON
 type rokTemplateArea struct {
 	Name string `form:"name" json:"name" xml:"name"  binding:"required"`
+	Type string `form:"type" json:"type" xml:"type"  binding:"required"`
 	X    int    `form:"x" json:"x,string" xml:"x"  binding:"required"`
 	Y    int    `form:"y" json:"y,string" xml:"y" binding:"required"`
 	W    int    `form:"w" json:"w,string" xml:"w" binding:"required"`
 	H    int    `form:"h" json:"h,string" xml:"h" binding:"required"`
+}
+
+func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchema) []schema.ROKTableField {
+	result := []schema.ROKTableField{}
+
+	for k := range s {
+		result = append(result, schema.ROKTableField{
+			Title: k,
+			Field: k,
+			Bold:  false,
+			Color: "",
+		})
+	}
+
+	return result
+}
+
+func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) *schema.RokOCRTemplate {
+	img, _ := imgutils.ReadImage(s.imagePath)
+	hash, _ := goimagehash.DifferenceHash(img)
+
+	return &schema.RokOCRTemplate{
+		Title:       fmt.Sprintf("ROK OCR Monster Template [%s]", id),
+		Version:     "1",
+		Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
+		Width:       img.Bounds().Dx(),
+		Height:      img.Bounds().Dy(),
+		Author:      "ROK OCR Template Maker",
+		Threshold:   1,
+		OCRSchema:   s.schema,
+		Table:       controller.makeTable(s.schema),
+	}
 }
 
 func (controller *TemplatesController) Setup() {
@@ -86,25 +125,28 @@ func (controller *TemplatesController) Setup() {
 	controller.Router.POST("/:session/scan", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
 			img, _ := imgutils.ReadImage(s.imagePath)
-			hash, _ := goimagehash.DifferenceHash(img)
+			template := controller.buildTemplate(c.Param("session"), s)
+
 			c.JSON(http.StatusOK, gin.H{
-				"fingerprint": fmt.Sprintf("%x", hash.GetHash()),
-				"results": rokocr.ParseImage("test", img, &schema.RokOCRTemplate{
-					Title:       fmt.Sprintf("Pending template [%s]", c.Param("session")),
-					Version:     "1",
-					Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
-					Width:       img.Bounds().Dx(),
-					Height:      img.Bounds().Dy(),
-					Author:      "ROK OCR Template Maker",
-					Threshold:   1,
-					OCRSchema:   s.schema,
-				}, os.TempDir(), "./tessdata"),
+				"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
+				"results":     rokocr.ParseImage("test", img, template, os.TempDir(), "./tessdata"),
 			})
 			return
 		}
 
 		c.JSON(http.StatusNotFound, gin.H{})
+	})
 
+	controller.Router.GET("/:session/export", func(c *gin.Context) {
+		if s, ok := controller.sessions[c.Param("session")]; ok {
+			template := controller.buildTemplate(c.Param("session"), s)
+			bytes, _ := json.MarshalIndent(template, "", "    ")
+			os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
+			c.Redirect(http.StatusFound, "/templates")
+			return
+		}
+
+		c.JSON(http.StatusNotFound, gin.H{})
 	})
 
 	controller.Router.POST("/:session/add-area", func(c *gin.Context) {
@@ -113,16 +155,22 @@ func (controller *TemplatesController) Setup() {
 
 			c.BindJSON(&postData)
 
-			s.schema[postData.Name] = schema.ROKOCRSchema{
-				Languages: []string{"eng"},
-				AllowList: []interface{}{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-				PSM:       7,
-				Crop: schema.OCRCrop{
-					X: postData.X,
-					Y: postData.Y,
-					W: postData.W,
-					H: postData.H,
-				},
+			if len(strings.TrimSpace(postData.Name)) > 0 {
+				if postData.Type == "number" {
+					s.schema[postData.Name] = schema.NewNumberField(&schema.OCRCrop{
+						X: postData.X,
+						Y: postData.Y,
+						W: postData.W,
+						H: postData.H,
+					})
+				} else {
+					s.schema[postData.Name] = schema.NewTextField(&schema.OCRCrop{
+						X: postData.X,
+						Y: postData.Y,
+						W: postData.W,
+						H: postData.H,
+					}, "eng")
+				}
 			}
 
 			c.JSON(http.StatusOK, gin.H{

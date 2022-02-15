@@ -49,8 +49,29 @@ type ROKOCRSchema struct {
 	Languages []string      `json:"lang,omitempty"`
 	OEM       int           `json:"oem,omitempty"`
 	PSM       int           `json:"psm,omitempty"`
-	Crop      OCRCrop       `json:"crop,omitempty"`
+	Crop      *OCRCrop      `json:"crop,omitempty"`
 	AllowList []interface{} `json:"allowlist,omitempty"`
+}
+
+func NewNumberField(cropArea *OCRCrop) ROKOCRSchema {
+	return ROKOCRSchema{
+		Languages: []string{"eng"},
+		Callback:  []string{},
+		AllowList: []interface{}{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+		PSM:       7,
+		OEM:       1,
+		Crop:      cropArea,
+	}
+}
+
+func NewTextField(cropArea *OCRCrop, languages ...string) ROKOCRSchema {
+	return ROKOCRSchema{
+		Languages: languages,
+		Callback:  []string{},
+		PSM:       7,
+		OEM:       1,
+		Crop:      cropArea,
+	}
 }
 
 type ROKTableField struct {
@@ -80,6 +101,10 @@ type OCRCrop struct {
 	Y int
 	W int
 	H int
+}
+
+func (b *OCRCrop) MarshalJSON() ([]byte, error) {
+	return json.Marshal([]int{b.X, b.Y, b.W, b.H})
 }
 
 func (b *OCRCrop) UnmarshalJSON(data []byte) error {

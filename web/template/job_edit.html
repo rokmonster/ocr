@@ -1,0 +1,22 @@
+{{template "partials/head.html" .}}
+
+
+<div class="container-fluid">
+    <form method="POST">
+
+        <div class="card">
+            <div class="card-header">Job Edit</div>
+            <div class="card-body p-0">
+                <pre>{{ printf "%+v" .job }}</pre>
+            </div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+
+        </div>
+
+    </form>
+</div>
+
+{{template "partials/foot.html" .}}
