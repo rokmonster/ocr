@@ -12,7 +12,8 @@ import (
 )
 
 func CreateTemplateEngine(embedFS embed.FS, subpath string) *template.Template {
-	root := template.New("").Funcs(sprig.FuncMap())
+
+	root := template.New("").Funcs(sprig.HtmlFuncMap())
 	sub, _ := fs.Sub(embedFS, subpath)
 
 	err := fs.WalkDir(sub, ".", func(path string, d fs.DirEntry, err error) error {

@@ -27,9 +27,8 @@ func main() {
 	// public group, not auth needed for this.
 	public := router.Group("")
 	{
-		(&webcontrollers.JobsController{
-			Router: public.Group("jobs"),
-		}).Setup()
+		webcontrollers.NewJobsController(public.Group("/jobs")).Setup()
+		webcontrollers.NewTemplatesController(public.Group("/templates")).Setup()
 	}
 
 	router.NoRoute(func(c *gin.Context) {

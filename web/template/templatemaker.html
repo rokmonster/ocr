@@ -1,0 +1,89 @@
+{{template "partials/head.html" .}}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">Template Builder</div>
+
+
+        <div class="card-body p-0">
+            <div class="row p-0 m-0">
+                <div class="col-8 p-0 m-0">
+                    <img src="/templates/{{.sessionId}}/image" alt="" id="image">
+                </div>
+                <div class="col-4">
+                    <div id="results"></div>
+                    <div id="areas-table"></div>
+
+                    <div class="input-group mb-3">
+                        <input type="text" id="area-name-input" class="form-control" placeholder="name of area">
+                        <button class="btn btn-outline-secondary" type="button" onClick="addArea()">Add area</button>
+                    </div>
+                      
+                    <!-- <div id="scan-results"></div> -->
+                    <button class="btn btn-outline-primary" type="button" onClick="doScanTest()">Scan test</button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    const jsSessionId = "{{ .sessionId }}";
+
+    var $image = $('#image');
+    var lastEvent;
+
+    $image.cropper({
+        viewMode: 1,
+        rotatable: false,
+        scalable: false,
+        zoomable: false,
+
+        crop: function (event) {
+            lastEvent = event.detail;
+            $("#results").html(`X: ${event.detail.x.toFixed(0)}, Y: ${event.detail.y.toFixed(0)}, W: ${event.detail.width.toFixed(0)}, H: ${event.detail.height.toFixed(0)}`);
+        }
+    });
+
+    
+    const addArea = () => {
+        $.ajax(`/templates/${jsSessionId}/add-area`, {
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                name: $("#area-name-input").val(),
+                x: lastEvent.x.toFixed(0),
+                y: lastEvent.y.toFixed(0),
+                w: lastEvent.width.toFixed(0),
+                h: lastEvent.height.toFixed(0),
+            }),
+        }).then((d, t, r) => {
+            $("#area-name-input").val("");
+            $("#areas-table").html(`<table class="table table-striped table-bordered table-sm">
+                <tr><th class="w-1">Field</th><th>Area</th><th class="w-1">Value</th><th class="w-1">Actions</th></tr>
+                ${$.map(d.schema, (e, n) => {
+                    return `<tr><td class="w-1">${n}</td><td>${JSON.stringify(e.crop)}</td><td class="w-1" id="value-${n}"></td><td class="w-1"></td></tr>`;
+                }).join('')}
+            </table>`);
+        });
+    };
+
+    const doScanTest = () => {
+        $.ajax(`/templates/${jsSessionId}/scan`, {
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({}),
+        }).then((d, t, r) => {
+            Object.keys(d.results).forEach((k) => {
+                $(`#value-${k}`).html(d.results[k]);
+            });
+        });
+    };
+
+
+</script>
+
+{{template "partials/foot.html" .}}

@@ -10,9 +10,15 @@ type JobsController struct {
 	Router *gin.RouterGroup
 }
 
+func NewJobsController(router *gin.RouterGroup) *JobsController {
+	return &JobsController{
+		Router: router,
+	}
+}
+
 func (controller *JobsController) Setup() {
 	// List all the jobs
-	controller.Router.GET("/", func(c *gin.Context) {
+	controller.Router.GET("", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "jobs.html", gin.H{
 			"jobs": []string{"feature not implemented", "to be added", "yet another job"},
 		})

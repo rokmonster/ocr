@@ -23,7 +23,6 @@ nfpms:
   - id: default
     package_name: rok-monster-ocr
     file_name_template: "{{ .ConventionalFileName }}"
-
     vendor: Julius Lisauskas
     maintainer: Julius Lisauskas <julius@lisauskas.lt>
 
@@ -31,9 +30,11 @@ nfpms:
       - deb
       - rpm
     bindir: /usr/bin
-    dependencies:
-      - libtesseract-dev
     overrides:
+      deb:
+        dependencies:
+          - libtesseract-dev
+          - adb
       rpm:
         dependencies:
           - tesseract-devel
