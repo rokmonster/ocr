@@ -3,66 +3,18 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/corona10/goimagehash"
 	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/scannerconfig"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 	rokocr "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
 )
 
 var flags = config.Parse()
-
-func getFilesInDirectory(directory string) []string {
-	files := []string{}
-
-	dir, _ := ioutil.ReadDir(directory)
-
-	for _, file := range dir {
-		if !file.IsDir() {
-			files = append(files, directory+"/"+file.Name())
-		}
-	}
-
-	return files
-}
-
-func pickTemplate(hash *goimagehash.ImageHash, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
-	best := availableTemplate[0]
-
-	for _, t := range availableTemplate {
-		distance, _ := t.Hash().Distance(hash)
-		bestDistance, _ := best.Hash().Distance(hash)
-		if distance < bestDistance {
-			best = t
-		}
-	}
-
-	return best
-}
-
-func findTemplate(dir string, availableTemplate []schema.RokOCRTemplate) *schema.RokOCRTemplate {
-	for _, file := range getFilesInDirectory(flags.MediaDirectory) {
-		img, err := imgutils.ReadImage(file)
-		if err != nil {
-			log.Debugf("[%s] => error: %v", filepath.Base(file), err)
-			continue
-		}
-
-		imagehash, _ := goimagehash.DifferenceHash(img)
-		template := pickTemplate(imagehash, availableTemplate)
-		return &template
-	}
-	// pick first template if no images found?
-	return &availableTemplate[0]
-}
 
 func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
 	headers := []string{}
@@ -110,49 +62,16 @@ func writeCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
 
 }
 
-func loadTemplates(directory string) []schema.RokOCRTemplate {
-	templates := []schema.RokOCRTemplate{}
-	for _, f := range getFilesInDirectory(directory) {
-		template := schema.LoadTemplate(f)
-		log.Debugf("Loaded template: %s => %s, hash: %s", f, template.Title, template.Fingerprint)
-		templates = append(templates, template)
-	}
-	return templates
-
-}
-
-func runRecognition(directory string, template *schema.RokOCRTemplate) []schema.OCRResponse {
-	// scan all the images
-	data := []schema.OCRResponse{}
-	for _, f := range getFilesInDirectory(flags.MediaDirectory) {
-		img, err := imgutils.ReadImage(f)
-		if err != nil {
-			log.Errorf("[%s] => error: %v", filepath.Base(f), err)
-			continue
-		}
-
-		imagehash, _ := goimagehash.DifferenceHash(img)
-		if template.Match(imagehash) {
-			result := rokocr.ParseImage(f, img, template, flags.TmpDirectory, flags.TessdataDirectory)
-			data = append(data, result)
-		} else {
-			log.Warnf("[%s] => hash: %x => SKIPPING", filepath.Base(f), imagehash.GetHash())
-		}
-	}
-
-	return data
-}
-
 func main() {
-	templates := loadTemplates(flags.TemplatesDirectory)
+	templates := rokocr.LoadTemplates(flags.TemplatesDirectory)
 	if len(templates) == 0 {
 		log.Fatalf("No templates found in: %v", flags.TemplatesDirectory)
 	}
 
 	log.Infof("Loaded %v templates", len(templates))
 
-	template := findTemplate(flags.MediaDirectory, templates)
-	data := runRecognition(flags.MediaDirectory, template)
+	template := rokocr.FindTemplate(flags.MediaDirectory, templates)
+	data := rokocr.RunRecognition(flags.MediaDirectory, flags.TessdataDirectory, template)
 
 	printResultsTable(data, template)
 	writeCSV(data, template)

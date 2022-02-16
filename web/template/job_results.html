@@ -1,0 +1,36 @@
+{{template "partials/head.html" .}}
+
+
+<div class="container-fluid">
+    <form method="POST" enctype="application/x-www-form-urlencoded">
+
+        <div class="card">
+            <div class="card-header">Job Results</div>
+
+            <table class="card-table table table-vcenter table-sm table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-nowrap w-1">#</th>
+                        {{ range $k, $v := first .job.Results }}
+                        <th>{{ $k }}</th>
+                        {{ end }}
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $i, $line := .job.Results }}
+                    <tr>
+                        <td class="text-nowrap w-1">{{ add $i 1}}</td>
+                        {{ range $k, $v := first $.job.Results }}
+                        <td>{{ get $line $k }}</td>
+                        {{ end }}
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+
+        </div>
+    </form>
+</div>
+
+
+{{template "partials/foot.html" .}}

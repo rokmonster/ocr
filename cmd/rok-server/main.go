@@ -48,7 +48,7 @@ func main() {
 	}))
 
 	router.Use(gin.Recovery())
-
+	router.MaxMultipartMemory = 64 << 20
 	router.Use(static.Serve("/", web.EmbeddedFS(web.StaticFS, "static")))
 	router.SetHTMLTemplate(web.CreateTemplateEngine(web.StaticFS, "template"))
 

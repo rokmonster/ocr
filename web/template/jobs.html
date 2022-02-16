@@ -18,9 +18,11 @@
                 <tr>
                     <td class="text-nowrap w-1">{{ $job.ID }}</td>
                     <td class="text-nowrap">{{ $job.Name }}</td>
-                    <td class="text-nowrap w-1">Pending</td>
+                    <td class="text-nowrap w-1">{{ $job.Status }}</td>
                     <td class="text-nowrap w-1">
                         <a href="/jobs/{{ $job.ID }}" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="/jobs/{{ $job.ID }}/start" class="btn btn-dark btn-sm">Start</a>
+                        <a href="/jobs/{{ $job.ID }}/results" class="btn btn-dark btn-sm">Results</a>
                         <a href="/jobs/{{ $job.ID }}/delete" class="btn btn-danger btn-sm">Delete</a>
                     </td>
                 </tr>

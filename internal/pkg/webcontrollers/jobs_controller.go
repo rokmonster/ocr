@@ -5,11 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/stringutils"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -26,8 +32,14 @@ func NewJobsController(router *gin.RouterGroup, db *bolt.DB) *JobsController {
 }
 
 type OCRJob struct {
-	ID   uint64 `json:"id"`
-	Name string `json:"name"`
+	ID      uint64                  `json:"id"`
+	Name    string                  `json:"name"`
+	Results []ocrschema.OCRResponse `json:"results,omitempty"`
+	Status  string                  `json:"status,omitempty"`
+}
+
+func (job *OCRJob) MediaDirectory() string {
+	return fmt.Sprintf("./media/job_%v", job.ID)
 }
 
 func (controller *JobsController) getJobs() []OCRJob {
@@ -39,6 +51,10 @@ func (controller *JobsController) getJobs() []OCRJob {
 				var job OCRJob
 				if err := json.Unmarshal(v, &job); err != nil {
 					return err
+				}
+
+				if len(strings.TrimSpace(job.Status)) == 0 {
+					job.Status = fmt.Sprintf("Pending: 0/%v processed", len(controller.getJobFiles(job.ID)))
 				}
 
 				jobs = append(jobs, job)
@@ -55,6 +71,48 @@ func (controller *JobsController) getJobs() []OCRJob {
 func (controller *JobsController) deleteJob(id uint64) {
 	_ = controller.db.Update(func(t *bolt.Tx) error {
 		return t.Bucket([]byte("jobs")).Delete(itob(id))
+	})
+}
+
+func (controller *JobsController) getJobFiles(id uint64) []string {
+	job := controller.getJob(id)
+	return fileutils.GetFilesInDirectory(job.MediaDirectory())
+}
+
+func (controller *JobsController) updateJob(id uint64, fn func(*OCRJob) *OCRJob) error {
+	return controller.db.Update(func(t *bolt.Tx) error {
+		var job *OCRJob
+
+		bucket := t.Bucket([]byte("jobs"))
+
+		bytes := bucket.Get(itob(id))
+		err := json.Unmarshal(bytes, &job)
+		if err != nil {
+			return err
+		}
+
+		job = fn(job)
+
+		buf, err := json.Marshal(job)
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put(itob(job.ID), buf)
+	})
+}
+
+func (controller *JobsController) updateJobStatus(id uint64, status string) error {
+	return controller.updateJob(id, func(job *OCRJob) *OCRJob {
+		job.Status = status
+		return job
+	})
+}
+
+func (controller *JobsController) updateJobResults(id uint64, results []ocrschema.OCRResponse) error {
+	return controller.updateJob(id, func(job *OCRJob) *OCRJob {
+		job.Results = results
+		return job
 	})
 }
 
@@ -115,13 +173,59 @@ func (controller *JobsController) Setup() {
 		job := controller.getJob(id)
 		log.Printf("edit job: %v", job)
 		c.HTML(http.StatusOK, "job_edit.html", gin.H{
-			"job": job,
+			"job":   job,
+			"files": controller.getJobFiles(id),
 		})
 	})
 
-	controller.Router.POST("/:id", func(c *gin.Context) {
+	controller.Router.GET("/:id/start", func(c *gin.Context) {
 		// TODO: Edit job here
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+		job := controller.getJob(id)
+
+		go func(job *OCRJob) {
+			controller.updateJobStatus(job.ID, "Started")
+			log.Printf("Processing job: %v", job)
+			mediaDir := job.MediaDirectory()
+
+			templates := rokocr.LoadTemplates("./templates")
+			if len(templates) > 0 {
+				log.Infof("Loaded %v templates", len(templates))
+				template := rokocr.FindTemplate(mediaDir, templates)
+				data := rokocr.RunRecognition(mediaDir, "./tessdata", template)
+				controller.updateJobResults(job.ID, data)
+				controller.updateJobStatus(job.ID, "Completed")
+			} else {
+				log.Warnf("No compatible template found")
+				controller.updateJobStatus(job.ID, "Failed, no template found")
+			}
+		}(job)
+
 		c.Redirect(http.StatusFound, "/jobs")
+	})
+
+	controller.Router.GET("/:id/results", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+		job := controller.getJob(id)
+
+		c.HTML(http.StatusOK, "job_results.html", gin.H{
+			"job":   job,
+			"files": controller.getJobFiles(id),
+		})
+	})
+
+	controller.Router.POST("/:id/upload", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+
+		file, _ := c.FormFile("file")
+
+		os.MkdirAll(fmt.Sprintf("./media/job_%v", id), os.ModePerm)
+		dst := fmt.Sprintf("./media/job_%v/%s", id, stringutils.Random(8))
+		c.SaveUploadedFile(file, dst)
+
+		c.JSON(http.StatusOK, gin.H{
+			"destination": dst,
+		})
 	})
 
 	controller.Router.GET("/:id/delete", func(c *gin.Context) {
@@ -131,7 +235,4 @@ func (controller *JobsController) Setup() {
 		c.Redirect(http.StatusFound, "/jobs")
 	})
 
-	controller.Router.GET("/:id/start", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/jobs")
-	})
 }
