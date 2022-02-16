@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/corona10/goimagehash"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
+	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/scannerconfig"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 	rokocr "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"

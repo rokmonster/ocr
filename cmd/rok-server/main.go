@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
+	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/serverconfig"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/webcontrollers"
 	"github.com/xor22h/rok-monster-ocr-golang/web"
+	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/static"
@@ -62,5 +65,41 @@ func main() {
 		c.Redirect(307, "/jobs")
 	})
 
-	log.Fatal(router.Run(":8080"))
+	if flags.TLS && len(flags.TLSDomain) > 0 {
+		log.Infof("Starting Autocert mode on TLS: https://%v", flags.TLSDomain)
+		m := autocert.Manager{
+			ForceRSA:   true,
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(flags.TLSDomain),
+			Cache:      autocert.DirCache("~/.cache"),
+		}
+		log.Fatal(runWithAutocertManager(router, &m))
+	} else {
+		log.Infof("Starting in plain HTTP on port: %v", flags.ListenPort)
+		log.Fatal(router.Run(fmt.Sprintf(":%d", flags.ListenPort)))
+	}
+}
+
+func runWithAutocertManager(r http.Handler, m *autocert.Manager) error {
+	config := m.TLSConfig()
+	config.MinVersion = tls.VersionTLS12
+
+	s := &http.Server{
+		Addr:      ":https",
+		TLSConfig: config,
+		Handler:   r,
+	}
+
+	go http.ListenAndServe(":http", m.HTTPHandler(http.HandlerFunc(redirect)))
+	return s.ListenAndServeTLS("", "")
+}
+
+func redirect(w http.ResponseWriter, req *http.Request) {
+	target := "https://" + req.Host + req.URL.Path
+
+	if len(req.URL.RawQuery) > 0 {
+		target += "?" + req.URL.RawQuery
+	}
+
+	http.Redirect(w, req, target, http.StatusTemporaryRedirect)
 }
