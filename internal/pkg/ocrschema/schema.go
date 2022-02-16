@@ -2,11 +2,13 @@ package ocrschema
 
 import (
 	"encoding/json"
+	"image"
 	"io/ioutil"
 	"strconv"
 
 	"github.com/corona10/goimagehash"
 	"github.com/sirupsen/logrus"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 )
 
 type RokOCRTemplate struct {
@@ -19,6 +21,12 @@ type RokOCRTemplate struct {
 	Fingerprint string                  `json:"fingerprint,omitempty"`
 	Threshold   int                     `json:"threshold,omitempty"`
 	Table       []ROKTableField         `json:"table,omitempty"`
+	Checkpoints []OCRCheckpoint         `json:"checkpoints,omitempty"`
+}
+
+type OCRCheckpoint struct {
+	Crop        *OCRCrop `json:"crop,omitempty"`
+	Fingerprint string   `json:"fingerprint,omitempty"`
 }
 
 func LoadTemplate(fileName string) RokOCRTemplate {
@@ -28,9 +36,49 @@ func LoadTemplate(fileName string) RokOCRTemplate {
 	return t
 }
 
-func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {
-	result, _ := strconv.ParseUint(b.Fingerprint, 16, 64)
+func differenceHashFromString(s string) *goimagehash.ImageHash {
+	result, _ := strconv.ParseUint(s, 16, 64)
 	return goimagehash.NewImageHash(uint64(result), goimagehash.DHash)
+}
+
+func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {
+	return differenceHashFromString(b.Fingerprint)
+}
+
+func hashMatches(b image.Image, hash *goimagehash.ImageHash) bool {
+	imghash, _ := goimagehash.DifferenceHash(b)
+	distance, err := imghash.Distance(hash)
+	// if we get error, that means this template is no go...
+	if err != nil {
+		return false
+	}
+
+	if distance > 0 {
+		logrus.Debugf("Expected hash: %x, real hash: %x, distance: %v", hash.GetHash(), imghash.GetHash(), distance)
+	}
+
+	// max distance allowed here is 1
+	return 1 >= distance
+}
+
+func (b *RokOCRTemplate) Matches(img image.Image) bool {
+	imagehash, _ := goimagehash.DifferenceHash(img)
+
+	if len(b.Checkpoints) == 0 {
+		return b.Match(imagehash)
+	}
+
+	// if we have checkpoints, check if all checkpoints matches
+	for _, s := range b.Checkpoints {
+		expected_hash := differenceHashFromString(s.Fingerprint)
+		subimg, _ := imgutils.CropImage(img, s.Crop.CropRectange())
+		if !hashMatches(subimg, expected_hash) {
+			logrus.Warnf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
+			return false
+		}
+	}
+
+	return true
 }
 
 func (b *RokOCRTemplate) Match(hash *goimagehash.ImageHash) bool {
@@ -81,6 +129,10 @@ type ROKTableField struct {
 	Color string
 }
 
+func (b *ROKTableField) MarshalJSON() ([]byte, error) {
+	return json.Marshal([]interface{}{b.Title, b.Field, b.Bold, b.Color})
+}
+
 func (b *ROKTableField) UnmarshalJSON(data []byte) error {
 
 	var v []interface{}
@@ -101,6 +153,10 @@ type OCRCrop struct {
 	Y int
 	W int
 	H int
+}
+
+func (s *OCRCrop) CropRectange() image.Rectangle {
+	return image.Rect(s.X, s.Y, s.X+s.W, s.Y+s.H)
 }
 
 func (b *OCRCrop) MarshalJSON() ([]byte, error) {

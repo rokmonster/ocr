@@ -168,10 +168,9 @@ func (controller *JobsController) Setup() {
 	})
 
 	controller.Router.GET("/:id", func(c *gin.Context) {
-		// TODO: Edit job here
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
-		log.Printf("edit job: %v", job)
+
 		c.HTML(http.StatusOK, "job_edit.html", gin.H{
 			"job":   job,
 			"files": controller.getJobFiles(id),
@@ -185,12 +184,12 @@ func (controller *JobsController) Setup() {
 
 		go func(job *OCRJob) {
 			controller.updateJobStatus(job.ID, "Started")
-			log.Printf("Processing job: %v", job)
+			log.Debugf("Processing job: %v", job)
 			mediaDir := job.MediaDirectory()
 
 			templates := rokocr.LoadTemplates("./templates")
 			if len(templates) > 0 {
-				log.Infof("Loaded %v templates", len(templates))
+				log.Debugf("Loaded %v templates", len(templates))
 				template := rokocr.FindTemplate(mediaDir, templates)
 				data := rokocr.RunRecognition(mediaDir, "./tessdata", template)
 				controller.updateJobResults(job.ID, data)
@@ -216,11 +215,13 @@ func (controller *JobsController) Setup() {
 
 	controller.Router.POST("/:id/upload", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+		job := controller.getJob(id)
 
+		os.MkdirAll(job.MediaDirectory(), os.ModePerm)
+
+		// move uploaded file
 		file, _ := c.FormFile("file")
-
-		os.MkdirAll(fmt.Sprintf("./media/job_%v", id), os.ModePerm)
-		dst := fmt.Sprintf("./media/job_%v/%s", id, stringutils.Random(8))
+		dst := fmt.Sprintf("%s/%s", job.MediaDirectory(), stringutils.Random(8))
 		c.SaveUploadedFile(file, dst)
 
 		c.JSON(http.StatusOK, gin.H{
@@ -230,7 +231,6 @@ func (controller *JobsController) Setup() {
 
 	controller.Router.GET("/:id/delete", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		log.Warnf("delete job: %+v", id)
 		controller.deleteJob(id)
 		c.Redirect(http.StatusFound, "/jobs")
 	})

@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/corona10/goimagehash"
 	log "github.com/sirupsen/logrus"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
@@ -33,10 +32,10 @@ func ParseSingleFile(f, tessData string, template *schema.RokOCRTemplate) (*sche
 		return nil, fmt.Errorf("cant read file: %v", err)
 	}
 
-	imagehash, _ := goimagehash.DifferenceHash(img)
-	if template.Match(imagehash) {
+	if template.Matches(img) {
 		result := ParseImage(f, img, template, os.TempDir(), tessData)
 		return &result, nil
 	}
-	return nil, fmt.Errorf("image doesn't match the template hash: %v", imagehash.GetHash())
+
+	return nil, fmt.Errorf("image doesn't match the template")
 }

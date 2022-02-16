@@ -68,7 +68,7 @@ func main() {
 		log.Fatalf("No templates found in: %v", flags.TemplatesDirectory)
 	}
 
-	log.Infof("Loaded %v templates", len(templates))
+	log.Debugf("Loaded %v templates", len(templates))
 
 	template := rokocr.FindTemplate(flags.MediaDirectory, templates)
 	data := rokocr.RunRecognition(flags.MediaDirectory, flags.TessdataDirectory, template)

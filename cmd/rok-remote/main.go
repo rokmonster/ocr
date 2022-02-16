@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/corona10/goimagehash"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/corona10/goimagehash"
 	"github.com/k0kubun/pp"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
@@ -90,28 +90,26 @@ func Top300Loop(device *adb.Device) error {
 					continue
 				}
 
-				// do hash
-				imagehash, _ := goimagehash.DifferenceHash(img)
-
 				// detect screen based on template
-				if powerDetailsTemplate.Match(imagehash) {
+				if powerDetailsTemplate.Matches(img) {
 					log.Infof("Detected power details screen - parsing")
 					result := rokocr.ParseImage("out.png", img, &powerDetailsTemplate, os.TempDir(), "./tessdata")
 					pp.Println(result)
 					waitExitProfile = false
-				} else if profileTemplate.Match(imagehash) {
+				} else if profileTemplate.Matches(img) {
 					if !waitExitProfile {
 						log.Infof("Detected profile screen")
 						device.RunCommand("input touchscreen tap 1850 125")
 						waitExitProfile = true
 					}
-				} else if powerRatingsTemplate.Match(imagehash) {
+				} else if powerRatingsTemplate.Matches(img) {
 					log.Infof("Detected power ratings screen")
 					result := rokocr.ParseImage("out.png", img, &powerRatingsTemplate, os.TempDir(), "./tessdata")
 					pp.Println(result)
 					device.RunCommand("input touchscreen tap 1140 980")
 					waitExitProfile = false
 				} else {
+					imagehash, _ := goimagehash.DifferenceHash(img)
 					log.Warnf("Unknown screen: %x", imagehash.GetHash())
 					waitExitProfile = false
 				}

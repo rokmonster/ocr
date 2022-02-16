@@ -1,20 +1,17 @@
-package config
+package serverconfig
 
 import (
 	"flag"
 	"os"
+
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
 )
 
 type RokServerConfiguration struct {
-	MediaDirectory     string
-	TemplatesDirectory string
-	OutputDirectory    string
-	TessdataDirectory  string
-	TmpDirectory       string
-	DeleteTempFiles    bool
-	ListenPort         int
-	TLS                bool
-	TLSDomain          string
+	config.CommonConfiguration
+	ListenPort int
+	TLS        bool
+	TLSDomain  string
 }
 
 func Parse() RokServerConfiguration {

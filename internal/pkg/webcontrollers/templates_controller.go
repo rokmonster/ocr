@@ -18,8 +18,9 @@ import (
 )
 
 type TemplateMakerSession struct {
-	imagePath string
-	schema    map[string]schema.ROKOCRSchema
+	imagePath   string
+	schema      map[string]schema.ROKOCRSchema
+	checkpoints []schema.OCRCheckpoint
 }
 
 type TemplatesController struct {
@@ -40,12 +41,16 @@ func NewTemplatesController(router *gin.RouterGroup, templateDir, tessdataDir st
 
 // Binding from JSON
 type rokTemplateArea struct {
-	Name string `form:"name" json:"name" xml:"name"  binding:"required"`
-	Type string `form:"type" json:"type" xml:"type"  binding:"required"`
-	X    int    `form:"x" json:"x,string" xml:"x"  binding:"required"`
-	Y    int    `form:"y" json:"y,string" xml:"y" binding:"required"`
-	W    int    `form:"w" json:"w,string" xml:"w" binding:"required"`
-	H    int    `form:"h" json:"h,string" xml:"h" binding:"required"`
+	rokCropCoordinates
+	Name string `json:"name" binding:"required"`
+	Type string `json:"type" binding:"required"`
+}
+
+type rokCropCoordinates struct {
+	X int `form:"x" json:"x,string" xml:"x"  binding:"required"`
+	Y int `form:"y" json:"y,string" xml:"y" binding:"required"`
+	W int `form:"w" json:"w,string" xml:"w" binding:"required"`
+	H int `form:"h" json:"h,string" xml:"h" binding:"required"`
 }
 
 func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchema) []schema.ROKTableField {
@@ -77,6 +82,7 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 		Threshold:   1,
 		OCRSchema:   s.schema,
 		Table:       controller.makeTable(s.schema),
+		Checkpoints: s.checkpoints,
 	}
 }
 
@@ -95,11 +101,12 @@ func (controller *TemplatesController) Setup() {
 		dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
 		c.SaveUploadedFile(file, dst)
 
-		logrus.Infof("Uploaded file: %s", dst)
+		logrus.Debugf("Uploaded file: %s", dst)
 
 		controller.sessions[sessionId] = TemplateMakerSession{
-			imagePath: dst,
-			schema:    make(map[string]schema.ROKOCRSchema),
+			imagePath:   dst,
+			checkpoints: []schema.OCRCheckpoint{},
+			schema:      make(map[string]schema.ROKOCRSchema),
 		}
 
 		c.Redirect(http.StatusFound, "/templates/"+sessionId)
@@ -174,8 +181,46 @@ func (controller *TemplatesController) Setup() {
 			}
 
 			c.JSON(http.StatusOK, gin.H{
-				"schema": s.schema,
+				"schema":      s.schema,
+				"checkpoints": s.checkpoints,
 			})
+			return
+		}
+
+		c.JSON(http.StatusNotFound, gin.H{})
+	})
+
+	controller.Router.POST("/:session/add-checkpoint", func(c *gin.Context) {
+		sessionId := c.Param("session")
+		if s, ok := controller.sessions[sessionId]; ok {
+			var postData rokCropCoordinates
+
+			c.BindJSON(&postData)
+
+			img, _ := imgutils.ReadImage(s.imagePath)
+
+			cropArea := schema.OCRCrop{
+				X: postData.X,
+				Y: postData.Y,
+				W: postData.W,
+				H: postData.H,
+			}
+
+			sub, _ := imgutils.CropImage(img, cropArea.CropRectange())
+			hash, _ := goimagehash.DifferenceHash(sub)
+
+			s.checkpoints = append(s.checkpoints, schema.OCRCheckpoint{
+				Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
+				Crop:        &cropArea,
+			})
+
+			controller.sessions[sessionId] = s
+
+			c.JSON(http.StatusOK, gin.H{
+				"schema":      s.schema,
+				"checkpoints": s.checkpoints,
+			})
+
 			return
 		}
 

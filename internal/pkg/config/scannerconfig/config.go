@@ -1,17 +1,14 @@
-package config
+package scannerconfig
 
 import (
 	"flag"
 	"os"
+
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
 )
 
 type ROKOCRConfiguration struct {
-	MediaDirectory     string
-	TemplatesDirectory string
-	OutputDirectory    string
-	TessdataDirectory  string
-	TmpDirectory       string
-	DeleteTempFiles    bool
+	config.CommonConfiguration
 }
 
 func Parse() ROKOCRConfiguration {
