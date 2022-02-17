@@ -22,7 +22,7 @@ builds:
 nfpms:
   - id: default
     package_name: rok-monster-ocr
-    file_name_template: "{{ .ConventionalFileName }}"
+    file_name_template: "{{ tolower .ProjectName }}"
     vendor: Julius Lisauskas
     maintainer: Julius Lisauskas <julius@lisauskas.lt>
 

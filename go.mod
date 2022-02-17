@@ -13,6 +13,8 @@ require (
 	github.com/otiai10/gosseract/v2 v2.3.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
+	go.etcd.io/bbolt v1.3.6
+	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
 
 )
@@ -42,8 +44,6 @@ require (
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
-	go.etcd.io/bbolt v1.3.6 // indirect
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
 	golang.org/x/text v0.3.6 // indirect
