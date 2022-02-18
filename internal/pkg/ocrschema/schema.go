@@ -73,7 +73,7 @@ func (b *RokOCRTemplate) Matches(img image.Image) bool {
 		expected_hash := differenceHashFromString(s.Fingerprint)
 		subimg, _ := imgutils.CropImage(img, s.Crop.CropRectange())
 		if !hashMatches(subimg, expected_hash) {
-			logrus.Warnf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
+			logrus.Debugf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
 			return false
 		}
 	}

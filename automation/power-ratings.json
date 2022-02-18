@@ -1,0 +1,424 @@
+{
+    "title": "ROK OCR Monster Template [xHjGoBllHQqm]",
+    "version": "1",
+    "author": "ROK OCR Template Maker",
+    "width": 2340,
+    "height": 1080,
+    "ocr_schema": {
+        "place_1": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                423,
+                291,
+                85,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_1_value": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1635,
+                294,
+                261,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_2": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                420,
+                408,
+                85,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_2_value": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1631,
+                413,
+                261,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_3": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                422,
+                532,
+                85,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_3_value": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1636,
+                531,
+                261,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_4": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                424,
+                656,
+                85,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_4_value": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1637,
+                655,
+                261,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_5": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                423,
+                772,
+                85,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_5_value": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1633,
+                774,
+                261,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_6": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                423,
+                894,
+                85,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "place_6_value": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1632,
+                891,
+                261,
+                95
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "title": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1679,
+                242,
+                111,
+                37
+            ]
+        }
+    },
+    "fingerprint": "e8e8f0f0f0f0f0f0",
+    "threshold": 1,
+    "table": [
+        [
+            "place_4",
+            "place_4",
+            false,
+            ""
+        ],
+        [
+            "place_6_value",
+            "place_6_value",
+            false,
+            ""
+        ],
+        [
+            "place_4_value",
+            "place_4_value",
+            false,
+            ""
+        ],
+        [
+            "place_3_value",
+            "place_3_value",
+            false,
+            ""
+        ],
+        [
+            "place_2_value",
+            "place_2_value",
+            false,
+            ""
+        ],
+        [
+            "place_1_value",
+            "place_1_value",
+            false,
+            ""
+        ],
+        [
+            "title",
+            "title",
+            false,
+            ""
+        ],
+        [
+            "place_3",
+            "place_3",
+            false,
+            ""
+        ],
+        [
+            "place_5",
+            "place_5",
+            false,
+            ""
+        ],
+        [
+            "place_6",
+            "place_6",
+            false,
+            ""
+        ],
+        [
+            "place_5_value",
+            "place_5_value",
+            false,
+            ""
+        ],
+        [
+            "place_1",
+            "place_1",
+            false,
+            ""
+        ],
+        [
+            "place_2",
+            "place_2",
+            false,
+            ""
+        ]
+    ],
+    "checkpoints": [
+        {
+            "crop": [
+                821,
+                31,
+                694,
+                38
+            ],
+            "fingerprint": "a06465696965"
+        },
+        {
+            "crop": [
+                1662,
+                241,
+                131,
+                38
+            ],
+            "fingerprint": "7c5ccc0f0f02425"
+        }
+    ]
+}

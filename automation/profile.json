@@ -1,0 +1,131 @@
+{
+    "title": "User Profile Screen",
+    "version": "1",
+    "author": "ROK OCR Template Maker",
+    "width": 2340,
+    "height": 1080,
+    "ocr_schema": {
+        "kp": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1561,
+                442,
+                200,
+                32
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "power": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1293,
+                441,
+                200,
+                32
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        }
+    },
+    "fingerprint": "c8e0e0f0e0f8f0f0",
+    "threshold": 1,
+    "table": [
+        [
+            "power",
+            "power",
+            false,
+            ""
+        ],
+        [
+            "kp",
+            "kp",
+            false,
+            ""
+        ]
+    ],
+    "checkpoints": [
+        {
+            "crop": [
+                584,
+                734,
+                174,
+                133
+            ],
+            "fingerprint": "ede0e16170e4dc73"
+        },
+        {
+            "crop": [
+                793,
+                732,
+                174,
+                133
+            ],
+            "fingerprint": "71f0f1717170f471"
+        },
+        {
+            "crop": [
+                991,
+                733,
+                174,
+                133
+            ],
+            "fingerprint": "37b2337171f8cc73"
+        },
+        {
+            "crop": [
+                1192,
+                734,
+                174,
+                133
+            ],
+            "fingerprint": "71f0f87971f4f433"
+        },
+        {
+            "crop": [
+                1388,
+                724,
+                174,
+                133
+            ],
+            "fingerprint": "32f6e4f87874de78"
+        },
+        {
+            "crop": [
+                1590,
+                735,
+                174,
+                133
+            ],
+            "fingerprint": "70f0e0f0e0ecfc71"
+        }
+    ]
+}

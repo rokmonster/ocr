@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image"
 	"os"
 	"time"
 
 	"github.com/corona10/goimagehash"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/k0kubun/pp"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
@@ -51,6 +51,18 @@ func ConnectAndUseDevice(descriptor adb.DeviceDescriptor) {
 	}
 }
 
+func screencapture(device *adb.Device) (image.Image, error) {
+	// screencap
+	cmdOutput, err := device.RunCommand("screencap -p")
+	if err != nil {
+		fmt.Println("\terror running command:", err)
+	}
+	_ = os.WriteFile("out.png", []byte(cmdOutput), 0644)
+
+	// read image
+	return imgutils.ReadImage("out.png")
+}
+
 func Top300Loop(device *adb.Device) error {
 	serialNo, err := device.Serial()
 	if err != nil {
@@ -64,59 +76,53 @@ func Top300Loop(device *adb.Device) error {
 	log.Printf("serial no: %s", serialNo)
 	log.Printf("devPath: %s", devPath)
 
-	waitExitProfile := false
+	// re-read templates white testing
+	powerDetailsTemplate := schema.LoadTemplate("./templates/iphone-11-with-power.json")
+	powerRatingsTemplate := schema.LoadTemplate("./automation/power-ratings.json")
+	profileTemplate := schema.LoadTemplate("./automation/profile.json")
+	rankingsSelection := schema.LoadTemplate("./automation/rankings-selection.json")
 
-	ticker := time.NewTicker(1 * time.Second)
+	img, err := screencapture(device)
 	quit := make(chan struct{})
 	go func() {
 		for {
-			select {
-			case <-ticker.C:
-				// re-read templates white testing
-				powerDetailsTemplate := schema.LoadTemplate("./templates/iphone-11-with-power.json")
-				powerRatingsTemplate := schema.LoadTemplate("./templates/iphone-11-power-rankings.json")
-				profileTemplate := schema.LoadTemplate("./templates/iphone-11-profile.json")
+			if err != nil {
+				log.Errorf("Error: %v", err)
+				time.Sleep(time.Second * 1)
+				img, err = screencapture(device)
+				continue
+			}
 
-				// screencap
-				cmdOutput, err := device.RunCommand("screencap -p")
-				if err != nil {
-					fmt.Println("\terror running command:", err)
-				}
-				_ = os.WriteFile("out.png", []byte(cmdOutput), 0644)
+			// detect screen based on template
+			if powerDetailsTemplate.Matches(img) {
+				log.Infof("Detected power details screen")
+				img, err = screencapture(device)
 
-				// read image
-				img, err := imgutils.ReadImage("out.png")
-				if err != nil {
-					continue
-				}
-
-				// detect screen based on template
-				if powerDetailsTemplate.Matches(img) {
-					log.Infof("Detected power details screen - parsing")
-					result := rokocr.ParseImage("out.png", img, &powerDetailsTemplate, os.TempDir(), "./tessdata")
-					pp.Println(result)
-					waitExitProfile = false
-				} else if profileTemplate.Matches(img) {
-					if !waitExitProfile {
-						log.Infof("Detected profile screen")
-						device.RunCommand("input touchscreen tap 1850 125")
-						waitExitProfile = true
-					}
-				} else if powerRatingsTemplate.Matches(img) {
-					log.Infof("Detected power ratings screen")
-					result := rokocr.ParseImage("out.png", img, &powerRatingsTemplate, os.TempDir(), "./tessdata")
-					pp.Println(result)
-					device.RunCommand("input touchscreen tap 1140 980")
-					waitExitProfile = false
-				} else {
-					imagehash, _ := goimagehash.DifferenceHash(img)
-					log.Warnf("Unknown screen: %x", imagehash.GetHash())
-					waitExitProfile = false
-				}
-
-			case <-quit:
-				ticker.Stop()
-				return
+			} else if profileTemplate.Matches(img) {
+				log.Debugf("Detected profile screen")
+				// close the screen
+				device.RunCommand("input touchscreen tap 1850 125")
+				time.Sleep(time.Millisecond * 500)
+				img, err = screencapture(device)
+			} else if rankingsSelection.Matches(img) {
+				log.Infof("Detected rankings screen")
+				time.Sleep(time.Millisecond * 500)
+				img, err = screencapture(device)
+			} else if powerRatingsTemplate.Matches(img) {
+				log.Debugf("Detected power ratings screen")
+				result := rokocr.ParseImage("out.png", img, &powerRatingsTemplate, os.TempDir(), "./tessdata")
+				log.Printf("Power ratings: %v -> %v", result["place_4"], result["place_4_value"])
+				log.Printf("Power ratings: %v -> %v", result["place_5"], result["place_5_value"])
+				log.Printf("Power ratings: %v -> %v", result["place_6"], result["place_6_value"])
+				device.RunCommand("input touchscreen tap 1140 980")
+				time.Sleep(time.Millisecond * 500)
+				img, err = screencapture(device)
+			} else {
+				imagehash, _ := goimagehash.DifferenceHash(img)
+				log.Debugf("Unknown screen: %x", imagehash.GetHash())
+				imgutils.WritePNGImage(img, fmt.Sprintf("./media/unknown_%x.png", imagehash.GetHash()))
+				time.Sleep(time.Millisecond * 500)
+				img, err = screencapture(device)
 			}
 		}
 	}()
