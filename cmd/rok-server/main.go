@@ -7,6 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/serverconfig"
+	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/webcontrollers"
 	"github.com/xor22h/rok-monster-ocr-golang/web"
 	"golang.org/x/crypto/acme/autocert"
@@ -21,6 +22,8 @@ import (
 var flags = config.Parse()
 
 func main() {
+	rokocr.Prepare(flags.CommonConfiguration)
+
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
 

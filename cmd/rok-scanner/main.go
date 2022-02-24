@@ -63,6 +63,7 @@ func writeCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
 }
 
 func main() {
+	rokocr.Prepare(flags.CommonConfiguration)
 	templates := rokocr.LoadTemplates(flags.TemplatesDirectory)
 	if len(templates) == 0 {
 		log.Fatalf("No templates found in: %v", flags.TemplatesDirectory)
