@@ -74,7 +74,7 @@ func main() {
 			ForceRSA:   true,
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: autocert.HostWhitelist(flags.TLSDomain),
-			Cache:      autocert.DirCache("~/.cache"),
+			Cache:      autocert.DirCache("./.cache"),
 		}
 		log.Fatal(runWithAutocertManager(router, &m))
 	} else {
