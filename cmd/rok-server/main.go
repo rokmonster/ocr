@@ -4,7 +4,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 
+	"github.com/coreos/go-systemd/v22/activation"
 	log "github.com/sirupsen/logrus"
 	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/serverconfig"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
@@ -22,6 +25,20 @@ import (
 var flags = config.Parse()
 
 func main() {
+	if flags.Install {
+		if len(strings.TrimSpace(flags.InstallUser)) > 0 && flags.TLS && len(strings.TrimSpace(flags.TLSDomain)) > 0 {
+			fmt.Printf("# Generating systemd unit files for running as %v\n", flags.InstallUser)
+			rokocr.InstallSystemD(flags)
+			fmt.Println("# Please run commands below")
+			fmt.Println("sudo systemctl daemon-reload")
+			fmt.Println("sudo systemctl enable --now rokocr-server.service")
+			os.Exit(0)
+		} else {
+			fmt.Println("# Install only possible with tls && domain name")
+			os.Exit(1)
+		}
+	}
+
 	rokocr.Prepare(flags.CommonConfiguration)
 
 	gin.SetMode(gin.ReleaseMode)
@@ -70,11 +87,11 @@ func main() {
 
 	if flags.TLS && len(flags.TLSDomain) > 0 {
 		log.Infof("Starting Autocert mode on TLS: https://%v", flags.TLSDomain)
+		cacheDir, _ := os.UserCacheDir()
 		m := autocert.Manager{
-			ForceRSA:   true,
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: autocert.HostWhitelist(flags.TLSDomain),
-			Cache:      autocert.DirCache("./.cache"),
+			Cache:      autocert.DirCache(cacheDir),
 		}
 		log.Fatal(runWithAutocertManager(router, &m))
 	} else {
@@ -93,6 +110,14 @@ func runWithAutocertManager(r http.Handler, m *autocert.Manager) error {
 		Handler:   r,
 	}
 
+	l, err := activation.ListenersWithNames()
+	if err == nil && len(l) >= 2 {
+		log.Info("Running with Unix activation listeners")
+		go http.Serve(l["http"][0], m.HTTPHandler(http.HandlerFunc(redirect)))
+		return s.ServeTLS(l["https"][0], "", "")
+	}
+
+	log.Infof("Starting HTTP Listeners")
 	go http.ListenAndServe(":http", m.HTTPHandler(http.HandlerFunc(redirect)))
 	return s.ListenAndServeTLS("", "")
 }
