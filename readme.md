@@ -53,7 +53,3 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 ## Community
 
 Have a question, an idea, or need help getting started? Checkout our [Discord](https://discord.gg/drhxwVQ)!
-
-## License
-
-The code is licensed [MIT](https://opensource.org/licenses/MIT) and the documentation is licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
