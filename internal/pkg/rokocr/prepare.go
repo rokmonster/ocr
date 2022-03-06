@@ -59,5 +59,6 @@ func Prepare(flags config.CommonConfiguration) {
 		logrus.Warnf("No tesseract trained data found, downloading english & french ones")
 		fileutils.Download(filepath.Join(flags.TessdataDirectory, "eng.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata")
 		fileutils.Download(filepath.Join(flags.TessdataDirectory, "fra.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata")
+		fileutils.Download(filepath.Join(flags.TessdataDirectory, "spa.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/spa.traineddata")
 	}
 }
