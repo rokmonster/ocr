@@ -29,11 +29,11 @@ type OCRCheckpoint struct {
 	Fingerprint string   `json:"fingerprint,omitempty"`
 }
 
-func LoadTemplate(fileName string) RokOCRTemplate {
+func LoadTemplate(fileName string) *RokOCRTemplate {
 	var t RokOCRTemplate
 	b, _ := ioutil.ReadFile(fileName)
 	json.Unmarshal(b, &t)
-	return t
+	return &t
 }
 
 func differenceHashFromString(s string) *goimagehash.ImageHash {

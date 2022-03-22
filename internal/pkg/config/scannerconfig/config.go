@@ -9,6 +9,7 @@ import (
 
 type ROKOCRConfiguration struct {
 	config.CommonConfiguration
+	ForceTemplate string
 }
 
 func Parse() ROKOCRConfiguration {
@@ -19,6 +20,7 @@ func Parse() ROKOCRConfiguration {
 	flag.StringVar(&flags.TessdataDirectory, "tessdata", "./tessdata", "tesseract data files directory")
 	flag.StringVar(&flags.OutputDirectory, "output", "./out", "output dir")
 	flag.StringVar(&flags.TmpDirectory, "tmp", os.TempDir(), "Directory for temporary files (cropped ones)")
+	flag.StringVar(&flags.ForceTemplate, "forceTemplate", "", "Force a specific template")
 	flag.Parse()
 
 	return flags

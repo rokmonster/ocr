@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
@@ -64,15 +65,25 @@ func writeCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
 
 func main() {
 	rokocr.Prepare(flags.CommonConfiguration)
-	templates := rokocr.LoadTemplates(flags.TemplatesDirectory)
-	if len(templates) == 0 {
-		log.Fatalf("No templates found in: %v", flags.TemplatesDirectory)
+
+	force := false
+	var template *schema.RokOCRTemplate
+
+	if len(strings.TrimSpace(flags.ForceTemplate)) > 0 {
+		force = true
+		template = schema.LoadTemplate(flags.ForceTemplate)
+		log.Infof("Running scanner in force mode with template: %v (%vx%v)", template.Title, template.Width, template.Height)
+	} else {
+		templates := rokocr.LoadTemplates(flags.TemplatesDirectory)
+		if len(templates) == 0 {
+			log.Fatalf("No templates found in: %v", flags.TemplatesDirectory)
+		}
+		log.Debugf("Loaded %v templates", len(templates))
+		template = rokocr.FindTemplate(flags.MediaDirectory, templates)
+		log.Infof("I think this template is best match: %v (%vx%v)", template.Title, template.Width, template.Height)
 	}
 
-	log.Debugf("Loaded %v templates", len(templates))
-
-	template := rokocr.FindTemplate(flags.MediaDirectory, templates)
-	data := rokocr.RunRecognition(flags.MediaDirectory, flags.TessdataDirectory, template)
+	data := rokocr.RunRecognition(flags.MediaDirectory, flags.TessdataDirectory, template, force)
 
 	printResultsTable(data, template)
 	writeCSV(data, template)

@@ -15,7 +15,7 @@ func LoadTemplates(directory string) []schema.RokOCRTemplate {
 	for _, f := range fileutils.GetFilesInDirectory(directory) {
 		template := schema.LoadTemplate(f)
 		log.Debugf("Loaded template: %s => %s, hash: %s", f, template.Title, template.Fingerprint)
-		templates = append(templates, template)
+		templates = append(templates, *template)
 	}
 	return templates
 }

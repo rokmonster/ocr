@@ -1,0 +1,273 @@
+{
+    "title": "Profile page (Pixel 5)",
+    "version": "1",
+    "author": "ROK OCR Template Maker",
+    "width": 2340,
+    "height": 1080,
+    "ocr_schema": {
+        "govid": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1141,
+                280,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "govname": {
+            "lang": [
+                "eng",
+                "fra",
+                "spa",
+                "chi_tra",
+                "chi_sim"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                985,
+                324,
+                486,
+                39
+            ]
+        },
+        "kp": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1324,
+                472,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t1": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1248,
+                712,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t2": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1249,
+                765,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t3": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1250,
+                817,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t4": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1249,
+                869,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        "t5": {
+            "lang": [
+                "eng"
+            ],
+            "oem": 1,
+            "psm": 7,
+            "crop": [
+                1249,
+                923,
+                306,
+                39
+            ],
+            "allowlist": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        }
+    },
+    "fingerprint": "e8e0e0fcfcfcfcfc",
+    "threshold": 1,
+    "table": [
+        [
+            "t4",
+            "t4",
+            false,
+            ""
+        ],
+        [
+            "t5",
+            "t5",
+            false,
+            ""
+        ],
+        [
+            "govname",
+            "govname",
+            false,
+            ""
+        ],
+        [
+            "govid",
+            "govid",
+            false,
+            ""
+        ],
+        [
+            "kp",
+            "kp",
+            false,
+            ""
+        ],
+        [
+            "t1",
+            "t1",
+            false,
+            ""
+        ],
+        [
+            "t2",
+            "t2",
+            false,
+            ""
+        ],
+        [
+            "t3",
+            "t3",
+            false,
+            ""
+        ]
+    ],
+    "checkpoints": [
+        {
+            "crop": [
+                589,
+                717,
+                172,
+                156
+            ],
+            "fingerprint": "cde9e06170e4dc0f"
+        },
+        {
+            "crop": [
+                790,
+                718,
+                172,
+                156
+            ],
+            "fingerprint": "b3f0f0717070f407"
+        }
+    ]
+}

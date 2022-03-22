@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"image"
 	"os"
-	"time"
+	"path/filepath"
 
-	"github.com/corona10/goimagehash"
-	"github.com/k0kubun/pp"
 	log "github.com/sirupsen/logrus"
 
 	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/automatorconfig"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
 	adb "github.com/zach-klippenstein/goadb"
 )
@@ -79,46 +76,26 @@ func workWithDevice(device *adb.Device) error {
 	log.Printf("devPath: %s", devPath)
 
 	quit := make(chan struct{})
+	i := 0
 	go func() {
+		screens := []string{"profile", "profile_with_stats", "more_details"}
 		for {
-			time.Sleep(time.Millisecond * 500)
-			img, err := screencapture(device)
-			if err != nil {
-				log.Errorf("Error: %v", err)
-				continue
+			for _, screen := range screens {
+				fileName, _ := filepath.Abs(fmt.Sprintf("%v/%04d_%v.png", flags.MediaDirectory, i, screen))
+				log.Infof("Press ENTER to capture: %v", fileName)
+				fmt.Scanln()
+				img, err := screencapture(device)
+				if err != nil {
+					log.Errorf("Error: %v", err)
+					continue
+				}
+				imgutils.WritePNGImage(img, fileName)
 			}
-
-			processImage(img)
+			i++
 		}
 	}()
 
 	<-quit
 
 	return nil
-}
-
-func processImage(img image.Image) {
-	imagehash, _ := goimagehash.DifferenceHash(img)
-	log.Infof("handling image: %vx%v, hash: %x", img.Bounds().Dx(), img.Bounds().Dy(), imagehash.GetHash())
-
-	// re-read templates white testing
-	powerDetailsTemplate := schema.LoadTemplate("./templates/iphone-11-with-power.json")
-	powerRatingsTemplate := schema.LoadTemplate("./automation/power-ratings.json")
-	profileTemplate := schema.LoadTemplate("./automation/profile.json")
-	rankingsSelection := schema.LoadTemplate("./automation/rankings-selection.json")
-
-	// detect screen based on template
-	if powerDetailsTemplate.Matches(img) {
-		result := rokocr.ParseImage("power_details", img, powerDetailsTemplate, flags.TmpDirectory, flags.TessdataDirectory)
-		log.Infof("Detected power details screen: %v", pp.Sprint(result))
-	} else if profileTemplate.Matches(img) {
-		log.Debugf("Detected profile screen")
-	} else if rankingsSelection.Matches(img) {
-		log.Infof("Detected rankings screen")
-	} else if powerRatingsTemplate.Matches(img) {
-		log.Debugf("Detected power ratings screen")
-	} else {
-		log.Debugf("Unknown screen: %x", imagehash.GetHash())
-		imgutils.WritePNGImage(img, fmt.Sprintf("./media/unknown_%x.png", imagehash.GetHash()))
-	}
 }
