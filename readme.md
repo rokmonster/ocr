@@ -1,6 +1,6 @@
 # ROK Monster OCR (GoLang)
 
-[![Discord](https://img.shields.io/discord/768180228710465598)](https://discord.gg/drhxwVQ) 
+[![Discord](https://img.shields.io/discord/955712057766985789)](https://discord.gg/3YS3xszTXe) 
 [![License: MIT](https://img.shields.io/github/license/xor22h/rok-monster-ocr-golang)](https://opensource.org/licenses/MIT)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xor22h/rok-monster-ocr-golang?style=flat-square)](https://goreportcard.com/report/github.com/xor22h/rok-monster-ocr-golang)
 
@@ -29,11 +29,11 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 - Easy install with package managers `apt-get` / `yum`
 - Fast hash based image comparison
 - Automated pick of best-match template (based on first image in media directory)
+- Easy to use WebUI. Just open [localhost:8080](http://localhost:8080/), upload files, and get results directly in your browser.
+- Automatic download/update of Tesseract data files.
 
 ## Future Plans
 
-- Automatic download/update of Tesseract data files.
-- Easy to use WebUI. Just open [localhost:8080](http://localhost:8080/), upload files, and get results directly in your browser (with a simple `docker run -d -p 8080:8080 $IMAGE`) 
 - Ability to use multiple templates in single run
 - Discord BOT mode. (Process each image sent to a specific discord channel)
 - Automate screnshot collection using ADB & Memu/LDPLay/real android device
