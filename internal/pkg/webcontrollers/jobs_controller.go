@@ -191,7 +191,7 @@ func (controller *JobsController) Setup() {
 			if len(templates) > 0 {
 				log.Debugf("Loaded %v templates", len(templates))
 				template := rokocr.FindTemplate(mediaDir, templates)
-				data := rokocr.RunRecognition(mediaDir, "./tessdata", template)
+				data := rokocr.RunRecognition(mediaDir, "./tessdata", template, false)
 				controller.updateJobResults(job.ID, data)
 				controller.updateJobStatus(job.ID, "Completed")
 			} else {
