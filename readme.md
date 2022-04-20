@@ -1,7 +1,7 @@
 # ROK Monster OCR (GoLang)
 
 [![Discord](https://img.shields.io/discord/955712057766985789?label=Discord&logo=discord&logoColor=%23ffffff)](https://discord.gg/3YS3xszTXe) 
-[![License: MIT](https://img.shields.io/github/license/xor22h/rok-monster-ocr-golang)](https://opensource.org/licenses/MIT)
+[![License: GPL-3.0](https://img.shields.io/github/license/xor22h/rok-monster-ocr-golang)](https://opensource.org/licenses/GPL-3.0)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xor22h/rok-monster-ocr-golang?style=flat-square)](https://goreportcard.com/report/github.com/xor22h/rok-monster-ocr-golang)
 
 
