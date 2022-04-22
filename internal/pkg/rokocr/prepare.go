@@ -11,6 +11,11 @@ import (
 )
 
 func InstallSystemD(flags serverconfig.RokServerConfiguration) {
+	workingDir := fmt.Sprintf("/home/%v", flags.InstallUser)
+	if flags.InstallUser == "root" {
+		workingDir = "/root"
+	}
+
 	fileutils.WriteFile([]byte(fmt.Sprintf(`[Unit]
 Description=ROK OCR Server
 Requires=rokocr-server-https.socket
@@ -23,12 +28,12 @@ RestartSec=2s
 Type=simple
 User=%v
 Group=%v
-WorkingDirectory=/home/%v
+WorkingDirectory=%v
 ExecStart=/usr/bin/rok-server -tls -domain %v
 Restart=always
 
 [Install]
-WantedBy=multi-user.target`, flags.InstallUser, flags.InstallUser, flags.InstallUser, flags.TLSDomain)), "/etc/systemd/system/rokocr-server.service")
+WantedBy=multi-user.target`, flags.InstallUser, flags.InstallUser, workingDir, flags.TLSDomain)), "/etc/systemd/system/rokocr-server.service")
 
 	fileutils.WriteFile([]byte(`[Socket]
 ListenStream=443
