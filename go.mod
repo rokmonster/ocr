@@ -1,6 +1,6 @@
 module github.com/xor22h/rok-monster-ocr-golang
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
@@ -15,8 +15,8 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
-	golang.org/x/image v0.0.0-20220302094943-723b81ca9867
+	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
+	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
 )
 
 require (

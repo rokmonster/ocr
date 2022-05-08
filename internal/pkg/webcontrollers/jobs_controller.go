@@ -1,6 +1,7 @@
 package webcontrollers
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -32,10 +33,11 @@ func NewJobsController(router *gin.RouterGroup, db *bolt.DB) *JobsController {
 }
 
 type OCRJob struct {
-	ID      uint64                  `json:"id"`
-	Name    string                  `json:"name"`
-	Results []ocrschema.OCRResponse `json:"results,omitempty"`
-	Status  string                  `json:"status,omitempty"`
+	ID       uint64                   `json:"id"`
+	Name     string                   `json:"name"`
+	Results  []ocrschema.OCRResponse  `json:"results,omitempty"`
+	Status   string                   `json:"status,omitempty"`
+	Template ocrschema.RokOCRTemplate `json:"template,omitempty"`
 }
 
 func (job *OCRJob) MediaDirectory() string {
@@ -105,6 +107,13 @@ func (controller *JobsController) updateJob(id uint64, fn func(*OCRJob) *OCRJob)
 func (controller *JobsController) updateJobStatus(id uint64, status string) error {
 	return controller.updateJob(id, func(job *OCRJob) *OCRJob {
 		job.Status = status
+		return job
+	})
+}
+
+func (controller *JobsController) updateJobTemplate(id uint64, template ocrschema.RokOCRTemplate) error {
+	return controller.updateJob(id, func(job *OCRJob) *OCRJob {
+		job.Template = template
 		return job
 	})
 }
@@ -191,6 +200,8 @@ func (controller *JobsController) Setup() {
 			if len(templates) > 0 {
 				log.Debugf("Loaded %v templates", len(templates))
 				template := rokocr.FindTemplate(mediaDir, templates)
+				controller.updateJobTemplate(job.ID, *template)
+
 				data := rokocr.RunRecognition(mediaDir, "./tessdata", template, false)
 				controller.updateJobResults(job.ID, data)
 				controller.updateJobStatus(job.ID, "Completed")
@@ -201,6 +212,16 @@ func (controller *JobsController) Setup() {
 		}(job)
 
 		c.Redirect(http.StatusFound, "/jobs")
+	})
+
+	controller.Router.GET("/:id/csv", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+		job := controller.getJob(id)
+
+		b := new(bytes.Buffer)
+		rokocr.WriteCSV(job.Results, &job.Template, b)
+
+		c.Data(http.StatusOK, "text/plain", b.Bytes())
 	})
 
 	controller.Router.GET("/:id/results", func(c *gin.Context) {

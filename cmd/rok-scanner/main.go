@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
 	"os"
 	"strings"
@@ -38,10 +37,6 @@ func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplat
 }
 
 func writeCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
-	headers := []string{}
-	for _, x := range template.Table {
-		headers = append(headers, x.Title)
-	}
 
 	fd, err := os.Create(fmt.Sprintf("%s/%v.csv", flags.OutputDirectory, time.Now().Unix()))
 	if err != nil {
@@ -50,17 +45,7 @@ func writeCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
 	}
 	defer fd.Close()
 
-	table := csv.NewWriter(fd)
-	table.Write(headers)
-	for _, row := range data {
-		rowData := []string{}
-		for _, x := range template.Table {
-			rowData = append(rowData, fmt.Sprintf("%v", row[x.Field]))
-		}
-		table.Write(rowData)
-	}
-	table.Flush()
-
+	rokocr.WriteCSV(data, template, fd)
 }
 
 func main() {
