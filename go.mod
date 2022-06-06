@@ -8,7 +8,7 @@ require (
 	github.com/corona10/goimagehash v1.1.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-contrib/static v0.0.1
-	github.com/gin-gonic/gin v1.8.0
+	github.com/gin-gonic/gin v1.8.1
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/otiai10/gosseract/v2 v2.3.1
