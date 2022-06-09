@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
@@ -21,11 +21,11 @@ import (
 )
 
 type JobsController struct {
-	Router fiber.Router
+	Router *gin.RouterGroup
 	db     *bolt.DB
 }
 
-func NewJobsController(router fiber.Router, db *bolt.DB) *JobsController {
+func NewJobsController(router *gin.RouterGroup, db *bolt.DB) *JobsController {
 	return &JobsController{
 		Router: router,
 		db:     db,
@@ -165,30 +165,30 @@ func itob(v uint64) []byte {
 
 func (controller *JobsController) Setup() {
 	// List all the jobs
-	controller.Router.Get("", func(c *fiber.Ctx) error {
-		return c.Render("jobs", fiber.Map{
+	controller.Router.GET("", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "jobs.html", gin.H{
 			"jobs": controller.getJobs(),
 		})
 	})
 
-	controller.Router.Get("/create", func(c *fiber.Ctx) error {
+	controller.Router.GET("/create", func(c *gin.Context) {
 		controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
-		return c.Redirect("/jobs", http.StatusFound)
+		c.Redirect(http.StatusFound, "/jobs")
 	})
 
-	controller.Router.Get("/:id", func(c *fiber.Ctx) error {
-		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
+	controller.Router.GET("/:id", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
-		return c.Render("job_edit", fiber.Map{
+		c.HTML(http.StatusOK, "job_edit.html", gin.H{
 			"job":   job,
 			"files": controller.getJobFiles(id),
 		})
 	})
 
-	controller.Router.Get("/:id/start", func(c *fiber.Ctx) error {
+	controller.Router.GET("/:id/start", func(c *gin.Context) {
 		// TODO: Edit job here
-		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
 		go func(job *OCRJob) {
@@ -211,31 +211,31 @@ func (controller *JobsController) Setup() {
 			}
 		}(job)
 
-		return c.Redirect("/jobs", http.StatusFound)
+		c.Redirect(http.StatusFound, "/jobs")
 	})
 
-	controller.Router.Get("/:id/csv", func(c *fiber.Ctx) error {
-		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
+	controller.Router.GET("/:id/csv", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
 		b := new(bytes.Buffer)
 		rokocr.WriteCSV(job.Results, &job.Template, b)
 
-		return c.Type("text/plain").Send(b.Bytes())
+		c.Data(http.StatusOK, "text/plain", b.Bytes())
 	})
 
-	controller.Router.Get("/:id/results", func(c *fiber.Ctx) error {
-		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
+	controller.Router.GET("/:id/results", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
-		return c.Render("job_results", fiber.Map{
+		c.HTML(http.StatusOK, "job_results.html", gin.H{
 			"job":   job,
 			"files": controller.getJobFiles(id),
 		})
 	})
 
-	controller.Router.Post("/:id/upload", func(c *fiber.Ctx) error {
-		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
+	controller.Router.POST("/:id/upload", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
 		os.MkdirAll(job.MediaDirectory(), os.ModePerm)
@@ -243,17 +243,17 @@ func (controller *JobsController) Setup() {
 		// move uploaded file
 		file, _ := c.FormFile("file")
 		dst := fmt.Sprintf("%s/%s", job.MediaDirectory(), stringutils.Random(8))
-		c.SaveFile(file, dst)
+		c.SaveUploadedFile(file, dst)
 
-		return c.JSON(fiber.Map{
+		c.JSON(http.StatusOK, gin.H{
 			"destination": dst,
 		})
 	})
 
-	controller.Router.Get("/:id/delete", func(c *fiber.Ctx) error {
-		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
+	controller.Router.GET("/:id/delete", func(c *gin.Context) {
+		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		controller.deleteJob(id)
-		return c.Redirect("/jobs", http.StatusFound)
+		c.Redirect(http.StatusFound, "/jobs")
 	})
 
 }

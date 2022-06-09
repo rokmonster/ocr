@@ -8,16 +8,16 @@ import (
 	"strings"
 
 	"github.com/coreos/go-systemd/v22/activation"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	log "github.com/sirupsen/logrus"
 	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/serverconfig"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/webcontrollers"
 	"github.com/xor22h/rok-monster-ocr-golang/web"
 	"golang.org/x/crypto/acme/autocert"
+
+	"github.com/gin-contrib/pprof"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -41,37 +41,49 @@ func main() {
 
 	rokocr.Prepare(flags.CommonConfiguration)
 
+	gin.SetMode(gin.ReleaseMode)
+	gin.DisableConsoleColor()
+
 	db, err := bolt.Open("db.bolt", 0666, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	app := fiber.New(fiber.Config{
-		TrustedProxies:        []string{},
-		Prefork:               false,
-		EnablePrintRoutes:     true,
-		Views:                 web.CreateTemplateEngine(web.StaticFS, "template"),
-		DisableStartupMessage: true,
-		BodyLimit:             64 << 20, // 64MB
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			return c.Redirect("/jobs", 307)
-		},
-	})
+	router := gin.New()
+	router.SetTrustedProxies([]string{})
 
-	app.Use(recover.New())
-	app.Use(logger.New())
+	// just reuse same logger
+	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+		Output: log.New().Writer(),
+		Formatter: func(params gin.LogFormatterParams) string {
+			return fmt.Sprintf("| %3d | %13v | %15s | %-7s %#v\n",
+				params.StatusCode,
+				params.Latency,
+				params.ClientIP,
+				params.Method,
+				params.Path,
+			)
+		},
+	}))
+
+	router.Use(gin.Recovery())
+	router.MaxMultipartMemory = 64 << 20
+	router.Use(static.Serve("/", web.EmbeddedFS(web.StaticFS, "static")))
+	router.SetHTMLTemplate(web.CreateTemplateEngine(web.StaticFS, "template"))
+
+	pprof.RouteRegister(router.Group("_debug"), "pprof")
 
 	// public group, not auth needed for this.
-	public := app.Group("")
+	public := router.Group("")
 	{
 		webcontrollers.NewJobsController(public.Group("/jobs"), db).Setup()
 		webcontrollers.NewTemplatesController(public.Group("/templates"), flags.TemplatesDirectory, flags.TessdataDirectory).Setup()
 	}
 
-	app.Use(filesystem.New(filesystem.Config{
-		Root: web.EmbeddedFS(web.StaticFS, "static"),
-	}))
+	router.NoRoute(func(c *gin.Context) {
+		c.Redirect(307, "/jobs")
+	})
 
 	if flags.TLS && len(flags.TLSDomain) > 0 {
 		log.Infof("Starting Autocert mode on TLS: https://%v", flags.TLSDomain)
@@ -81,30 +93,33 @@ func main() {
 			HostPolicy: autocert.HostWhitelist(flags.TLSDomain),
 			Cache:      autocert.DirCache(cacheDir),
 		}
-		log.Fatal(runWithAutocertManager(app, &m))
+		log.Fatal(runWithAutocertManager(router, &m))
 	} else {
 		log.Infof("Starting in plain HTTP on port: %v", flags.ListenPort)
-		log.Fatal(app.Listen(fmt.Sprintf(":%d", flags.ListenPort)))
+		log.Fatal(router.Run(fmt.Sprintf(":%d", flags.ListenPort)))
 	}
 }
 
-func runWithAutocertManager(r *fiber.App, m *autocert.Manager) error {
+func runWithAutocertManager(r http.Handler, m *autocert.Manager) error {
 	config := m.TLSConfig()
 	config.MinVersion = tls.VersionTLS12
+
+	s := &http.Server{
+		Addr:      ":https",
+		TLSConfig: config,
+		Handler:   r,
+	}
 
 	l, err := activation.ListenersWithNames()
 	if err == nil && len(l) >= 2 {
 		log.Info("Running with Unix activation listeners")
 		go http.Serve(l["http"][0], m.HTTPHandler(http.HandlerFunc(redirect)))
-
-		ln := tls.NewListener(l["https"][0], config)
-		return r.Listener(ln)
+		return s.ServeTLS(l["https"][0], "", "")
 	}
 
 	log.Infof("Starting HTTP Listeners")
 	go http.ListenAndServe(":http", m.HTTPHandler(http.HandlerFunc(redirect)))
-	tlsListener, _ := tls.Listen("tcp", ":https", config)
-	return r.Listener(tlsListener)
+	return s.ListenAndServeTLS("", "")
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
