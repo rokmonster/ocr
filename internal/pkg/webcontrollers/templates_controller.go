@@ -9,7 +9,8 @@ import (
 	"strings"
 
 	"github.com/corona10/goimagehash"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
@@ -24,13 +25,13 @@ type TemplateMakerSession struct {
 }
 
 type TemplatesController struct {
-	Router       *gin.RouterGroup
+	Router       fiber.Router
 	sessions     map[string]TemplateMakerSession
 	templatesDir string
 	tessdataDir  string
 }
 
-func NewTemplatesController(router *gin.RouterGroup, templateDir, tessdataDir string) *TemplatesController {
+func NewTemplatesController(router fiber.Router, templateDir, tessdataDir string) *TemplatesController {
 	return &TemplatesController{
 		Router:       router,
 		sessions:     make(map[string]TemplateMakerSession),
@@ -88,18 +89,18 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 
 func (controller *TemplatesController) Setup() {
 
-	controller.Router.GET("", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{})
+	controller.Router.Get("", func(c *fiber.Ctx) error {
+		return c.Render("templatemaker_upload", fiber.Map{})
 	})
 
 	// create new session, and redirect
-	controller.Router.POST("", func(c *gin.Context) {
+	controller.Router.Post("", func(c *fiber.Ctx) error {
 		// create session id
 		sessionId := stringutils.Random(12)
 		// handle file upload...
 		file, _ := c.FormFile("image")
 		dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
-		c.SaveUploadedFile(file, dst)
+		c.SaveFile(file, dst)
 
 		logrus.Debugf("Uploaded file: %s", dst)
 
@@ -109,58 +110,62 @@ func (controller *TemplatesController) Setup() {
 			schema:      make(map[string]schema.ROKOCRSchema),
 		}
 
-		c.Redirect(http.StatusFound, "/templates/"+sessionId)
+		return c.Redirect("/templates/"+sessionId, http.StatusFound)
 	})
 
-	controller.Router.GET("/:session", func(c *gin.Context) {
-		if _, ok := controller.sessions[c.Param("session")]; ok {
+	controller.Router.Get("/:session", func(c *fiber.Ctx) error {
+		sessionId := utils.CopyString(c.Params("session"))
+		if _, ok := controller.sessions[sessionId]; ok {
 			// check if session exists;
-			c.HTML(http.StatusOK, "templatemaker.html", gin.H{
-				"sessionId": c.Param("session"),
+			return c.Render("templatemaker", fiber.Map{
+				"sessionId": sessionId,
 			})
-			return
 		}
-		c.Redirect(http.StatusFound, "/templates")
-
+		return c.Redirect("/templates", http.StatusFound)
 	})
 
-	controller.Router.GET("/:session/image", func(c *gin.Context) {
-		imagePath := controller.sessions[c.Param("session")].imagePath
-		c.File(imagePath)
+	controller.Router.Get("/:session/image", func(c *fiber.Ctx) error {
+		sessionId := utils.CopyString(c.Params("session"))
+		imagePath := controller.sessions[sessionId].imagePath
+		return c.SendFile(imagePath)
 	})
 
-	controller.Router.POST("/:session/scan", func(c *gin.Context) {
-		if s, ok := controller.sessions[c.Param("session")]; ok {
+	controller.Router.Post("/:session/scan", func(c *fiber.Ctx) error {
+		sessionId := utils.CopyString(c.Params("session"))
+
+		if s, ok := controller.sessions[sessionId]; ok {
 			img, _ := imgutils.ReadImage(s.imagePath)
-			template := controller.buildTemplate(c.Param("session"), s)
+			template := controller.buildTemplate(sessionId, s)
 
-			c.JSON(http.StatusOK, gin.H{
+			return c.JSON(fiber.Map{
 				"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
 				"results":     rokocr.ParseImage("test", img, template, os.TempDir(), "./tessdata"),
 			})
-			return
 		}
 
-		c.JSON(http.StatusNotFound, gin.H{})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{})
 	})
 
-	controller.Router.GET("/:session/export", func(c *gin.Context) {
-		if s, ok := controller.sessions[c.Param("session")]; ok {
-			template := controller.buildTemplate(c.Param("session"), s)
+	controller.Router.Get("/:session/export", func(c *fiber.Ctx) error {
+		sessionId := utils.CopyString(c.Params("session"))
+
+		if s, ok := controller.sessions[sessionId]; ok {
+			template := controller.buildTemplate(sessionId, s)
 			bytes, _ := json.MarshalIndent(template, "", "    ")
-			os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
-			c.Redirect(http.StatusFound, "/templates")
-			return
+			os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, sessionId), bytes, 0644)
+			return c.Redirect("/templates", http.StatusFound)
 		}
 
-		c.JSON(http.StatusNotFound, gin.H{})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{})
 	})
 
-	controller.Router.POST("/:session/add-area", func(c *gin.Context) {
-		if s, ok := controller.sessions[c.Param("session")]; ok {
+	controller.Router.Post("/:session/add-area", func(c *fiber.Ctx) error {
+		sessionId := utils.CopyString(c.Params("session"))
+
+		if s, ok := controller.sessions[sessionId]; ok {
 			var postData rokTemplateArea
 
-			c.BindJSON(&postData)
+			c.BodyParser(&postData)
 
 			if len(strings.TrimSpace(postData.Name)) > 0 {
 				if postData.Type == "number" {
@@ -180,22 +185,21 @@ func (controller *TemplatesController) Setup() {
 				}
 			}
 
-			c.JSON(http.StatusOK, gin.H{
+			return c.Status(http.StatusOK).JSON(fiber.Map{
 				"schema":      s.schema,
 				"checkpoints": s.checkpoints,
 			})
-			return
 		}
 
-		c.JSON(http.StatusNotFound, gin.H{})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{})
 	})
 
-	controller.Router.POST("/:session/add-checkpoint", func(c *gin.Context) {
-		sessionId := c.Param("session")
+	controller.Router.Post("/:session/add-checkpoint", func(c *fiber.Ctx) error {
+		sessionId := utils.CopyString(c.Params("session"))
 		if s, ok := controller.sessions[sessionId]; ok {
 			var postData rokCropCoordinates
 
-			c.BindJSON(&postData)
+			c.BodyParser(&postData)
 
 			img, _ := imgutils.ReadImage(s.imagePath)
 
@@ -216,14 +220,12 @@ func (controller *TemplatesController) Setup() {
 
 			controller.sessions[sessionId] = s
 
-			c.JSON(http.StatusOK, gin.H{
+			return c.JSON(fiber.Map{
 				"schema":      s.schema,
 				"checkpoints": s.checkpoints,
 			})
-
-			return
 		}
 
-		c.JSON(http.StatusNotFound, gin.H{})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{})
 	})
 }

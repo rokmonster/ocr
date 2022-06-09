@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
@@ -21,11 +21,11 @@ import (
 )
 
 type JobsController struct {
-	Router *gin.RouterGroup
+	Router fiber.Router
 	db     *bolt.DB
 }
 
-func NewJobsController(router *gin.RouterGroup, db *bolt.DB) *JobsController {
+func NewJobsController(router fiber.Router, db *bolt.DB) *JobsController {
 	return &JobsController{
 		Router: router,
 		db:     db,
@@ -165,30 +165,30 @@ func itob(v uint64) []byte {
 
 func (controller *JobsController) Setup() {
 	// List all the jobs
-	controller.Router.GET("", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "jobs.html", gin.H{
+	controller.Router.Get("", func(c *fiber.Ctx) error {
+		return c.Render("jobs", fiber.Map{
 			"jobs": controller.getJobs(),
 		})
 	})
 
-	controller.Router.GET("/create", func(c *gin.Context) {
+	controller.Router.Get("/create", func(c *fiber.Ctx) error {
 		controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
-		c.Redirect(http.StatusFound, "/jobs")
+		return c.Redirect("/jobs", http.StatusFound)
 	})
 
-	controller.Router.GET("/:id", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	controller.Router.Get("/:id", func(c *fiber.Ctx) error {
+		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
 		job := controller.getJob(id)
 
-		c.HTML(http.StatusOK, "job_edit.html", gin.H{
+		return c.Render("job_edit", fiber.Map{
 			"job":   job,
 			"files": controller.getJobFiles(id),
 		})
 	})
 
-	controller.Router.GET("/:id/start", func(c *gin.Context) {
+	controller.Router.Get("/:id/start", func(c *fiber.Ctx) error {
 		// TODO: Edit job here
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
 		job := controller.getJob(id)
 
 		go func(job *OCRJob) {
@@ -211,31 +211,31 @@ func (controller *JobsController) Setup() {
 			}
 		}(job)
 
-		c.Redirect(http.StatusFound, "/jobs")
+		return c.Redirect("/jobs", http.StatusFound)
 	})
 
-	controller.Router.GET("/:id/csv", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	controller.Router.Get("/:id/csv", func(c *fiber.Ctx) error {
+		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
 		job := controller.getJob(id)
 
 		b := new(bytes.Buffer)
 		rokocr.WriteCSV(job.Results, &job.Template, b)
 
-		c.Data(http.StatusOK, "text/plain", b.Bytes())
+		return c.Type("text/plain").Send(b.Bytes())
 	})
 
-	controller.Router.GET("/:id/results", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	controller.Router.Get("/:id/results", func(c *fiber.Ctx) error {
+		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
 		job := controller.getJob(id)
 
-		c.HTML(http.StatusOK, "job_results.html", gin.H{
+		return c.Render("job_results", fiber.Map{
 			"job":   job,
 			"files": controller.getJobFiles(id),
 		})
 	})
 
-	controller.Router.POST("/:id/upload", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	controller.Router.Post("/:id/upload", func(c *fiber.Ctx) error {
+		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
 		job := controller.getJob(id)
 
 		os.MkdirAll(job.MediaDirectory(), os.ModePerm)
@@ -243,17 +243,17 @@ func (controller *JobsController) Setup() {
 		// move uploaded file
 		file, _ := c.FormFile("file")
 		dst := fmt.Sprintf("%s/%s", job.MediaDirectory(), stringutils.Random(8))
-		c.SaveUploadedFile(file, dst)
+		c.SaveFile(file, dst)
 
-		c.JSON(http.StatusOK, gin.H{
+		return c.JSON(fiber.Map{
 			"destination": dst,
 		})
 	})
 
-	controller.Router.GET("/:id/delete", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	controller.Router.Get("/:id/delete", func(c *fiber.Ctx) error {
+		id, _ := strconv.ParseUint(c.Params("id"), 0, 64)
 		controller.deleteJob(id)
-		c.Redirect(http.StatusFound, "/jobs")
+		return c.Redirect("/jobs", http.StatusFound)
 	})
 
 }

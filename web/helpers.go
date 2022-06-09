@@ -2,46 +2,23 @@ package web
 
 import (
 	"embed"
-	"html/template"
-	"io"
 	"io/fs"
 	"net/http"
 	"strings"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/gofiber/template/html"
 )
 
-func CreateTemplateEngine(embedFS embed.FS, subpath string) *template.Template {
-
-	root := template.New("").Funcs(sprig.HtmlFuncMap())
+func CreateTemplateEngine(embedFS embed.FS, subpath string) *html.Engine {
 	sub, _ := fs.Sub(embedFS, subpath)
+	engine := html.NewFileSystem(http.FS(sub), ".html")
 
-	err := fs.WalkDir(sub, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
+	for name, f := range sprig.HtmlFuncMap() {
+		engine.AddFunc(name, f)
+	}
 
-		if !d.IsDir() {
-			f, errOpen := sub.Open(path)
-			if errOpen != nil {
-				return errOpen
-			}
-			b, errRead := io.ReadAll(f)
-			if errRead != nil {
-				return errRead
-			}
-
-			t := root.New(path)
-			_, errParse := t.Parse(string(b))
-			if errParse != nil {
-				return errParse
-			}
-		}
-
-		return nil
-	})
-
-	return template.Must(root, err)
+	return engine
 }
 
 type binaryFileSystem struct {
