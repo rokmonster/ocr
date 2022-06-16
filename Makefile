@@ -18,6 +18,6 @@ build: deps
 	goreleaser build --snapshot --rm-dist --single-target
 
 dev:
-	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.17
+	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.18
 
 .PHONY: check deps build tessdata

@@ -29,4 +29,6 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
+          DISCORD_WEBHOOK_ID: ${{ secrets.DD_ID }}
+          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DD_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

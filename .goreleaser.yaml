@@ -52,6 +52,11 @@ archives:
     - media/*.png
     - templates/*.json
  
+announce:
+  discord:
+    enabled: true
+    message_template: 'ROK Monster OCR {{.Tag}} is out! Check it out at {{ .ReleaseURL }}'
+    
 checksum:
   name_template: 'checksums.txt'
 snapshot:

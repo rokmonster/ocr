@@ -17,7 +17,7 @@ import (
 var flags = config.Parse()
 
 func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
-	headers := []string{}
+	headers := []string{"Filename"}
 	for _, x := range template.Table {
 		headers = append(headers, x.Title)
 	}
@@ -26,9 +26,10 @@ func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplat
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetHeader(headers)
 	for _, row := range data {
-		rowData := []string{}
+		rowData := []string{row.Filename}
+
 		for _, x := range template.Table {
-			rowData = append(rowData, fmt.Sprintf("%v", row[x.Field]))
+			rowData = append(rowData, fmt.Sprintf("%v", row.Data[x.Field]))
 		}
 		table.Append(rowData)
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 func WriteCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate, w io.Writer) {
-	headers := []string{}
+	headers := []string{"Filename"}
 	for _, x := range template.Table {
 		headers = append(headers, x.Title)
 	}
@@ -17,9 +17,9 @@ func WriteCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate, w io.W
 	table := csv.NewWriter(w)
 	table.Write(headers)
 	for _, row := range data {
-		rowData := []string{}
+		rowData := []string{row.Filename}
 		for _, x := range template.Table {
-			rowData = append(rowData, fmt.Sprintf("%v", row[x.Field]))
+			rowData = append(rowData, fmt.Sprintf("%v", row.Data[x.Field]))
 		}
 		table.Write(rowData)
 	}
