@@ -15,7 +15,7 @@ import (
 func ParseImage(name string, img image.Image, template *schema.RokOCRTemplate, tmpdir, tessdata string) schema.OCRResponse {
 	log.Debugf("[%s] Processing with template: %s", filepath.Base(name), template.Title)
 
-	results := make(map[string]string)
+	results := make(map[string]interface{})
 
 	if template.Width != img.Bounds().Dx() || template.Height != img.Bounds().Dy() {
 		log.Debugf("[%s] Need to resize: Original -> %v,%v, Template -> %v, %v", filepath.Base(name), img.Bounds().Dx(), img.Bounds().Dy(), template.Width, template.Height)

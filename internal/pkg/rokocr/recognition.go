@@ -11,19 +11,32 @@ import (
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 )
 
-func RunRecognition(mediaDir, tessData string, template *schema.RokOCRTemplate, force bool) []schema.OCRResponse {
-	// scan all the images
-	data := []schema.OCRResponse{}
-	dir, _ := filepath.Abs(mediaDir)
-	files := fileutils.GetFilesInDirectory(dir)
-	for i, f := range files {
-		log.Infof("[%04d/%04d] Parsing image: %v", i+1, len(files), filepath.Base(f))
-		result, err := ParseSingleFile(f, tessData, template, force)
-		if err != nil {
-			log.Warnf("[%s] %v", filepath.Base(f), err)
-			continue
+func RunRecognitionChan(mediaDir, tessData string, template *schema.RokOCRTemplate, force bool) <-chan schema.OCRResponse {
+	out := make(chan schema.OCRResponse)
+
+	go func() {
+		dir, _ := filepath.Abs(mediaDir)
+		files := fileutils.GetFilesInDirectory(dir)
+		for i, f := range files {
+			log.Infof("[%04d/%04d] Parsing image: %v", i+1, len(files), filepath.Base(f))
+			result, err := ParseSingleFile(f, tessData, template, force)
+			if err != nil {
+				log.Warnf("[%s] %v", filepath.Base(f), err)
+				continue
+			}
+			out <- *result
 		}
-		data = append(data, *result)
+		close(out)
+	}()
+
+	return out
+}
+
+func RunRecognition(mediaDir, tessData string, template *schema.RokOCRTemplate, force bool) []schema.OCRResponse {
+	data := []schema.OCRResponse{}
+
+	for elem := range RunRecognitionChan(mediaDir, tessData, template, force) {
+		data = append(data, elem)
 	}
 
 	return data

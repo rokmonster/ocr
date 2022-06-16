@@ -7,11 +7,12 @@
         <div class="card">
             <div class="card-header">Job Results</div>
 
-            <table class="card-table table table-vcenter table-sm table-striped table-hover">
+            <table class="card-table table table-vcenter table-sm table-striped table-hover font-monospace">
                 <thead>
                     <tr>
                         <th class="text-nowrap w-1">#</th>
-                        {{ range $k, $v := first .job.Results }}
+                        <th class="text-nowrap w-1">Filename</th>
+                        {{ range $k, $v := (first .job.Results).Data }}
                         <th>{{ $k }}</th>
                         {{ end }}
                     </tr>
@@ -20,7 +21,8 @@
                     {{ range $i, $line := .job.Results }}
                     <tr>
                         <td class="text-nowrap w-1">{{ add $i 1}}</td>
-                        {{ range $k, $v := first $.job.Results }}
+                        <td class="text-nowrap w-1">{{ $line.Filename }}</td>
+                        {{ range $k, $v := (first $.job.Results).Data }}
                         <td>{{ get $line.Data $k }}</td>
                         {{ end }}
                     </tr>

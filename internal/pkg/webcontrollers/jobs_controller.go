@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +17,6 @@ import (
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/stringutils"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -192,8 +192,15 @@ func (controller *JobsController) Setup() {
 		job := controller.getJob(id)
 
 		go func(job *OCRJob) {
-			controller.updateJobStatus(job.ID, "Started")
 			log.Debugf("Processing job: %v", job)
+
+			index := 1
+			fileCount := len(controller.getJobFiles(job.ID))
+
+			// clean results & update status
+			controller.updateJobResults(job.ID, []ocrschema.OCRResponse{})
+			controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
+
 			mediaDir := job.MediaDirectory()
 
 			templates := rokocr.LoadTemplates("./templates")
@@ -202,9 +209,16 @@ func (controller *JobsController) Setup() {
 				template := rokocr.FindTemplate(mediaDir, templates)
 				controller.updateJobTemplate(job.ID, *template)
 
-				data := rokocr.RunRecognition(mediaDir, "./tessdata", template, false)
+				data := []ocrschema.OCRResponse{}
+				for elem := range rokocr.RunRecognitionChan(mediaDir, "./tessdata", template, false) {
+					data = append(data, elem)
+					index = index + 1
+					controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
+					controller.updateJobResults(job.ID, data)
+				}
+
 				controller.updateJobResults(job.ID, data)
-				controller.updateJobStatus(job.ID, "Completed")
+				controller.updateJobStatus(job.ID, fmt.Sprintf("Completed: %v files", len(data)))
 			} else {
 				log.Warnf("No compatible template found")
 				controller.updateJobStatus(job.ID, "Failed, no template found")
@@ -242,7 +256,7 @@ func (controller *JobsController) Setup() {
 
 		// move uploaded file
 		file, _ := c.FormFile("file")
-		dst := fmt.Sprintf("%s/%s", job.MediaDirectory(), stringutils.Random(8))
+		dst := filepath.Join(job.MediaDirectory(), filepath.Base(file.Filename))
 		c.SaveUploadedFile(file, dst)
 
 		c.JSON(http.StatusOK, gin.H{
