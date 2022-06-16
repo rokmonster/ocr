@@ -21,7 +21,7 @@
                     <tr>
                         <td class="text-nowrap w-1">{{ add $i 1}}</td>
                         {{ range $k, $v := first $.job.Results }}
-                        <td>{{ get $line $k }}</td>
+                        <td>{{ get $line.Data $k }}</td>
                         {{ end }}
                     </tr>
                     {{end}}
