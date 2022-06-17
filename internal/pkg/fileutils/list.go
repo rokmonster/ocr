@@ -1,6 +1,9 @@
 package fileutils
 
-import "io/ioutil"
+import (
+	"io/ioutil"
+	"path/filepath"
+)
 
 func GetFilesInDirectory(directory string) []string {
 	files := []string{}
@@ -9,7 +12,7 @@ func GetFilesInDirectory(directory string) []string {
 
 	for _, file := range dir {
 		if !file.IsDir() {
-			files = append(files, directory+"/"+file.Name())
+			files = append(files, filepath.Join(directory, file.Name()))
 		}
 	}
 

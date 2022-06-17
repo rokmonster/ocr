@@ -16,7 +16,7 @@ import (
 
 var flags = config.Parse()
 
-func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
+func printResultsTable(data []schema.OCRResponse, template schema.RokOCRTemplate) {
 	headers := []string{"Filename"}
 	for _, x := range template.Table {
 		headers = append(headers, x.Title)
@@ -37,7 +37,7 @@ func printResultsTable(data []schema.OCRResponse, template *schema.RokOCRTemplat
 	table.Render()
 }
 
-func writeCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate) {
+func writeCSV(data []schema.OCRResponse, template schema.RokOCRTemplate) {
 
 	fd, err := os.Create(fmt.Sprintf("%s/%v.csv", flags.OutputDirectory, time.Now().Unix()))
 	if err != nil {
@@ -53,11 +53,11 @@ func main() {
 	rokocr.Prepare(flags.CommonConfiguration)
 
 	force := false
-	var template *schema.RokOCRTemplate
+	var template schema.RokOCRTemplate
 
 	if len(strings.TrimSpace(flags.ForceTemplate)) > 0 {
 		force = true
-		template = schema.LoadTemplate(flags.ForceTemplate)
+		template, _ = schema.LoadTemplate(flags.ForceTemplate)
 		log.Infof("Running scanner in force mode with template: %v (%vx%v)", template.Title, template.Width, template.Height)
 	} else {
 		templates := rokocr.LoadTemplates(flags.TemplatesDirectory)

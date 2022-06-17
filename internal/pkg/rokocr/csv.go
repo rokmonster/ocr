@@ -8,7 +8,7 @@ import (
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 )
 
-func WriteCSV(data []schema.OCRResponse, template *schema.RokOCRTemplate, w io.Writer) {
+func WriteCSV(data []schema.OCRResponse, template schema.RokOCRTemplate, w io.Writer) {
 	headers := []string{"Filename"}
 	for _, x := range template.Table {
 		headers = append(headers, x.Title)

@@ -1,0 +1,35 @@
+{{template "partials/head.html" .}}
+
+
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">Templates</div>
+        <table class="card-table table table-vcenter table-sm table-striped table-hover">
+            <thead>
+                <tr>
+                    <th class="text-nowrap">Template name</th>
+                    <th class="text-nowrap w-1">Author</th>
+                    <th class="text-nowrap w-1">Resolution</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range $i, $t := .templates }}
+                <tr>
+                    <td class="text-nowrap">{{ $t.Title }}</td>
+                    <td class="text-nowrap w-1">{{ $t.Author }}</td>
+                    <td class="text-nowrap w-1">{{ $t.Width }}x{{ $t.Height }}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+
+        <div class="card-footer">
+            <a href="/templates/new" class="btn btn-primary">New template</a>
+        </div>
+
+    </div>
+</div>
+
+{{template "partials/foot.html" .}}

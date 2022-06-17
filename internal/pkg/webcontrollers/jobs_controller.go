@@ -207,7 +207,7 @@ func (controller *JobsController) Setup() {
 			if len(templates) > 0 {
 				log.Debugf("Loaded %v templates", len(templates))
 				template := rokocr.FindTemplate(mediaDir, templates)
-				controller.updateJobTemplate(job.ID, *template)
+				controller.updateJobTemplate(job.ID, template)
 
 				data := []ocrschema.OCRResponse{}
 				for elem := range rokocr.RunRecognitionChan(mediaDir, "./tessdata", template, false) {
@@ -233,7 +233,7 @@ func (controller *JobsController) Setup() {
 		job := controller.getJob(id)
 
 		b := new(bytes.Buffer)
-		rokocr.WriteCSV(job.Results, &job.Template, b)
+		rokocr.WriteCSV(job.Results, job.Template, b)
 
 		c.Data(http.StatusOK, "text/plain", b.Bytes())
 	})

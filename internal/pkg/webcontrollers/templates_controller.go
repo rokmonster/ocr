@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
@@ -68,11 +69,11 @@ func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchem
 	return result
 }
 
-func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) *schema.RokOCRTemplate {
+func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) schema.RokOCRTemplate {
 	img, _ := imgutils.ReadImage(s.imagePath)
 	hash, _ := goimagehash.DifferenceHash(img)
 
-	return &schema.RokOCRTemplate{
+	return schema.RokOCRTemplate{
 		Title:       fmt.Sprintf("ROK OCR Monster Template [%s]", id),
 		Version:     "1",
 		Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
@@ -89,11 +90,17 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 func (controller *TemplatesController) Setup() {
 
 	controller.Router.GET("", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "templates.html", gin.H{
+			"templates": rokocr.LoadTemplates(controller.templatesDir),
+		})
+	})
+
+	controller.Router.GET("/new", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{})
 	})
 
 	// create new session, and redirect
-	controller.Router.POST("", func(c *gin.Context) {
+	controller.Router.POST("/new", func(c *gin.Context) {
 		// create session id
 		sessionId := stringutils.Random(12)
 		// handle file upload...
@@ -136,7 +143,7 @@ func (controller *TemplatesController) Setup() {
 
 			c.JSON(http.StatusOK, gin.H{
 				"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
-				"results":     rokocr.ParseImage("test", img, template, os.TempDir(), "./tessdata"),
+				"results":     rokocr.ParseImage("test", img, template, os.TempDir(), "./tessdata").Data,
 			})
 			return
 		}
@@ -146,7 +153,7 @@ func (controller *TemplatesController) Setup() {
 
 	controller.Router.GET("/:session/export", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
-			template := controller.buildTemplate(c.Param("session"), s)
+			template := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
 			bytes, _ := json.MarshalIndent(template, "", "    ")
 			os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
 			c.Redirect(http.StatusFound, "/templates")

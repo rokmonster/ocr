@@ -3,6 +3,7 @@
 before:
   hooks:
     - go mod tidy
+
 builds:
   - id: scanner
     binary: rok-scanner
@@ -20,7 +21,7 @@ builds:
       - amd64
 
 nfpms:
-  - id: default
+  - id: packages
     package_name: rok-monster-ocr
     file_name_template: "{{ tolower .ProjectName }}"
     vendor: Julius Lisauskas
@@ -38,6 +39,26 @@ nfpms:
       rpm:
         dependencies:
           - tesseract-devel
+
+
+dockers:
+  - ids:
+    - packages
+ 
+    image_templates:
+    - "ghcr.io/xor22h/rok-monster-ocr-golang:{{ .Tag }}"
+    - "ghcr.io/xor22h/rok-monster-ocr-golang:latest"
+
+    dockerfile: 'Dockerfile.debian'
+    use: docker
+
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/amd64"
 
 archives:
   - id: default

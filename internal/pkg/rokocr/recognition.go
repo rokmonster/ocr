@@ -11,7 +11,7 @@ import (
 	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 )
 
-func RunRecognitionChan(mediaDir, tessData string, template *schema.RokOCRTemplate, force bool) <-chan schema.OCRResponse {
+func RunRecognitionChan(mediaDir, tessData string, template schema.RokOCRTemplate, force bool) <-chan schema.OCRResponse {
 	out := make(chan schema.OCRResponse)
 
 	go func() {
@@ -32,7 +32,7 @@ func RunRecognitionChan(mediaDir, tessData string, template *schema.RokOCRTempla
 	return out
 }
 
-func RunRecognition(mediaDir, tessData string, template *schema.RokOCRTemplate, force bool) []schema.OCRResponse {
+func RunRecognition(mediaDir, tessData string, template schema.RokOCRTemplate, force bool) []schema.OCRResponse {
 	data := []schema.OCRResponse{}
 
 	for elem := range RunRecognitionChan(mediaDir, tessData, template, force) {
@@ -42,7 +42,7 @@ func RunRecognition(mediaDir, tessData string, template *schema.RokOCRTemplate, 
 	return data
 }
 
-func ParseSingleFile(f, tessData string, template *schema.RokOCRTemplate, force bool) (*schema.OCRResponse, error) {
+func ParseSingleFile(f, tessData string, template schema.RokOCRTemplate, force bool) (*schema.OCRResponse, error) {
 	img, err := imgutils.ReadImage(f)
 	if err != nil {
 		return nil, fmt.Errorf("cant read file: %v", err)

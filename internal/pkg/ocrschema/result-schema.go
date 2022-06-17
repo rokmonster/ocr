@@ -1,6 +1,6 @@
 package ocrschema
 
 type OCRResponse struct {
-	Filename string
-	Data     map[string]interface{}
+	Filename string                 `json:"filename"`
+	Data     map[string]interface{} `json:"data"`
 }

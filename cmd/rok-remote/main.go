@@ -102,10 +102,10 @@ func processImage(img image.Image) {
 	log.Infof("handling image: %vx%v, hash: %x", img.Bounds().Dx(), img.Bounds().Dy(), imagehash.GetHash())
 
 	// re-read templates white testing
-	powerDetailsTemplate := schema.LoadTemplate("./templates/iphone-11-with-power.json")
-	powerRatingsTemplate := schema.LoadTemplate("./automation/power-ratings.json")
-	profileTemplate := schema.LoadTemplate("./automation/profile.json")
-	rankingsSelection := schema.LoadTemplate("./automation/rankings-selection.json")
+	powerDetailsTemplate, _ := schema.LoadTemplate("./templates/iphone-11-with-power.json")
+	powerRatingsTemplate, _ := schema.LoadTemplate("./automation/power-ratings.json")
+	profileTemplate, _ := schema.LoadTemplate("./automation/profile.json")
+	rankingsSelection, _ := schema.LoadTemplate("./automation/rankings-selection.json")
 
 	// detect screen based on template
 	if powerDetailsTemplate.Matches(img) {

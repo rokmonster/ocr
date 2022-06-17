@@ -29,11 +29,11 @@ type OCRCheckpoint struct {
 	Fingerprint string   `json:"fingerprint,omitempty"`
 }
 
-func LoadTemplate(fileName string) *RokOCRTemplate {
+func LoadTemplate(fileName string) (RokOCRTemplate, error) {
 	var t RokOCRTemplate
 	b, _ := ioutil.ReadFile(fileName)
-	json.Unmarshal(b, &t)
-	return &t
+	err := json.Unmarshal(b, &t)
+	return t, err
 }
 
 func differenceHashFromString(s string) *goimagehash.ImageHash {
@@ -93,7 +93,7 @@ func (b *RokOCRTemplate) Match(hash *goimagehash.ImageHash) bool {
 }
 
 type ROKOCRSchema struct {
-	Callback  []string      `json:"callback,omitempty"`
+	Callback  interface{}   `json:"callback,omitempty"`
 	Languages []string      `json:"lang,omitempty"`
 	OEM       int           `json:"oem,omitempty"`
 	PSM       int           `json:"psm,omitempty"`

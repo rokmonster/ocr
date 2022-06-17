@@ -12,7 +12,7 @@ import (
 	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/stringutils"
 )
 
-func ParseImage(name string, img image.Image, template *schema.RokOCRTemplate, tmpdir, tessdata string) schema.OCRResponse {
+func ParseImage(name string, img image.Image, template schema.RokOCRTemplate, tmpdir, tessdata string) schema.OCRResponse {
 	log.Debugf("[%s] Processing with template: %s", filepath.Base(name), template.Title)
 
 	results := make(map[string]interface{})

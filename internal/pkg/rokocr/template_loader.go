@@ -13,14 +13,20 @@ import (
 func LoadTemplates(directory string) []schema.RokOCRTemplate {
 	templates := []schema.RokOCRTemplate{}
 	for _, f := range fileutils.GetFilesInDirectory(directory) {
-		template := schema.LoadTemplate(f)
-		log.Debugf("Loaded template: %s => %s, hash: %s", f, template.Title, template.Fingerprint)
-		templates = append(templates, *template)
+		if filepath.Ext(f) == ".json" {
+			template, err := schema.LoadTemplate(f)
+			if err == nil {
+				log.Debugf("Loaded template: %s => %s, hash: %s", f, template.Title, template.Fingerprint)
+				templates = append(templates, template)
+			} else {
+				log.Errorf("Failed to load template: %v => %v", filepath.Base(f), err)
+			}
+		}
 	}
 	return templates
 }
 
-func FindTemplate(mediaDir string, availableTemplate []schema.RokOCRTemplate) *schema.RokOCRTemplate {
+func FindTemplate(mediaDir string, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
 	for _, file := range fileutils.GetFilesInDirectory(mediaDir) {
 		img, err := imgutils.ReadImage(file)
 		if err != nil {
@@ -30,10 +36,10 @@ func FindTemplate(mediaDir string, availableTemplate []schema.RokOCRTemplate) *s
 
 		imagehash, _ := goimagehash.DifferenceHash(img)
 		template := pickTemplate(imagehash, availableTemplate)
-		return &template
+		return template
 	}
 	// pick first template if no images found?
-	return &availableTemplate[0]
+	return availableTemplate[0]
 }
 
 func pickTemplate(hash *goimagehash.ImageHash, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
