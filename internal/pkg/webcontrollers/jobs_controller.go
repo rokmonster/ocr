@@ -136,11 +136,13 @@ func (controller *JobsController) getJob(id uint64) *OCRJob {
 	return job
 }
 
-func (controller *JobsController) createJob(jobName string) {
-	_ = controller.db.Update(func(t *bolt.Tx) error {
+func (controller *JobsController) createJob(jobName string) (uint64, error) {
+	id := uint64(0)
+
+	err := controller.db.Update(func(t *bolt.Tx) error {
 		bucket, _ := t.CreateBucketIfNotExists([]byte("jobs"))
 
-		id, _ := bucket.NextSequence()
+		id, _ = bucket.NextSequence()
 
 		u := OCRJob{
 			Name: jobName,
@@ -154,6 +156,8 @@ func (controller *JobsController) createJob(jobName string) {
 
 		return bucket.Put(itob(u.ID), buf)
 	})
+
+	return id, err
 }
 
 // itob returns an 8-byte big endian representation of v.
@@ -172,8 +176,12 @@ func (controller *JobsController) Setup() {
 	})
 
 	controller.Router.GET("/create", func(c *gin.Context) {
-		controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
-		c.Redirect(http.StatusFound, "/jobs")
+		id, err := controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
+		if err == nil {
+			c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v", id))
+		} else {
+			c.Redirect(http.StatusFound, "/jobs")
+		}
 	})
 
 	controller.Router.GET("/:id", func(c *gin.Context) {
@@ -225,7 +233,7 @@ func (controller *JobsController) Setup() {
 			}
 		}(job)
 
-		c.Redirect(http.StatusFound, "/jobs")
+		c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v/results", id))
 	})
 
 	controller.Router.GET("/:id/csv", func(c *gin.Context) {

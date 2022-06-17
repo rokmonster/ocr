@@ -55,7 +55,7 @@ func main() {
 
 	// just reuse same logger
 	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		Output: log.New().Writer(),
+		Output: log.New().WriterLevel(log.DebugLevel),
 		Formatter: func(params gin.LogFormatterParams) string {
 			return fmt.Sprintf("| %3d | %13v | %15s | %-7s %#v\n",
 				params.StatusCode,
