@@ -1,0 +1,30 @@
+{{template "partials/head.html" .}}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">Devices</div>
+        <table class="card-table table table-vcenter table-sm table-striped table-hover">
+            <thead>
+                <tr>
+                    <th class="text-nowrap">DeviceName</th>
+                    <th class="text-nowrap w-1">DeviceAddress</th>
+                    <th class="text-nowrap w-1">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range $i, $d := .devices }}
+                <tr>
+                    <td class="text-nowrap">{{ $d.Name }}</td>
+                    <td class="text-nowrap w-1">{{ $d.Address }}</td>
+                    <td class="text-nowrap w-1">
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+{{template "partials/foot.html" .}}

@@ -10,7 +10,8 @@ import (
 
 type AutomatorConfig struct {
 	config.CommonConfiguration
-	ADBPort int
+	ADBPort   int
+	ROKServer string
 }
 
 func Parse() AutomatorConfig {
@@ -22,6 +23,7 @@ func Parse() AutomatorConfig {
 	flag.StringVar(&flags.OutputDirectory, "output", "./out", "output dir")
 	flag.StringVar(&flags.TmpDirectory, "tmp", os.TempDir(), "Directory for temporary files (cropped ones)")
 	flag.IntVar(&flags.ADBPort, "adb-port", adb.AdbPort, "ADB Port")
+	flag.StringVar(&flags.ROKServer, "rok-server", "http://localhost:8080", "rokserver to connect to")
 	flag.Parse()
 	return flags
 }

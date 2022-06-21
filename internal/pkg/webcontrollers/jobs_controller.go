@@ -169,7 +169,7 @@ func itob(v uint64) []byte {
 
 func (controller *JobsController) Setup() {
 	// List all the jobs
-	controller.Router.GET("", func(c *gin.Context) {
+	controller.Router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "jobs.html", gin.H{
 			"jobs": controller.getJobs(),
 		})

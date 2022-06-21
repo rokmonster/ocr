@@ -77,6 +77,7 @@ func main() {
 	// public group, not auth needed for this.
 	public := router.Group("")
 	{
+		webcontrollers.NewRemoteDevicesController(public.Group("/devices")).Setup()
 		webcontrollers.NewJobsController(public.Group("/jobs"), db).Setup()
 		webcontrollers.NewTemplatesController(public.Group("/templates"), flags.TemplatesDirectory, flags.TessdataDirectory).Setup()
 	}
