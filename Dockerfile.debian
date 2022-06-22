@@ -1,5 +1,5 @@
 FROM debian:11
-COPY rok-monster-ocr-golang.deb /tmp/rok-monster-ocr-golang.deb
-RUN apt-get update && apt-get install -y /tmp/rok-monster-ocr-golang.deb
+COPY ocr.deb /tmp/ocr.deb
+RUN apt-get update && apt-get install -y /tmp/ocr.deb
 EXPOSE 8080
 ENTRYPOINT ["rok-server"]
