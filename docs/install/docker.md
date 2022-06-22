@@ -12,8 +12,8 @@ If you are familiar with [Docker](https://www.docker.com/products/docker-desktop
 **This method works on Windows/Linux/MacOS**
 
 ```bash
-docker pull ghcr.io/xor22h/rok-monster-ocr-golang:latest
-docker run -d -p8080:8080 ghcr.io/xor22h/rok-monster-ocr-golang:latest
+docker pull ghcr.io/rokmonster/ocr:latest
+docker run -d -p8080:8080 ghcr.io/rokmonster/ocr:latest
 ```
 
 Just open  [http://localhost:8080](http://localhost:8080) and enjoy.

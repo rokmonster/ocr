@@ -46,8 +46,8 @@ dockers:
     - packages
  
     image_templates:
-    - "ghcr.io/xor22h/rok-monster-ocr-golang:{{ .Tag }}"
-    - "ghcr.io/xor22h/rok-monster-ocr-golang:latest"
+    - "ghcr.io/rokmonster/ocr:{{ .Tag }}"
+    - "ghcr.io/rokmonster/ocr:latest"
 
     dockerfile: 'Dockerfile.debian'
     use: docker

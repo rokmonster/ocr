@@ -7,7 +7,7 @@ permalink: /
 # ROK Monster OCR (GoLang)
 
 [![Discord](https://img.shields.io/discord/768180228710465598?label=Discord&logo=discord&logoColor=%23ffffff)](https://discord.gg/drhxwVQ) 
-[![License: MIT](https://img.shields.io/github/license/xor22h/rok-monster-ocr-golang)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/github/license/rokmonster/ocr)](https://opensource.org/licenses/MIT)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rokmonster/ocr?style=flat-square)](https://goreportcard.com/report/github.com/rokmonster/ocr)
 
 
