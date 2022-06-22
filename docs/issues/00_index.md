@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Known Issues
 nav_order: 4
 permalink: /issues

@@ -1,4 +1,5 @@
 ---
+layout: default
 title: WSL
 permalink: /issues/wsl
 parent: Known Issues

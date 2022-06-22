@@ -15,9 +15,3 @@ kramdown:
   syntax_highlighter_opts:
     block:
       line_numbers: false
-
-defaults:
-  - scope:
-      path: "" # an empty string here means all files in the project
-    values:
-      layout: "default"

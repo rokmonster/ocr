@@ -1,4 +1,5 @@
 ---
+layout: default
 title: GoLang
 nav_order: 3
 permalink: /install/golang

@@ -1,4 +1,5 @@
 ---
+layout: default
 title: System Packages
 nav_order: 1
 permalink: /install/os-packages
