@@ -1,7 +1,8 @@
 ---
-title: Server
-nav_order: 1
-permalink: /server
+title: rok-server
+nav_order: 2
+permalink: /components/rok-server
+parent: Components
 ---
 
 ## Server
@@ -18,7 +19,13 @@ permalink: /server
 
 * Pipelines (Combine data from multiple images/jobs)
 
-## QuickStart
+## QuickStart (Linux VM / Local PC / No TLS)
+
+- Download either deb/rpm package from [Latest release](https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/) 
+- Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
+- Start with a simple `rok-server` & open [http://localhost:8080](http://localhost:8080) 
+
+## QuickStart (Linux VM & TLS)
 
 - Download either deb/rpm package from [Latest release](https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/) 
 - Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)

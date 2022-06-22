@@ -1,6 +1,8 @@
-title: ROK OCR
+title: ROK Monster OCR
 remote_theme: pmarsceill/just-the-docs
-# theme: "just-the-docs"
+
+plugins:
+  - jekyll-remote-theme
 
 defaults:
   - scope:
