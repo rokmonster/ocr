@@ -48,7 +48,7 @@ Command line tools to help collect player statistics from [Rise of Kingdoms](htt
 
 ## Getting started
 
-[Read the docs here](https://xor22h.github.io/rok-monster-ocr-golang/)
+[Read the docs here](https://rokmonster.github.io/ocr/)
 
 ## Community
 
