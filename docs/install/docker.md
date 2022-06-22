@@ -5,7 +5,7 @@ permalink: /install/docker
 parent: Installation
 ---
 
-## Running ROK Monster OCR with Docker
+# Install with Docker
 
 If you are familiar with [Docker](https://www.docker.com/products/docker-desktop/), running `rok-server` is very easy & simple using only few commands.
 

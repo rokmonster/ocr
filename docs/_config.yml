@@ -4,6 +4,18 @@ remote_theme: pmarsceill/just-the-docs
 plugins:
   - jekyll-remote-theme
 
+search_enabled: true
+search.heading_level: 3
+
+compress_html:
+  ignore:
+    envs: all
+
+kramdown:
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
 defaults:
   - scope:
       path: "" # an empty string here means all files in the project

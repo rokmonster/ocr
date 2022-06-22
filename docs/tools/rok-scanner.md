@@ -5,6 +5,6 @@ permalink: /components/rok-scanner
 parent: Components
 ---
 
-## Scanner
+# Scanner
 
 `rok-scanner` is a CLI Tool for scanning a folder with images

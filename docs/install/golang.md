@@ -5,7 +5,7 @@ permalink: /install/golang
 parent: Installation
 ---
 
-## Installing ROK Monster OCR with GoLang
+# Install with GoLang
 
 This method of install is more flexible & allows you to run it on any machine (Linux/Mac/Windows)
 
@@ -15,14 +15,14 @@ This method will work fine on different architectures (arm64) too. So you can us
 
 ### ROK Server
 
-```
+```bash
 go install github.com/xor22h/rok-monster-ocr-golang/cmd/rok-server@latest
 $GOBIN/rok-server
 ```
 
 ### ROK Scanner
 
-```
+```bash
 go install github.com/xor22h/rok-monster-ocr-golang/cmd/rok-scanner@latest
 $GOBIN/rok-scanner
 ```

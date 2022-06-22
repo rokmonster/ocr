@@ -5,7 +5,7 @@ permalink: /components/rok-server
 parent: Components
 ---
 
-## Server
+# Server
 
 `rok-server` enables WEB UI And easy access to data
 

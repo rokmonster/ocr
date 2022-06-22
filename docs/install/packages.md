@@ -5,7 +5,7 @@ permalink: /install/os-packages
 parent: Installation
 ---
 
-## Installation usign deb/rpm package
+# Install using deb/rpm package
 
 **This method of installing is the recommended for novice users, but only works on Linux VM's**
 
