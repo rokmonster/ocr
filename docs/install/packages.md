@@ -15,14 +15,14 @@ parent: Installation
 **Ubuntu/Debian**
 
 ```bash
-curl -Lo /tmp/rok-monster.deb https://github.com/rokmonster/ocr/releases/latest/download/rok-monster-ocr-golang.deb
-sudo apt install -y /tmp/rok-monster.deb
+curl -Lo /tmp/ocr.deb https://github.com/rokmonster/ocr/releases/latest/download/ocr.deb
+sudo apt install -y /tmp/ocr.deb
 ```
 
 **Centos/Redhat**
 
 ```bash
-sudo yum install -y https://github.com/rokmonster/ocr/releases/latest/download/rok-monster-ocr-golang.rpm
+sudo yum install -y https://github.com/rokmonster/ocr/releases/latest/download/ocr.rpm
 ```
 
 ## Usage
