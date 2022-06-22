@@ -87,11 +87,12 @@ func main() {
 	})
 
 	if flags.TLS && len(flags.TLSDomain) > 0 {
-		log.Infof("Starting Autocert mode on TLS: https://%v", flags.TLSDomain)
+		domains := strings.Split(flags.TLSDomain, ",")
+		log.Infof("Starting Autocert mode on TLS: %v", domains)
 		cacheDir, _ := os.UserCacheDir()
 		m := autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(flags.TLSDomain),
+			HostPolicy: autocert.HostWhitelist(domains...),
 			Cache:      autocert.DirCache(cacheDir),
 		}
 		log.Fatal(runWithAutocertManager(router, &m))
