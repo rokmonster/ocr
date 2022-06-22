@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/corona10/goimagehash"
+	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	"github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
 )
 
 type RokOCRTemplate struct {

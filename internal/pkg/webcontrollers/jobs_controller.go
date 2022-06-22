@@ -13,10 +13,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rokmonster/ocr/internal/pkg/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/ocrschema"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	log "github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
 	bolt "go.etcd.io/bbolt"
 )
 

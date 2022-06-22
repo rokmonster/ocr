@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
+	"github.com/rokmonster/ocr/internal/pkg/config"
 )
 
 type RokServerConfiguration struct {

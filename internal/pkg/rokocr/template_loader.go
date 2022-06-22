@@ -4,10 +4,10 @@ import (
 	"path/filepath"
 
 	"github.com/corona10/goimagehash"
+	"github.com/rokmonster/ocr/internal/pkg/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/imgutils"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	log "github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 )
 
 func LoadTemplates(directory string) []schema.RokOCRTemplate {

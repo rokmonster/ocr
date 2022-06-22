@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/rokmonster/ocr/internal/pkg/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/imgutils"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	log "github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 )
 
 func RunRecognitionChan(mediaDir, tessData string, template schema.RokOCRTemplate, force bool) <-chan schema.OCRResponse {

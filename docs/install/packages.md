@@ -9,20 +9,20 @@ parent: Installation
 
 **This method of installing is the recommended for novice users, but only works on Linux VM's**
 
-- Download either deb/rpm package from [Latest release](https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/) 
+- Download either deb/rpm package from [Latest release](https://github.com/rokmonster/ocr/releases/latest/) 
 - Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
 
 **Ubuntu/Debian**
 
 ```bash
-curl -Lo /tmp/rok-monster.deb https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/download/rok-monster-ocr-golang.deb
+curl -Lo /tmp/rok-monster.deb https://github.com/rokmonster/ocr/releases/latest/download/rok-monster-ocr-golang.deb
 sudo apt install -y /tmp/rok-monster.deb
 ```
 
 **Centos/Redhat**
 
 ```bash
-sudo yum install -y https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/download/rok-monster-ocr-golang.rpm
+sudo yum install -y https://github.com/rokmonster/ocr/releases/latest/download/rok-monster-ocr-golang.rpm
 ```
 
 ## Usage

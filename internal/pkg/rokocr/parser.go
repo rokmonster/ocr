@@ -7,9 +7,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/stringutils"
+	"github.com/rokmonster/ocr/internal/pkg/imgutils"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
+	"github.com/rokmonster/ocr/internal/pkg/stringutils"
 )
 
 func ParseImage(name string, img image.Image, template schema.RokOCRTemplate, tmpdir, tessdata string) schema.OCRResponse {

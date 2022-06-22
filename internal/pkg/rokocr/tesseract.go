@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/otiai10/gosseract/v2"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	log "github.com/sirupsen/logrus"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
 )
 
 func ParseText(imageFileName string, schema schema.ROKOCRSchema, tessdata string) (string, error) {

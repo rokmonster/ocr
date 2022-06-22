@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 )
 
 func WriteCSV(data []schema.OCRResponse, template schema.RokOCRTemplate, w io.Writer) {

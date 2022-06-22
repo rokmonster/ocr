@@ -16,13 +16,13 @@ This method will work fine on different architectures (arm64) too. So you can us
 ### ROK Server
 
 ```bash
-go install github.com/xor22h/rok-monster-ocr-golang/cmd/rok-server@latest
+go install github.com/rokmonster/ocr/cmd/rok-server@latest
 $GOBIN/rok-server
 ```
 
 ### ROK Scanner
 
 ```bash
-go install github.com/xor22h/rok-monster-ocr-golang/cmd/rok-scanner@latest
+go install github.com/rokmonster/ocr/cmd/rok-scanner@latest
 $GOBIN/rok-scanner
 ```

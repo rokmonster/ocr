@@ -8,11 +8,11 @@ import (
 	"strings"
 
 	"github.com/coreos/go-systemd/v22/activation"
+	config "github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr"
+	"github.com/rokmonster/ocr/internal/pkg/webcontrollers"
+	"github.com/rokmonster/ocr/web"
 	log "github.com/sirupsen/logrus"
-	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/serverconfig"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/webcontrollers"
-	"github.com/xor22h/rok-monster-ocr-golang/web"
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/gin-contrib/pprof"

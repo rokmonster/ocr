@@ -11,11 +11,11 @@ import (
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
+	"github.com/rokmonster/ocr/internal/pkg/imgutils"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr"
+	"github.com/rokmonster/ocr/internal/pkg/stringutils"
 	"github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/stringutils"
 )
 
 type TemplateMakerSession struct {

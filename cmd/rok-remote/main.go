@@ -14,9 +14,9 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 
-	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/automatorconfig"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/imgutils"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
+	config "github.com/rokmonster/ocr/internal/pkg/config/automatorconfig"
+	"github.com/rokmonster/ocr/internal/pkg/imgutils"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	adb "github.com/zach-klippenstein/goadb"
 )
 

@@ -21,13 +21,13 @@ parent: Components
 
 ## QuickStart (Linux VM / Local PC / No TLS)
 
-- Download either deb/rpm package from [Latest release](https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/) 
+- Download either deb/rpm package from [Latest release](https://github.com/rokmonster/ocr/releases/latest/) 
 - Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
 - Start with a simple `rok-server` & open [http://localhost:8080](http://localhost:8080) 
 
 ## QuickStart (Linux VM & TLS)
 
-- Download either deb/rpm package from [Latest release](https://github.com/xor22h/rok-monster-ocr-golang/releases/latest/) 
+- Download either deb/rpm package from [Latest release](https://github.com/rokmonster/ocr/releases/latest/) 
 - Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
 - Setup automatic startup & TLS
 - Open your browser at https://${IP}.nip.io

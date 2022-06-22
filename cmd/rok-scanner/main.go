@@ -9,9 +9,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 
-	config "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/scannerconfig"
-	schema "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/ocrschema"
-	rokocr "github.com/xor22h/rok-monster-ocr-golang/internal/pkg/rokocr"
+	config "github.com/rokmonster/ocr/internal/pkg/config/scannerconfig"
+	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
+	rokocr "github.com/rokmonster/ocr/internal/pkg/rokocr"
 )
 
 var flags = config.Parse()

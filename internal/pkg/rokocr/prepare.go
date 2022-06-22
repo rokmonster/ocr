@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/rokmonster/ocr/internal/pkg/config"
+	"github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
+	"github.com/rokmonster/ocr/internal/pkg/fileutils"
 	"github.com/sirupsen/logrus"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/config/serverconfig"
-	"github.com/xor22h/rok-monster-ocr-golang/internal/pkg/fileutils"
 )
 
 func InstallSystemD(flags serverconfig.RokServerConfiguration) {
