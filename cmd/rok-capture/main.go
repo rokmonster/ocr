@@ -59,7 +59,7 @@ func screencapture(device *adb.Device) (image.Image, error) {
 	_ = os.WriteFile("out.png", []byte(cmdOutput), 0644)
 
 	// read image
-	return imgutils.ReadImage("out.png")
+	return imgutils.ReadImageFile("out.png")
 }
 
 func workWithDevice(device *adb.Device) error {

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func Download(filepath string, url string) error {
-	logrus.Infof("Downloading: %v", url)
+	log.Infof("Downloading: %v", url)
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/corona10/goimagehash"
 	"github.com/rokmonster/ocr/internal/pkg/imgutils"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type RokOCRTemplate struct {
@@ -54,7 +54,7 @@ func hashMatches(b image.Image, hash *goimagehash.ImageHash) bool {
 	}
 
 	if distance > 0 {
-		logrus.Debugf("Expected hash: %x, real hash: %x, distance: %v", hash.GetHash(), imghash.GetHash(), distance)
+		log.Debugf("Expected hash: %x, real hash: %x, distance: %v", hash.GetHash(), imghash.GetHash(), distance)
 	}
 
 	// max distance allowed here is 1
@@ -73,7 +73,7 @@ func (b *RokOCRTemplate) Matches(img image.Image) bool {
 		expected_hash := differenceHashFromString(s.Fingerprint)
 		subimg, _ := imgutils.CropImage(img, s.Crop.CropRectange())
 		if !hashMatches(subimg, expected_hash) {
-			logrus.Debugf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
+			log.Debugf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
 			return false
 		}
 	}
@@ -88,7 +88,7 @@ func (b *RokOCRTemplate) Match(hash *goimagehash.ImageHash) bool {
 		return false
 	}
 
-	logrus.Debugf("hash: %x, distance: %v\n", hash.GetHash(), distance)
+	log.Debugf("hash: %x, distance: %v\n", hash.GetHash(), distance)
 	return distance <= b.Threshold
 }
 

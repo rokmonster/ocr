@@ -8,18 +8,16 @@ import (
 	"strings"
 
 	"github.com/coreos/go-systemd/v22/activation"
+	"github.com/gin-contrib/pprof"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
 	config "github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	"github.com/rokmonster/ocr/internal/pkg/webcontrollers"
 	"github.com/rokmonster/ocr/web"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/acme/autocert"
-
-	"github.com/gin-contrib/pprof"
-	"github.com/gin-contrib/static"
-	"github.com/gin-gonic/gin"
-
 	bolt "go.etcd.io/bbolt"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var flags = config.Parse()
@@ -77,7 +75,7 @@ func main() {
 	// public group, not auth needed for this.
 	public := router.Group("")
 	{
-		webcontrollers.NewRemoteDevicesController(public.Group("/devices")).Setup()
+		webcontrollers.NewRemoteDevicesController(public.Group("/devices"), flags.TemplatesDirectory, flags.TessdataDirectory).Setup()
 		webcontrollers.NewJobsController(public.Group("/jobs"), db).Setup()
 		webcontrollers.NewTemplatesController(public.Group("/templates"), flags.TemplatesDirectory, flags.TessdataDirectory).Setup()
 	}

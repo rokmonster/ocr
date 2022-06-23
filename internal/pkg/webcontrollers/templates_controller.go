@@ -15,7 +15,7 @@ import (
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	"github.com/rokmonster/ocr/internal/pkg/stringutils"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type TemplateMakerSession struct {
@@ -70,7 +70,7 @@ func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchem
 }
 
 func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) schema.RokOCRTemplate {
-	img, _ := imgutils.ReadImage(s.imagePath)
+	img, _ := imgutils.ReadImageFile(s.imagePath)
 	hash, _ := goimagehash.DifferenceHash(img)
 
 	return schema.RokOCRTemplate{
@@ -108,7 +108,7 @@ func (controller *TemplatesController) Setup() {
 		dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
 		c.SaveUploadedFile(file, dst)
 
-		logrus.Debugf("Uploaded file: %s", dst)
+		log.Debugf("Uploaded file: %s", dst)
 
 		controller.sessions[sessionId] = TemplateMakerSession{
 			imagePath:   dst,
@@ -138,7 +138,7 @@ func (controller *TemplatesController) Setup() {
 
 	controller.Router.POST("/:session/scan", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
-			img, _ := imgutils.ReadImage(s.imagePath)
+			img, _ := imgutils.ReadImageFile(s.imagePath)
 			template := controller.buildTemplate(c.Param("session"), s)
 
 			c.JSON(http.StatusOK, gin.H{
@@ -204,7 +204,7 @@ func (controller *TemplatesController) Setup() {
 
 			c.BindJSON(&postData)
 
-			img, _ := imgutils.ReadImage(s.imagePath)
+			img, _ := imgutils.ReadImageFile(s.imagePath)
 
 			cropArea := schema.OCRCrop{
 				X: postData.X,

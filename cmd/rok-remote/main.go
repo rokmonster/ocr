@@ -1,22 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"image"
-	"image/png"
 	"net/url"
-	"os"
 	"sync"
 
-	"github.com/corona10/goimagehash"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
-
 	config "github.com/rokmonster/ocr/internal/pkg/config/automatorconfig"
-	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
+	"github.com/rokmonster/ocr/internal/pkg/websocket/remote"
+	log "github.com/sirupsen/logrus"
 	adb "github.com/zach-klippenstein/goadb"
 )
 
@@ -58,14 +49,12 @@ func main() {
 
 		log.Infof("Found device: %v - %v", serial, info.DeviceInfo)
 
-		rc := RemoteControllerClient{
-			device: device,
-			server: flags.ROKServer,
-		}
+		uri := getWebsocketURI(flags.ROKServer)
+		rc := remote.NewRemoteADBDeviceWS(uri.String(), device)
 
 		go func() {
 			defer wg.Done()
-			rc.DeviceRegisterAndWork()
+			rc.DeviceRegisterAndWork() // this one is blocking...
 		}()
 	}
 
@@ -77,13 +66,8 @@ func main() {
 	wg.Wait()
 }
 
-type RemoteControllerClient struct {
-	device *adb.Device
-	server string
-}
-
-func (c *RemoteControllerClient) getWebsocketURI() url.URL {
-	uri, _ := url.Parse(c.server)
+func getWebsocketURI(server string) url.URL {
+	uri, _ := url.Parse(server)
 	scheme := uri.Scheme
 
 	if uri.Scheme == "https" {
@@ -95,97 +79,4 @@ func (c *RemoteControllerClient) getWebsocketURI() url.URL {
 	}
 
 	return url.URL{Scheme: scheme, Host: uri.Host, Path: "/devices/ws"}
-}
-
-func (c *RemoteControllerClient) DeviceRegisterAndWork() {
-	info, _ := c.device.DeviceInfo()
-	defer log.Warnf("Done with device: %v", info.Serial)
-	log.Infof("Device: %v", info.Serial)
-
-	u := c.getWebsocketURI()
-	log.Infof("Connecting to %s", u.String())
-
-	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		log.Fatal("dial:", err)
-	}
-
-	defer func() {
-		log.Debugf("Sending bye bye...")
-		ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "bye"))
-		ws.Close()
-	}()
-
-	log.Infof("Saying hello: %v", info.Serial)
-
-	_ = ws.WriteJSON(gin.H{
-		"serial": info.Serial,
-	})
-
-	// read instruction & handle it
-handlerloop:
-	for {
-		var message struct {
-			Command string      `json:"command"`
-			Args    interface{} `json:"args,omitempty"`
-		}
-
-		err := ws.ReadJSON(&message)
-		if err != nil {
-			log.Errorf("read: %v", err)
-			break handlerloop
-		}
-
-		switch message.Command {
-		case "quit":
-			break handlerloop
-		case "imagehash":
-			c.doImageHash(ws)
-		case "image":
-			c.doSendImage(ws)
-		default:
-			log.Warnf("Unknown command: '%v' received", message.Command)
-		}
-	}
-
-	log.Infof("We broke from handler loop...")
-}
-
-func (c *RemoteControllerClient) doImageHash(ws *websocket.Conn) {
-	img, _ := screencapture(c.device)
-	imagehash, _ := goimagehash.DifferenceHash(img)
-	log.Infof("[imagehash] w: %v, h: %v, hash: %x", img.Bounds().Dx(), img.Bounds().Dy(), imagehash.GetHash())
-	ws.WriteJSON(gin.H{
-		"responseType": "imagehash",
-		"value": gin.H{
-			"hash": fmt.Sprintf("%x", imagehash.GetHash()),
-			"w":    img.Bounds().Dx(),
-			"h":    img.Bounds().Dy(),
-		},
-	})
-}
-
-func (c *RemoteControllerClient) doSendImage(ws *websocket.Conn) {
-	img, _ := screencapture(c.device)
-	buf := new(bytes.Buffer)
-
-	png.Encode(buf, img)
-
-	log.Infof("[image] w: %v, h: %v, len: %v bytes", img.Bounds().Dx(), img.Bounds().Dy(), buf.Len())
-	ws.WriteJSON(gin.H{
-		"responseType": "image",
-		"value":        buf.Bytes(),
-	})
-}
-
-func screencapture(device *adb.Device) (image.Image, error) {
-	// screencap
-	cmdOutput, err := device.RunCommand("screencap -p")
-	if err != nil {
-		return nil, err
-	}
-	_ = os.WriteFile("out.png", []byte(cmdOutput), 0644)
-
-	// read image
-	return imgutils.ReadImage("out.png")
 }

@@ -35,6 +35,7 @@
                 "eng",
                 "fra",
                 "spa",
+                "rus",
                 "chi_tra",
                 "chi_sim"
             ],
@@ -199,7 +200,7 @@
         }
     },
     "fingerprint": "e8e0e0fcfcfcfcfc",
-    "threshold": 1,
+    "threshold": 2,
     "table": [
         [
             "t4",

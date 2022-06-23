@@ -43,7 +43,7 @@ func RunRecognition(mediaDir, tessData string, template schema.RokOCRTemplate, f
 }
 
 func ParseSingleFile(f, tessData string, template schema.RokOCRTemplate, force bool) (*schema.OCRResponse, error) {
-	img, err := imgutils.ReadImage(f)
+	img, err := imgutils.ReadImageFile(f)
 	if err != nil {
 		return nil, fmt.Errorf("cant read file: %v", err)
 	}

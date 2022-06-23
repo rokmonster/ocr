@@ -28,21 +28,21 @@ func LoadTemplates(directory string) []schema.RokOCRTemplate {
 
 func FindTemplate(mediaDir string, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
 	for _, file := range fileutils.GetFilesInDirectory(mediaDir) {
-		img, err := imgutils.ReadImage(file)
+		img, err := imgutils.ReadImageFile(file)
 		if err != nil {
 			log.Debugf("[%s] => error: %v", filepath.Base(file), err)
 			continue
 		}
 
 		imagehash, _ := goimagehash.DifferenceHash(img)
-		template := pickTemplate(imagehash, availableTemplate)
+		template := PickTemplate(imagehash, availableTemplate)
 		return template
 	}
 	// pick first template if no images found?
 	return availableTemplate[0]
 }
 
-func pickTemplate(hash *goimagehash.ImageHash, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
+func PickTemplate(hash *goimagehash.ImageHash, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
 	best := availableTemplate[0]
 
 	for _, t := range availableTemplate {

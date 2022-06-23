@@ -5,10 +5,11 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
+	"io"
 	"os"
 )
 
-func ReadImage(filename string) (image.Image, error) {
+func ReadImageFile(filename string) (image.Image, error) {
 	imgfile, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -16,14 +17,18 @@ func ReadImage(filename string) (image.Image, error) {
 
 	defer imgfile.Close()
 
+	return ReadImage(imgfile)
+}
+
+func ReadImage(reader io.Reader) (image.Image, error) {
 	// try to decode as PNG
-	img, err := png.Decode(imgfile)
+	img, err := png.Decode(reader)
 	if err == nil {
 		return img, nil
 	}
 
 	// try to decode as PNG
-	img, err = jpeg.Decode(imgfile)
+	img, err = jpeg.Decode(reader)
 	if err == nil {
 		return img, nil
 	}

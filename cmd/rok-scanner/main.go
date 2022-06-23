@@ -7,11 +7,10 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
-	log "github.com/sirupsen/logrus"
-
 	config "github.com/rokmonster/ocr/internal/pkg/config/scannerconfig"
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	rokocr "github.com/rokmonster/ocr/internal/pkg/rokocr"
+	log "github.com/sirupsen/logrus"
 )
 
 var flags = config.Parse()
