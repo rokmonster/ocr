@@ -19,8 +19,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewRemoteServerWS(device *ServerClient, socket *websocket.Conn, templates, tessdata string) *remoteServerWS {
-	return &remoteServerWS{
+func NewRemoteServerWS(socket *websocket.Conn, device, templates, tessdata string) *RemoteServerWS {
+	return &RemoteServerWS{
 		results:      make([]ocrschema.OCRResponse, 0),
 		templatesDir: templates,
 		tessdataDir:  tessdata,
@@ -29,34 +29,42 @@ func NewRemoteServerWS(device *ServerClient, socket *websocket.Conn, templates, 
 	}
 }
 
-type remoteServerWS struct {
-	device       *ServerClient
+type RemoteServerWS struct {
 	socket       *websocket.Conn
+	device       string
 	templatesDir string
 	tessdataDir  string
 	results      []ocrschema.OCRResponse
 }
 
-func (c *remoteServerWS) requestScreenHash() error {
+func (c *RemoteServerWS) Disconnect() error {
+	return c.requestDisconnect()
+}
+
+func (c *RemoteServerWS) GetData() []ocrschema.OCRResponse {
+	return c.results
+}
+
+func (c *RemoteServerWS) requestScreenHash() error {
 	return c.socket.WriteJSON(gin.H{"command": "imagehash"})
 }
 
-func (c *remoteServerWS) requestImage() error {
+func (c *RemoteServerWS) requestImage() error {
 	return c.socket.WriteJSON(gin.H{"command": "image"})
 }
 
-func (c *remoteServerWS) requestDisconnect() error {
+func (c *RemoteServerWS) requestDisconnect() error {
 	return c.socket.WriteJSON(gin.H{"command": "quit"})
 }
 
-func (c *remoteServerWS) requestTap(x, y int) error {
+func (c *RemoteServerWS) requestTap(x, y int) error {
 	return c.socket.WriteJSON(gin.H{"command": "tap", "args": gin.H{
 		"x": x,
 		"y": y,
 	}})
 }
 
-func (c *remoteServerWS) processImage(img image.Image) {
+func (c *RemoteServerWS) processImage(img image.Image) {
 	templates := rokocr.LoadTemplates(c.templatesDir)
 	imagehash, _ := goimagehash.DifferenceHash(img)
 	t := rokocr.PickTemplate(imagehash, templates)
@@ -65,7 +73,7 @@ func (c *remoteServerWS) processImage(img image.Image) {
 
 	// put results
 	c.results = append(c.results, res)
-	c.PrintAll()
+	c.printAll()
 
 	// todo where to TAP?
 	_ = c.requestTap(100, 300)
@@ -73,7 +81,7 @@ func (c *remoteServerWS) processImage(img image.Image) {
 	time.Sleep(time.Second * 2)
 }
 
-func (c *remoteServerWS) PrintAll() {
+func (c *RemoteServerWS) printAll() {
 	var headers []string
 	for _, r := range c.results {
 		for k := range r.Data {
@@ -103,16 +111,16 @@ func (c *remoteServerWS) PrintAll() {
 	}
 
 	table.Render()
-	log.Infof("[%v] Results so far: \n%v", c.device.Name, output.String())
+	log.Infof("[%v] Results so far: \n%v", c.device, output.String())
 }
 
-func (c *remoteServerWS) isScreenInteresting(w, h int, hash *goimagehash.ImageHash) bool {
+func (c *RemoteServerWS) isScreenInteresting(w, h int, hash *goimagehash.ImageHash) bool {
 	templates := rokocr.LoadTemplates(c.templatesDir)
 	t := rokocr.PickTemplate(hash, templates)
 	return t.Match(hash)
 }
 
-func (c *remoteServerWS) Loop() {
+func (c *RemoteServerWS) Loop() {
 	_ = c.requestScreenHash()
 
 	// read message, send command, etc...
@@ -137,7 +145,7 @@ func (c *remoteServerWS) Loop() {
 				json.Unmarshal(wsResponse.Value, &value)
 				hash := goimagehash.NewImageHash(value.Hash, goimagehash.DHash)
 
-				log.Infof("[%v] on screen with hash: %x", c.device.Name, hash.GetHash())
+				log.Infof("[%v] on screen with hash: %x", c.device, hash.GetHash())
 
 				if c.isScreenInteresting(value.Width, value.Height, hash) {
 					c.requestImage()
@@ -153,7 +161,7 @@ func (c *remoteServerWS) Loop() {
 				var msgBytes []byte
 				json.Unmarshal(wsResponse.Value, &msgBytes)
 				img, _ := png.Decode(bytes.NewReader(msgBytes))
-				log.Infof("[%v] sent image of size: %v bytes => w: %v h: %v", c.device.Name, len(msgBytes), img.Bounds().Dx(), img.Bounds().Dy())
+				log.Infof("[%v] sent image of size: %v bytes => w: %v h: %v", c.device, len(msgBytes), img.Bounds().Dx(), img.Bounds().Dy())
 
 				c.processImage(img)
 				c.requestScreenHash()
@@ -164,7 +172,7 @@ func (c *remoteServerWS) Loop() {
 			}
 		default:
 			{
-				log.Errorf("[%v] unknown response received: %+v", c.device.Name, wsResponse.ResponseType)
+				log.Errorf("[%v] unknown response received: %+v", c.device, wsResponse.ResponseType)
 			}
 		}
 	}

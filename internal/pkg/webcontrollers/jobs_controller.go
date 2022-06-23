@@ -21,14 +21,12 @@ import (
 )
 
 type JobsController struct {
-	Router *gin.RouterGroup
-	db     *bolt.DB
+	db *bolt.DB
 }
 
-func NewJobsController(router *gin.RouterGroup, db *bolt.DB) *JobsController {
+func NewJobsController(db *bolt.DB) *JobsController {
 	return &JobsController{
-		Router: router,
-		db:     db,
+		db: db,
 	}
 }
 
@@ -166,15 +164,15 @@ func itob(v uint64) []byte {
 	return b
 }
 
-func (controller *JobsController) Setup() {
+func (controller *JobsController) Setup(router *gin.RouterGroup) {
 	// List all the jobs
-	controller.Router.GET("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "jobs.html", gin.H{
 			"jobs": controller.getJobs(),
 		})
 	})
 
-	controller.Router.GET("/create", func(c *gin.Context) {
+	router.GET("/create", func(c *gin.Context) {
 		id, err := controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
 		if err == nil {
 			c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v", id))
@@ -183,7 +181,7 @@ func (controller *JobsController) Setup() {
 		}
 	})
 
-	controller.Router.GET("/:id", func(c *gin.Context) {
+	router.GET("/:id", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
@@ -193,7 +191,7 @@ func (controller *JobsController) Setup() {
 		})
 	})
 
-	controller.Router.GET("/:id/start", func(c *gin.Context) {
+	router.GET("/:id/start", func(c *gin.Context) {
 		// TODO: Edit job here
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
@@ -235,7 +233,7 @@ func (controller *JobsController) Setup() {
 		c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v/results", id))
 	})
 
-	controller.Router.GET("/:id/csv", func(c *gin.Context) {
+	router.GET("/:id/csv", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
@@ -245,7 +243,7 @@ func (controller *JobsController) Setup() {
 		c.Data(http.StatusOK, "text/plain", b.Bytes())
 	})
 
-	controller.Router.GET("/:id/results", func(c *gin.Context) {
+	router.GET("/:id/results", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
@@ -255,7 +253,7 @@ func (controller *JobsController) Setup() {
 		})
 	})
 
-	controller.Router.POST("/:id/upload", func(c *gin.Context) {
+	router.POST("/:id/upload", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
@@ -271,7 +269,7 @@ func (controller *JobsController) Setup() {
 		})
 	})
 
-	controller.Router.GET("/:id/delete", func(c *gin.Context) {
+	router.GET("/:id/delete", func(c *gin.Context) {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		controller.deleteJob(id)
 		c.Redirect(http.StatusFound, "/jobs")

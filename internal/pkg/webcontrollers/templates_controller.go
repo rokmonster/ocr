@@ -3,12 +3,13 @@ package webcontrollers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin/binding"
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
@@ -26,15 +27,13 @@ type TemplateMakerSession struct {
 }
 
 type TemplatesController struct {
-	Router       *gin.RouterGroup
 	sessions     map[string]TemplateMakerSession
 	templatesDir string
 	tessdataDir  string
 }
 
-func NewTemplatesController(router *gin.RouterGroup, templateDir, tessdataDir string) *TemplatesController {
+func NewTemplatesController(templateDir, tessdataDir string) *TemplatesController {
 	return &TemplatesController{
-		Router:       router,
 		sessions:     make(map[string]TemplateMakerSession),
 		templatesDir: templateDir,
 		tessdataDir:  tessdataDir,
@@ -88,20 +87,20 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 	}
 }
 
-func (controller *TemplatesController) Setup() {
+func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 
-	controller.Router.GET("", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "templates.html", gin.H{
 			"templates": rokocr.LoadTemplates(controller.templatesDir),
 		})
 	})
 
-	controller.Router.GET("/new", func(c *gin.Context) {
+	router.GET("/new", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{})
 	})
 
 	// create new session, and redirect
-	controller.Router.POST("/new", func(c *gin.Context) {
+	router.POST("/new", func(c *gin.Context) {
 		// create session id
 		sessionId := stringutils.Random(12)
 		// handle file upload...
@@ -120,7 +119,7 @@ func (controller *TemplatesController) Setup() {
 		c.Redirect(http.StatusFound, "/templates/"+sessionId)
 	})
 
-	controller.Router.GET("/:session", func(c *gin.Context) {
+	router.GET("/:session", func(c *gin.Context) {
 		if _, ok := controller.sessions[c.Param("session")]; ok {
 			// check if session exists;
 			c.HTML(http.StatusOK, "templatemaker.html", gin.H{
@@ -132,12 +131,12 @@ func (controller *TemplatesController) Setup() {
 
 	})
 
-	controller.Router.GET("/:session/image", func(c *gin.Context) {
+	router.GET("/:session/image", func(c *gin.Context) {
 		imagePath := controller.sessions[c.Param("session")].imagePath
 		c.File(imagePath)
 	})
 
-	controller.Router.POST("/:session/scan", func(c *gin.Context) {
+	router.POST("/:session/scan", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
 			img, _ := imgutils.ReadImageFile(s.imagePath)
 			template := controller.buildTemplate(c.Param("session"), s)
@@ -152,7 +151,7 @@ func (controller *TemplatesController) Setup() {
 		c.JSON(http.StatusNotFound, gin.H{})
 	})
 
-	controller.Router.GET("/:session/export", func(c *gin.Context) {
+	router.GET("/:session/export", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
 			template := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
 			bytes, _ := json.MarshalIndent(template, "", "    ")
@@ -164,7 +163,7 @@ func (controller *TemplatesController) Setup() {
 		c.JSON(http.StatusNotFound, gin.H{})
 	})
 
-	controller.Router.POST("/:session/add-area", func(c *gin.Context) {
+	router.POST("/:session/add-area", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
 			var postData rokTemplateArea
 
@@ -198,7 +197,7 @@ func (controller *TemplatesController) Setup() {
 		c.JSON(http.StatusNotFound, gin.H{})
 	})
 
-	controller.Router.POST("/:session/add-checkpoint", func(c *gin.Context) {
+	router.POST("/:session/add-checkpoint", func(c *gin.Context) {
 		sessionId := c.Param("session")
 		if s, ok := controller.sessions[sessionId]; ok {
 			var postData rokCropCoordinates

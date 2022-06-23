@@ -18,6 +18,8 @@
                     <td class="text-nowrap">{{ $d.Name }}</td>
                     <td class="text-nowrap w-1">{{ $d.Address }}</td>
                     <td class="text-nowrap w-1">
+                        <a href="/devices/{{ $i }}/data" class="btn btn-danger btn-sm">Data</a>
+                        <a href="/devices/{{ $i }}/disconnect" class="btn btn-danger btn-sm">Disonnect</a>
                     </td>
                 </tr>
                 {{end}}

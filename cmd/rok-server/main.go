@@ -3,10 +3,12 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/utils"
 	"net/http"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/utils"
 
 	"github.com/coreos/go-systemd/v22/activation"
 	"github.com/gin-contrib/pprof"
@@ -43,7 +45,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
 
-	db, err := bolt.Open("db.bolt", 0666, nil)
+	db, err := bolt.Open("db.bolt", 0666, &bolt.Options{Timeout: time.Second})
 	utils.Panic(err)
 
 	defer db.Close()
@@ -75,9 +77,9 @@ func main() {
 	// public group, not auth needed for this.
 	public := router.Group("")
 	{
-		webcontrollers.NewRemoteDevicesController(public.Group("/devices"), flags.TemplatesDirectory, flags.TessdataDirectory).Setup()
-		webcontrollers.NewJobsController(public.Group("/jobs"), db).Setup()
-		webcontrollers.NewTemplatesController(public.Group("/templates"), flags.TemplatesDirectory, flags.TessdataDirectory).Setup()
+		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(public.Group("/devices"))
+		webcontrollers.NewJobsController(db).Setup(public.Group("/jobs"))
+		webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(public.Group("/templates"))
 	}
 
 	router.NoRoute(func(c *gin.Context) {
