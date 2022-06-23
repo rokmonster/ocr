@@ -3,6 +3,7 @@ package webcontrollers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -55,7 +56,7 @@ type rokCropCoordinates struct {
 }
 
 func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchema) []schema.ROKTableField {
-	result := []schema.ROKTableField{}
+	var result []schema.ROKTableField
 
 	for k := range s {
 		result = append(result, schema.ROKTableField{
@@ -106,7 +107,7 @@ func (controller *TemplatesController) Setup() {
 		// handle file upload...
 		file, _ := c.FormFile("image")
 		dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
-		c.SaveUploadedFile(file, dst)
+		_ = c.SaveUploadedFile(file, dst)
 
 		log.Debugf("Uploaded file: %s", dst)
 
@@ -155,7 +156,7 @@ func (controller *TemplatesController) Setup() {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
 			template := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
 			bytes, _ := json.MarshalIndent(template, "", "    ")
-			os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
+			_ = os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
 			c.Redirect(http.StatusFound, "/templates")
 			return
 		}
@@ -167,7 +168,7 @@ func (controller *TemplatesController) Setup() {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
 			var postData rokTemplateArea
 
-			c.BindJSON(&postData)
+			_ = c.MustBindWith(&postData, binding.JSON)
 
 			if len(strings.TrimSpace(postData.Name)) > 0 {
 				if postData.Type == "number" {
@@ -202,7 +203,7 @@ func (controller *TemplatesController) Setup() {
 		if s, ok := controller.sessions[sessionId]; ok {
 			var postData rokCropCoordinates
 
-			c.BindJSON(&postData)
+			_ = c.MustBindWith(&postData, binding.JSON)
 
 			img, _ := imgutils.ReadImageFile(s.imagePath)
 

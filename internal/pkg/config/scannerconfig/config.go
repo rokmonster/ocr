@@ -7,13 +7,13 @@ import (
 	"github.com/rokmonster/ocr/internal/pkg/config"
 )
 
-type ROKOCRConfiguration struct {
+type ROKScannerConfig struct {
 	config.CommonConfiguration
 	ForceTemplate string
 }
 
-func Parse() ROKOCRConfiguration {
-	var flags ROKOCRConfiguration
+func Parse() ROKScannerConfig {
+	var flags ROKScannerConfig
 
 	flag.StringVar(&flags.MediaDirectory, "media", "./media", "folder where all files to scan is placed")
 	flag.StringVar(&flags.TemplatesDirectory, "templates", "./templates", "templates dir")

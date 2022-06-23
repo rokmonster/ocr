@@ -1,4 +1,4 @@
-package automatorconfig
+package rokremoteconfig
 
 import (
 	"flag"
@@ -8,14 +8,14 @@ import (
 	adb "github.com/zach-klippenstein/goadb"
 )
 
-type AutomatorConfig struct {
+type ROKRemoteConfig struct {
 	config.CommonConfiguration
-	ADBPort   int
-	ROKServer string
+	ADBPort int
+	Server  string
 }
 
-func Parse() AutomatorConfig {
-	var flags AutomatorConfig
+func Parse() ROKRemoteConfig {
+	var flags ROKRemoteConfig
 
 	flag.StringVar(&flags.MediaDirectory, "media", "./media", "folder where all files to scan is placed")
 	flag.StringVar(&flags.TemplatesDirectory, "templates", "./templates", "templates dir")
@@ -23,7 +23,7 @@ func Parse() AutomatorConfig {
 	flag.StringVar(&flags.OutputDirectory, "output", "./out", "output dir")
 	flag.StringVar(&flags.TmpDirectory, "tmp", os.TempDir(), "Directory for temporary files (cropped ones)")
 	flag.IntVar(&flags.ADBPort, "adb-port", adb.AdbPort, "ADB Port")
-	flag.StringVar(&flags.ROKServer, "rok-server", "http://localhost:8080", "rokserver to connect to")
+	flag.StringVar(&flags.Server, "rok-server", "http://localhost:8080", "rokserver to connect to")
 	flag.Parse()
 	return flags
 }

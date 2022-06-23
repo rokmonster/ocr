@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewRemoteServerWS(device *RemoteServerClient, socket *websocket.Conn, templates, tessdata string) *remoteServerWS {
+func NewRemoteServerWS(device *ServerClient, socket *websocket.Conn, templates, tessdata string) *remoteServerWS {
 	return &remoteServerWS{
 		results:      make([]ocrschema.OCRResponse, 0),
 		templatesDir: templates,
@@ -30,33 +30,30 @@ func NewRemoteServerWS(device *RemoteServerClient, socket *websocket.Conn, templ
 }
 
 type remoteServerWS struct {
-	device       *RemoteServerClient
+	device       *ServerClient
 	socket       *websocket.Conn
 	templatesDir string
 	tessdataDir  string
 	results      []ocrschema.OCRResponse
 }
 
-func (c *remoteServerWS) requestScreenHash() {
-	c.socket.WriteJSON(gin.H{"command": "imagehash"})
+func (c *remoteServerWS) requestScreenHash() error {
+	return c.socket.WriteJSON(gin.H{"command": "imagehash"})
 }
 
-func (c *remoteServerWS) requestImage() {
-	c.socket.WriteJSON(gin.H{"command": "image"})
+func (c *remoteServerWS) requestImage() error {
+	return c.socket.WriteJSON(gin.H{"command": "image"})
 }
 
-func (c *remoteServerWS) requestDisconnect() {
-	c.socket.WriteJSON(gin.H{"command": "quit"})
+func (c *remoteServerWS) requestDisconnect() error {
+	return c.socket.WriteJSON(gin.H{"command": "quit"})
 }
 
-func (c *remoteServerWS) requestTap(x, y int) {
-	c.socket.WriteJSON(gin.H{"command": "tap", "args": gin.H{
+func (c *remoteServerWS) requestTap(x, y int) error {
+	return c.socket.WriteJSON(gin.H{"command": "tap", "args": gin.H{
 		"x": x,
 		"y": y,
 	}})
-
-	// wait a few seconds
-	time.Sleep(time.Second * 2)
 }
 
 func (c *remoteServerWS) processImage(img image.Image) {
@@ -71,11 +68,13 @@ func (c *remoteServerWS) processImage(img image.Image) {
 	c.PrintAll()
 
 	// todo where to TAP?
-	c.requestTap(100, 300)
+	_ = c.requestTap(100, 300)
+	// wait a few seconds
+	time.Sleep(time.Second * 2)
 }
 
 func (c *remoteServerWS) PrintAll() {
-	headers := []string{}
+	var headers []string
 	for _, r := range c.results {
 		for k := range r.Data {
 			headers = append(headers, k)
@@ -90,7 +89,7 @@ func (c *remoteServerWS) PrintAll() {
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetHeader(headers)
 	for _, row := range c.results {
-		rowData := []string{}
+		var rowData []string
 
 		for _, x := range headers {
 			if value, ok := row.Data[x]; ok {
@@ -114,7 +113,7 @@ func (c *remoteServerWS) isScreenInteresting(w, h int, hash *goimagehash.ImageHa
 }
 
 func (c *remoteServerWS) Loop() {
-	c.requestScreenHash()
+	_ = c.requestScreenHash()
 
 	// read message, send command, etc...
 	for {

@@ -1,10 +1,11 @@
 package main
 
 import (
+	"github.com/rokmonster/ocr/internal/pkg/utils"
 	"net/url"
 	"sync"
 
-	config "github.com/rokmonster/ocr/internal/pkg/config/automatorconfig"
+	config "github.com/rokmonster/ocr/internal/pkg/config/rokremoteconfig"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	"github.com/rokmonster/ocr/internal/pkg/websocket/remote"
 	log "github.com/sirupsen/logrus"
@@ -24,17 +25,14 @@ func main() {
 	client, err = adb.NewWithConfig(adb.ServerConfig{
 		Port: flags.ADBPort,
 	})
+	utils.Panic(err)
 
-	if err != nil {
-		log.Fatal(err)
-	}
 	log.Println("Starting adb server")
-	client.StartServer()
+	utils.Panic(client.StartServer())
 
 	serverVersion, err := client.ServerVersion()
-	if err != nil {
-		log.Fatal(err)
-	}
+	utils.Panic(err)
+
 	log.Println("ADB Server version:", serverVersion)
 
 	// register all available devices with remote
@@ -49,8 +47,8 @@ func main() {
 
 		log.Infof("Found device: %v - %v", serial, info.DeviceInfo)
 
-		uri := getWebsocketURI(flags.ROKServer)
-		rc := remote.NewRemoteADBDeviceWS(uri.String(), device)
+		uri := getWebsocketURI(flags.Server)
+		rc := remote.NewADBDeviceWS(uri.String(), device)
 
 		go func() {
 			defer wg.Done()

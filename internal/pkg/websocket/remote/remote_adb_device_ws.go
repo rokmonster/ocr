@@ -16,20 +16,20 @@ import (
 	adb "github.com/zach-klippenstein/goadb"
 )
 
-type RemoteADBDeviceWS struct {
+type ADBDeviceWS struct {
 	device    *adb.Device
 	lastImage *image.Image
 	wsUri     string
 }
 
-func NewRemoteADBDeviceWS(websocketUri string, device *adb.Device) *RemoteADBDeviceWS {
-	return &RemoteADBDeviceWS{
+func NewADBDeviceWS(websocketUri string, device *adb.Device) *ADBDeviceWS {
+	return &ADBDeviceWS{
 		wsUri:  websocketUri,
 		device: device,
 	}
 }
 
-func (c *RemoteADBDeviceWS) DeviceRegisterAndWork() {
+func (c *ADBDeviceWS) DeviceRegisterAndWork() {
 	info, _ := c.device.DeviceInfo()
 	defer log.Warnf("Done with device: %v", info.Serial)
 
@@ -43,8 +43,8 @@ func (c *RemoteADBDeviceWS) DeviceRegisterAndWork() {
 
 	defer func() {
 		log.Debugf("Sending bye bye...")
-		ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "bye"))
-		ws.Close()
+		_ = ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "bye"))
+		_ = ws.Close()
 	}()
 
 	log.Infof("Saying hello: %v", info.Serial)
@@ -71,15 +71,15 @@ handlerloop:
 		case "quit":
 			break handlerloop
 		case "imagehash":
-			c.doImageHash(ws)
+			_ = c.doImageHash(ws)
 		case "image":
-			c.doSendImage(ws)
+			_ = c.doSendImage(ws)
 		case "tap":
 			var value struct {
 				X int `json:"x"`
 				Y int `json:"y"`
 			}
-			json.Unmarshal(message.Args, &value)
+			_ = json.Unmarshal(message.Args, &value)
 			log.Infof("[tap] x: %v, y: %v", value.X, value.Y)
 			c.doTap(ws, value.X, value.Y)
 		default:
@@ -90,12 +90,12 @@ handlerloop:
 	log.Infof("We broke from handler loop...")
 }
 
-func (c *RemoteADBDeviceWS) doImageHash(ws *websocket.Conn) {
-	img, _ := c.screencapture()
+func (c *ADBDeviceWS) doImageHash(ws *websocket.Conn) error {
+	img, _ := c.screenCapture()
 	imagehash, _ := goimagehash.DifferenceHash(img)
 	c.lastImage = &img
 	log.Infof("[imagehash (newimage)] w: %v, h: %v, hash: %x", img.Bounds().Dx(), img.Bounds().Dy(), imagehash.GetHash())
-	ws.WriteJSON(gin.H{
+	return ws.WriteJSON(gin.H{
 		"responseType": "imagehash",
 		"value": gin.H{
 			"hash": imagehash.GetHash(),
@@ -105,21 +105,21 @@ func (c *RemoteADBDeviceWS) doImageHash(ws *websocket.Conn) {
 	})
 }
 
-func (c *RemoteADBDeviceWS) doTap(ws *websocket.Conn, x, y int) {
+func (c *ADBDeviceWS) doTap(ws *websocket.Conn, x, y int) {
 	_, e := c.device.RunCommand("input", "tap", fmt.Sprintf("%v", x), fmt.Sprintf("%v", y))
 	if e != nil {
 		log.Errorf("[tap] failed with: %v", e)
 	}
 }
 
-func (c *RemoteADBDeviceWS) doSendImage(ws *websocket.Conn) error {
+func (c *ADBDeviceWS) doSendImage(ws *websocket.Conn) error {
 	if c.lastImage == nil {
 		return errors.New("can't send the image, no image captured yet")
 	}
 	img := *c.lastImage
 
 	buf := new(bytes.Buffer)
-	png.Encode(buf, img)
+	_ = png.Encode(buf, img)
 
 	log.Infof("[image] w: %v, h: %v, len: %v bytes", img.Bounds().Dx(), img.Bounds().Dy(), buf.Len())
 	return ws.WriteJSON(gin.H{
@@ -128,9 +128,8 @@ func (c *RemoteADBDeviceWS) doSendImage(ws *websocket.Conn) error {
 	})
 }
 
-func (c *RemoteADBDeviceWS) screencapture() (image.Image, error) {
-	// screencap
-	cmdOutput, err := c.device.RunCommand("screencap -p")
+func (c *ADBDeviceWS) screenCapture() (image.Image, error) {
+	cmdOutput, err := c.device.RunCommand("screencap", "-p")
 	if err != nil {
 		return nil, err
 	}

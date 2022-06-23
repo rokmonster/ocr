@@ -1,17 +1,15 @@
 package webcontrollers
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rokmonster/ocr/internal/pkg/websocket/remote"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
-func (controller *RemoteDevicesController) getRemoteDevices() []remote.RemoteServerClient {
-	devices := []remote.RemoteServerClient{}
+func (controller *RemoteDevicesController) getRemoteDevices() []remote.ServerClient {
+	var devices []remote.ServerClient
 
 	for _, d := range controller.clients {
 		devices = append(devices, d)
@@ -22,7 +20,7 @@ func (controller *RemoteDevicesController) getRemoteDevices() []remote.RemoteSer
 
 type RemoteDevicesController struct {
 	router       *gin.RouterGroup
-	clients      map[*websocket.Conn]remote.RemoteServerClient
+	clients      map[*websocket.Conn]remote.ServerClient
 	upgrader     websocket.Upgrader
 	templatesDir string
 	tessdataDir  string
@@ -31,7 +29,7 @@ type RemoteDevicesController struct {
 func NewRemoteDevicesController(router *gin.RouterGroup, templates, tessdata string) *RemoteDevicesController {
 	return &RemoteDevicesController{
 		router:       router,
-		clients:      make(map[*websocket.Conn]remote.RemoteServerClient),
+		clients:      make(map[*websocket.Conn]remote.ServerClient),
 		templatesDir: templates,
 		tessdataDir:  tessdata,
 		upgrader: websocket.Upgrader{
@@ -61,13 +59,6 @@ func (controller *RemoteDevicesController) Setup() {
 	controller.router.GET("/ws", func(c *gin.Context) {
 		ws, _ := controller.upgrader.Upgrade(c.Writer, c.Request, nil)
 
-		go func() {
-			for {
-				ws.WriteMessage(websocket.PingMessage, []byte{})
-				time.Sleep(time.Second * 10)
-			}
-		}()
-
 		// don't forget to close the connection & remove client
 		defer ws.Close()
 		defer delete(controller.clients, ws)
@@ -80,12 +71,12 @@ func (controller *RemoteDevicesController) Setup() {
 
 		if err != nil {
 			log.Errorf("I don't like this WS Client: %v", err)
-			ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "I expect you to behave nicely"))
+			_ = ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "I expect you to behave nicely"))
 			return
 		} else {
 			log.Infof("[%v] connected from: %v", deviceInfo.Serial, ws.RemoteAddr())
 
-			device := remote.RemoteServerClient{
+			device := remote.ServerClient{
 				Address: ws.RemoteAddr().String(),
 				Name:    deviceInfo.Serial,
 			}

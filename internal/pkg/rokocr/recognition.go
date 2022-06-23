@@ -33,7 +33,7 @@ func RunRecognitionChan(mediaDir, tessData string, template schema.RokOCRTemplat
 }
 
 func RunRecognition(mediaDir, tessData string, template schema.RokOCRTemplate, force bool) []schema.OCRResponse {
-	data := []schema.OCRResponse{}
+	var data []schema.OCRResponse
 
 	for elem := range RunRecognitionChan(mediaDir, tessData, template, force) {
 		data = append(data, elem)

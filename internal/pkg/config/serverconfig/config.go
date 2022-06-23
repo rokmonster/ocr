@@ -7,7 +7,7 @@ import (
 	"github.com/rokmonster/ocr/internal/pkg/config"
 )
 
-type RokServerConfiguration struct {
+type ROKServerConfig struct {
 	config.CommonConfiguration
 	ListenPort  int
 	TLS         bool
@@ -16,8 +16,8 @@ type RokServerConfiguration struct {
 	InstallUser string
 }
 
-func Parse() RokServerConfiguration {
-	var flags RokServerConfiguration
+func Parse() ROKServerConfig {
+	var flags ROKServerConfig
 
 	flag.StringVar(&flags.MediaDirectory, "media", "./media", "folder where all files to scan is placed")
 	flag.StringVar(&flags.TemplatesDirectory, "templates", "./templates", "templates dir")

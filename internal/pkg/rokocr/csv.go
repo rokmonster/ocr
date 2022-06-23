@@ -15,13 +15,13 @@ func WriteCSV(data []schema.OCRResponse, template schema.RokOCRTemplate, w io.Wr
 	}
 
 	table := csv.NewWriter(w)
-	table.Write(headers)
+	_ = table.Write(headers)
 	for _, row := range data {
 		rowData := []string{row.Filename}
 		for _, x := range template.Table {
 			rowData = append(rowData, fmt.Sprintf("%v", row.Data[x.Field]))
 		}
-		table.Write(rowData)
+		_ = table.Write(rowData)
 	}
 	table.Flush()
 

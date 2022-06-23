@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func InstallSystemD(flags serverconfig.RokServerConfiguration) {
+func InstallSystemD(flags serverconfig.ROKServerConfig) {
 	workingDir := fmt.Sprintf("/home/%v", flags.InstallUser)
 	if flags.InstallUser == "root" {
 		workingDir = "/root"

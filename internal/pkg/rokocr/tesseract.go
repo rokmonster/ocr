@@ -25,14 +25,14 @@ func ParseText(imageFileName string, schema schema.ROKOCRSchema, tessdata string
 	client.SetImage(imageFileName)
 
 	if len(schema.AllowList) > 0 {
-		allowlistString := []string{}
+		var whitelistedCharacters []string
 
 		for _, x := range schema.AllowList {
-			allowlistString = append(allowlistString, fmt.Sprintf("%v", x))
+			whitelistedCharacters = append(whitelistedCharacters, fmt.Sprintf("%v", x))
 		}
 
-		whitelist := strings.Join(allowlistString, "")
-		client.SetWhitelist(whitelist)
+		whitelist := strings.Join(whitelistedCharacters, "")
+		_ = client.SetWhitelist(whitelist)
 	}
 
 	text, err := client.Text()

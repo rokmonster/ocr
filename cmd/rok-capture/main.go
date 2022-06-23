@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/utils"
 	"image"
 	"os"
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 
-	config "github.com/rokmonster/ocr/internal/pkg/config/automatorconfig"
+	config "github.com/rokmonster/ocr/internal/pkg/config/rokremoteconfig"
 	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	adb "github.com/zach-klippenstein/goadb"
@@ -27,18 +28,13 @@ func main() {
 	client, err = adb.NewWithConfig(adb.ServerConfig{
 		Port: flags.ADBPort,
 	})
+	utils.Panic(err)
 
-	if err != nil {
-		log.Fatal(err)
-	}
 	log.Println("Starting adb server")
-	client.StartServer()
+	utils.Panic(client.StartServer())
 
-	serverVersion, err := client.ServerVersion()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Server version:", serverVersion)
+	_, err = client.ServerVersion()
+	utils.Panic(err)
 
 	ConnectAndUseDevice(adb.AnyDevice())
 }
@@ -83,13 +79,13 @@ func workWithDevice(device *adb.Device) error {
 			for _, screen := range screens {
 				fileName, _ := filepath.Abs(fmt.Sprintf("%v/%04d_%v.png", flags.MediaDirectory, i, screen))
 				log.Infof("Press ENTER to capture: %v", fileName)
-				fmt.Scanln()
+				_, _ = fmt.Scanln()
 				img, err := screencapture(device)
 				if err != nil {
 					log.Errorf("Error: %v", err)
 					continue
 				}
-				imgutils.WritePNGImage(img, fileName)
+				_ = imgutils.WritePNGImage(img, fileName)
 			}
 			i++
 		}

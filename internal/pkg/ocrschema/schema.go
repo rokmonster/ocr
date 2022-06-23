@@ -38,7 +38,7 @@ func LoadTemplate(fileName string) (RokOCRTemplate, error) {
 
 func differenceHashFromString(s string) *goimagehash.ImageHash {
 	result, _ := strconv.ParseUint(s, 16, 64)
-	return goimagehash.NewImageHash(uint64(result), goimagehash.DHash)
+	return goimagehash.NewImageHash(result, goimagehash.DHash)
 }
 
 func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {
@@ -62,17 +62,17 @@ func hashMatches(b image.Image, hash *goimagehash.ImageHash) bool {
 }
 
 func (b *RokOCRTemplate) Matches(img image.Image) bool {
-	imagehash, _ := goimagehash.DifferenceHash(img)
+	imageHash, _ := goimagehash.DifferenceHash(img)
 
 	if len(b.Checkpoints) == 0 {
-		return b.Match(imagehash)
+		return b.Match(imageHash)
 	}
 
 	// if we have checkpoints, check if all checkpoints matches
 	for _, s := range b.Checkpoints {
-		expected_hash := differenceHashFromString(s.Fingerprint)
-		subimg, _ := imgutils.CropImage(img, s.Crop.CropRectange())
-		if !hashMatches(subimg, expected_hash) {
+		expectedHash := differenceHashFromString(s.Fingerprint)
+		subImg, _ := imgutils.CropImage(img, s.Crop.CropRectange())
+		if !hashMatches(subImg, expectedHash) {
 			log.Debugf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
 			return false
 		}
@@ -155,8 +155,8 @@ type OCRCrop struct {
 	H int
 }
 
-func (s *OCRCrop) CropRectange() image.Rectangle {
-	return image.Rect(s.X, s.Y, s.X+s.W, s.Y+s.H)
+func (b *OCRCrop) CropRectange() image.Rectangle {
+	return image.Rect(b.X, b.Y, b.X+b.W, b.Y+b.H)
 }
 
 func (b *OCRCrop) MarshalJSON() ([]byte, error) {

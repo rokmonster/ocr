@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// WriteImage writes an Image back to the disk.
+// WritePNGImage - writes an Image back to the disk.
 func WritePNGImage(img image.Image, name string) error {
 	fd, err := os.Create(name)
 	if err != nil {

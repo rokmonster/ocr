@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/utils"
 	"net/http"
 	"os"
 	"strings"
@@ -43,13 +44,12 @@ func main() {
 	gin.DisableConsoleColor()
 
 	db, err := bolt.Open("db.bolt", 0666, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	utils.Panic(err)
+
 	defer db.Close()
 
 	router := gin.New()
-	router.SetTrustedProxies([]string{})
+	_ = router.SetTrustedProxies([]string{})
 
 	// just reuse same logger
 	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
@@ -101,12 +101,12 @@ func main() {
 }
 
 func runWithAutocertManager(r http.Handler, m *autocert.Manager) error {
-	config := m.TLSConfig()
-	config.MinVersion = tls.VersionTLS12
+	tlsConfig := m.TLSConfig()
+	tlsConfig.MinVersion = tls.VersionTLS12
 
 	s := &http.Server{
 		Addr:      ":https",
-		TLSConfig: config,
+		TLSConfig: tlsConfig,
 		Handler:   r,
 	}
 

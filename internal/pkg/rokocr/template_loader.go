@@ -11,7 +11,7 @@ import (
 )
 
 func LoadTemplates(directory string) []schema.RokOCRTemplate {
-	templates := []schema.RokOCRTemplate{}
+	var templates []schema.RokOCRTemplate
 	for _, f := range fileutils.GetFilesInDirectory(directory) {
 		if filepath.Ext(f) == ".json" {
 			template, err := schema.LoadTemplate(f)

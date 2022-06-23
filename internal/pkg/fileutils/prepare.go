@@ -10,5 +10,5 @@ import (
 func Mkdirs(path string) {
 	p, _ := filepath.Abs(path)
 	log.Infof("Creating dir: %s", p)
-	os.MkdirAll(p, os.ModePerm)
+	_ = os.MkdirAll(p, os.ModePerm)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 func GetFilesInDirectory(directory string) []string {
-	files := []string{}
+	var files []string
 
 	dir, _ := ioutil.ReadDir(directory)
 

@@ -45,11 +45,11 @@ func (job *OCRJob) MediaDirectory() string {
 }
 
 func (controller *JobsController) getJobs() []OCRJob {
-	jobs := []OCRJob{}
+	var jobs []OCRJob
 
 	_ = controller.db.View(func(t *bolt.Tx) error {
 		if j := t.Bucket([]byte("jobs")); j != nil {
-			j.ForEach(func(k, v []byte) error {
+			return j.ForEach(func(k, v []byte) error {
 				var job OCRJob
 				if err := json.Unmarshal(v, &job); err != nil {
 					return err
@@ -62,7 +62,6 @@ func (controller *JobsController) getJobs() []OCRJob {
 				jobs = append(jobs, job)
 				return nil
 			})
-			return nil
 		}
 		return fmt.Errorf("bucket not found")
 	})
@@ -163,7 +162,7 @@ func (controller *JobsController) createJob(jobName string) (uint64, error) {
 // itob returns an 8-byte big endian representation of v.
 func itob(v uint64) []byte {
 	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
+	binary.BigEndian.PutUint64(b, v)
 	return b
 }
 
@@ -206,8 +205,8 @@ func (controller *JobsController) Setup() {
 			fileCount := len(controller.getJobFiles(job.ID))
 
 			// clean results & update status
-			controller.updateJobResults(job.ID, []ocrschema.OCRResponse{})
-			controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
+			_ = controller.updateJobResults(job.ID, []ocrschema.OCRResponse{})
+			_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
 
 			mediaDir := job.MediaDirectory()
 
@@ -215,21 +214,21 @@ func (controller *JobsController) Setup() {
 			if len(templates) > 0 {
 				log.Debugf("Loaded %v templates", len(templates))
 				template := rokocr.FindTemplate(mediaDir, templates)
-				controller.updateJobTemplate(job.ID, template)
+				_ = controller.updateJobTemplate(job.ID, template)
 
-				data := []ocrschema.OCRResponse{}
+				var data []ocrschema.OCRResponse
 				for elem := range rokocr.RunRecognitionChan(mediaDir, "./tessdata", template, false) {
 					data = append(data, elem)
 					index = index + 1
-					controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
-					controller.updateJobResults(job.ID, data)
+					_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
+					_ = controller.updateJobResults(job.ID, data)
 				}
 
-				controller.updateJobResults(job.ID, data)
-				controller.updateJobStatus(job.ID, fmt.Sprintf("Completed: %v files", len(data)))
+				_ = controller.updateJobResults(job.ID, data)
+				_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Completed: %v files", len(data)))
 			} else {
 				log.Warnf("No compatible template found")
-				controller.updateJobStatus(job.ID, "Failed, no template found")
+				_ = controller.updateJobStatus(job.ID, "Failed, no template found")
 			}
 		}(job)
 
@@ -260,12 +259,12 @@ func (controller *JobsController) Setup() {
 		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
 		job := controller.getJob(id)
 
-		os.MkdirAll(job.MediaDirectory(), os.ModePerm)
+		_ = os.MkdirAll(job.MediaDirectory(), os.ModePerm)
 
 		// move uploaded file
 		file, _ := c.FormFile("file")
 		dst := filepath.Join(job.MediaDirectory(), filepath.Base(file.Filename))
-		c.SaveUploadedFile(file, dst)
+		_ = c.SaveUploadedFile(file, dst)
 
 		c.JSON(http.StatusOK, gin.H{
 			"destination": dst,
