@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install deps
         run: sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libtesseract-dev libopencv-dev
