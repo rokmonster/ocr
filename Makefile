@@ -15,11 +15,16 @@ dockerclient:
 
 # for usage inside `make dev` - installs tesseractlib & adb
 dockerdeps: dockerclient
-	apt update && apt install -y libtesseract-dev libopencv-dev adb
+	apt update && apt install -y libtesseract-dev
 	
 # get's go releaser
 deps: 
 	go install github.com/goreleaser/goreleaser@latest
+
+opencv:
+	go mod vendor
+	(cd vendor/gocv.io/x/gocv/ && make deps download sudo_pre_install_clean build_static sudo_install clean)
+	rm -rf vendor
 
 # for usage inside `make dev` - builds binary, uploads it to demo server & restarts
 sshinstall: dockerdeps build

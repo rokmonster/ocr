@@ -11,10 +11,10 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Install deps
-        run: sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libtesseract-dev libopencv-dev
+      - name: Install deps (Libtesseract-dev && make)
+        run: sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libtesseract-dev make
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -23,6 +23,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18
+      - name: Build static opencv
+        run: make opencv
       - name: ghcr-login
         if: startsWith(github.ref, 'refs/tags/v')
         uses: docker/login-action@v2

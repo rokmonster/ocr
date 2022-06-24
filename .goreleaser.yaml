@@ -8,6 +8,8 @@ builds:
   - id: scanner
     binary: rok-scanner
     main: ./cmd/rok-scanner
+    tags:
+      - static
     goos:
       - linux
     goarch:
@@ -15,6 +17,8 @@ builds:
   - id: server
     binary: rok-server
     main: ./cmd/rok-server
+    tags:
+      - static
     goos:
       - linux
     goarch:
@@ -64,10 +68,7 @@ nfpms:
       deb:
         dependencies:
           - libtesseract4
-          - libopencv-contrib4.5d
-          - libopencv-videoio4.5d
-          - libopencv-photo4.5d
-
+  
 dockers:
   - ids:
     - ocr-package
