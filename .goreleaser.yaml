@@ -59,9 +59,9 @@ nfpms:
       deb:
         dependencies:
           - libtesseract4
-          - libopencv-contrib4.5
-          - libopencv-videoio4.5
-          - libopencv-photo4.5
+          - libopencv-contrib4.5d
+          - libopencv-videoio4.5d
+          - libopencv-photo4.5d
           - adb
       rpm:
         dependencies:
@@ -89,7 +89,7 @@ dockers:
 
 archives:
   - id: rokmonster-ocr
-    name_template: "rokmonster-ocr_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "rokmonster-ocr_{{ .Os }}_{{ .Arch }}"
     builds:
       - server
       - scanner
@@ -104,7 +104,7 @@ archives:
     - media/*.png
     - templates/*.json
   - id: rokmonster-remote
-    name_template: "rokmonster-remote_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "rokmonster-remote_{{ .Os }}_{{ .Arch }}"
     builds:
       - remote
     format: tar.gz
