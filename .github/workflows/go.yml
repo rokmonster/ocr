@@ -24,7 +24,7 @@ jobs:
         with:
           go-version: 1.18
       - name: Remove github crap from ubuntu image (breaks static build of opencv)
-        run: sudo apt-get remove -y libopenexr24 libjpeg-turbo8 libblas3
+        run: sudo apt-get remove -y libopenexr24 libjpeg-turbo8
       - name: Build static opencv
         run: make opencv
       - name: ghcr-login
