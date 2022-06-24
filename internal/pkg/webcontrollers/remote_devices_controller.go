@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/rokmonster/ocr/internal/pkg/websocket/remote"
+	wsserver "github.com/rokmonster/ocr/internal/pkg/websocket/server"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +18,7 @@ func (controller *RemoteDevicesController) getRemoteDevices() map[uuid.UUID]Serv
 type ServerClient struct {
 	Name    string
 	Address string
-	Handler *remote.RemoteServerWS
+	Handler *wsserver.RemoteServerWS
 }
 
 type RemoteDevicesController struct {
@@ -98,7 +98,7 @@ func (controller *RemoteDevicesController) Setup(router *gin.RouterGroup) {
 			sessionId := uuid.New()
 
 			// register handler && start the loop
-			handler := remote.NewRemoteServerWS(ws, sessionId.String(), controller.templatesDir, controller.tessdataDir)
+			handler := wsserver.NewRemoteServerWS(ws, sessionId.String(), controller.templatesDir, controller.tessdataDir)
 			device := ServerClient{
 				Address: ws.RemoteAddr().String(),
 				Name:    deviceInfo.Serial,

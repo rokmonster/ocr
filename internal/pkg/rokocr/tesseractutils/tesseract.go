@@ -1,4 +1,4 @@
-package rokocr
+package tesseractutils
 
 import (
 	"fmt"
@@ -9,20 +9,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ParseText(imageFileName string, schema schema.ROKOCRSchema, tessdata string) (string, error) {
+func ParseText(imageFileName string, schema schema.OCRSchema, tessdata string) (string, error) {
 	client := gosseract.NewClient()
 
-	client.SetTessdataPrefix(tessdata)
+	_ = client.SetTessdataPrefix(tessdata)
 	if len(schema.Languages) > 0 {
-		client.SetLanguage(schema.Languages...)
+		_ = client.SetLanguage(schema.Languages...)
 	} else {
-		client.SetLanguage("eng")
+		_ = client.SetLanguage("eng")
 	}
-	client.SetPageSegMode(gosseract.PageSegMode(schema.PSM))
+	_ = client.SetPageSegMode(gosseract.PageSegMode(schema.PSM))
 
 	defer client.Close()
 
-	client.SetImage(imageFileName)
+	_ = client.SetImage(imageFileName)
 
 	if len(schema.AllowList) > 0 {
 		var whitelistedCharacters []string

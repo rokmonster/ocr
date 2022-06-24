@@ -2,26 +2,26 @@ package ocrschema
 
 import (
 	"encoding/json"
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"image"
 	"io/ioutil"
 	"strconv"
 
 	"github.com/corona10/goimagehash"
-	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	log "github.com/sirupsen/logrus"
 )
 
-type RokOCRTemplate struct {
-	Title       string                  `json:"title,omitempty"`
-	Version     string                  `json:"version,omitempty"`
-	Author      string                  `json:"author,omitempty"`
-	Width       int                     `json:"width,omitempty"`
-	Height      int                     `json:"height,omitempty"`
-	OCRSchema   map[string]ROKOCRSchema `json:"ocr_schema,omitempty"`
-	Fingerprint string                  `json:"fingerprint,omitempty"`
-	Threshold   int                     `json:"threshold,omitempty"`
-	Table       []ROKTableField         `json:"table,omitempty"`
-	Checkpoints []OCRCheckpoint         `json:"checkpoints,omitempty"`
+type OCRTemplate struct {
+	Title       string               `json:"title,omitempty"`
+	Version     string               `json:"version,omitempty"`
+	Author      string               `json:"author,omitempty"`
+	Width       int                  `json:"width,omitempty"`
+	Height      int                  `json:"height,omitempty"`
+	OCRSchema   map[string]OCRSchema `json:"ocr_schema,omitempty"`
+	Fingerprint string               `json:"fingerprint,omitempty"`
+	Threshold   int                  `json:"threshold,omitempty"`
+	Table       []OCRTableField      `json:"table,omitempty"`
+	Checkpoints []OCRCheckpoint      `json:"checkpoints,omitempty"`
 }
 
 type OCRCheckpoint struct {
@@ -29,8 +29,8 @@ type OCRCheckpoint struct {
 	Fingerprint string   `json:"fingerprint,omitempty"`
 }
 
-func LoadTemplate(fileName string) (RokOCRTemplate, error) {
-	var t RokOCRTemplate
+func LoadTemplate(fileName string) (OCRTemplate, error) {
+	var t OCRTemplate
 	b, _ := ioutil.ReadFile(fileName)
 	err := json.Unmarshal(b, &t)
 	return t, err
@@ -41,27 +41,27 @@ func differenceHashFromString(s string) *goimagehash.ImageHash {
 	return goimagehash.NewImageHash(result, goimagehash.DHash)
 }
 
-func (b *RokOCRTemplate) Hash() *goimagehash.ImageHash {
+func (b *OCRTemplate) Hash() *goimagehash.ImageHash {
 	return differenceHashFromString(b.Fingerprint)
 }
 
 func hashMatches(b image.Image, hash *goimagehash.ImageHash) bool {
-	imghash, _ := goimagehash.DifferenceHash(b)
-	distance, err := imghash.Distance(hash)
+	imgHash, _ := goimagehash.DifferenceHash(b)
+	distance, err := imgHash.Distance(hash)
 	// if we get error, that means this template is no go...
 	if err != nil {
 		return false
 	}
 
 	if distance > 0 {
-		log.Debugf("Expected hash: %x, real hash: %x, distance: %v", hash.GetHash(), imghash.GetHash(), distance)
+		log.Debugf("Expected hash: %x, real hash: %x, distance: %v", hash.GetHash(), imgHash.GetHash(), distance)
 	}
 
 	// max distance allowed here is 1
 	return 1 >= distance
 }
 
-func (b *RokOCRTemplate) Matches(img image.Image) bool {
+func (b *OCRTemplate) Matches(img image.Image) bool {
 	imageHash, _ := goimagehash.DifferenceHash(img)
 
 	if len(b.Checkpoints) == 0 {
@@ -71,7 +71,7 @@ func (b *RokOCRTemplate) Matches(img image.Image) bool {
 	// if we have checkpoints, check if all checkpoints matches
 	for _, s := range b.Checkpoints {
 		expectedHash := differenceHashFromString(s.Fingerprint)
-		subImg, _ := imgutils.CropImage(img, s.Crop.CropRectange())
+		subImg, _ := imgutils.CropImage(img, s.Crop.CropRectangle())
 		if !hashMatches(subImg, expectedHash) {
 			log.Debugf("Area %v doesn't match expected hash: %v", s.Crop, s.Fingerprint)
 			return false
@@ -81,7 +81,7 @@ func (b *RokOCRTemplate) Matches(img image.Image) bool {
 	return true
 }
 
-func (b *RokOCRTemplate) Match(hash *goimagehash.ImageHash) bool {
+func (b *OCRTemplate) Match(hash *goimagehash.ImageHash) bool {
 	distance, err := b.Hash().Distance(hash)
 	// if we get error, that means this template is no go...
 	if err != nil {
@@ -92,7 +92,7 @@ func (b *RokOCRTemplate) Match(hash *goimagehash.ImageHash) bool {
 	return distance <= b.Threshold
 }
 
-type ROKOCRSchema struct {
+type OCRSchema struct {
 	Callback  interface{}   `json:"callback,omitempty"`
 	Languages []string      `json:"lang,omitempty"`
 	OEM       int           `json:"oem,omitempty"`
@@ -101,8 +101,8 @@ type ROKOCRSchema struct {
 	AllowList []interface{} `json:"allowlist,omitempty"`
 }
 
-func NewNumberField(cropArea *OCRCrop) ROKOCRSchema {
-	return ROKOCRSchema{
+func NewNumberField(cropArea *OCRCrop) OCRSchema {
+	return OCRSchema{
 		Languages: []string{"eng"},
 		Callback:  []string{},
 		AllowList: []interface{}{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
@@ -112,8 +112,8 @@ func NewNumberField(cropArea *OCRCrop) ROKOCRSchema {
 	}
 }
 
-func NewTextField(cropArea *OCRCrop, languages ...string) ROKOCRSchema {
-	return ROKOCRSchema{
+func NewTextField(cropArea *OCRCrop, languages ...string) OCRSchema {
+	return OCRSchema{
 		Languages: languages,
 		Callback:  []string{},
 		PSM:       7,
@@ -122,18 +122,18 @@ func NewTextField(cropArea *OCRCrop, languages ...string) ROKOCRSchema {
 	}
 }
 
-type ROKTableField struct {
+type OCRTableField struct {
 	Title string
 	Field string
 	Bold  bool
 	Color string
 }
 
-func (b *ROKTableField) MarshalJSON() ([]byte, error) {
+func (b *OCRTableField) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]interface{}{b.Title, b.Field, b.Bold, b.Color})
 }
 
-func (b *ROKTableField) UnmarshalJSON(data []byte) error {
+func (b *OCRTableField) UnmarshalJSON(data []byte) error {
 
 	var v []interface{}
 	if err := json.Unmarshal(data, &v); err != nil {
@@ -155,7 +155,7 @@ type OCRCrop struct {
 	H int
 }
 
-func (b *OCRCrop) CropRectange() image.Rectangle {
+func (b *OCRCrop) CropRectangle() image.Rectangle {
 	return image.Rect(b.X, b.Y, b.X+b.W, b.Y+b.H)
 }
 

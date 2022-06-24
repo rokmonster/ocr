@@ -14,8 +14,8 @@ dockerclient:
 	docker info
 
 # for usage inside `make dev` - installs tesseractlib & adb
-dockerdeps: 
-	apt update && apt install -y libtesseract-dev adb
+dockerdeps: dockerclient
+	apt update && apt install -y libtesseract-dev libopencv-dev adb
 	
 # get's go releaser
 deps: 

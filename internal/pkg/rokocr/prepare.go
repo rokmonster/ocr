@@ -1,13 +1,14 @@
 package rokocr
 
 import (
+	"errors"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
+	"os"
 	"path/filepath"
 
 	"github.com/rokmonster/ocr/internal/pkg/config"
 	"github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
-	"github.com/rokmonster/ocr/internal/pkg/fileutils"
-	log "github.com/sirupsen/logrus"
 )
 
 func InstallSystemD(flags serverconfig.ROKServerConfig) {
@@ -60,13 +61,25 @@ func Prepare(flags config.CommonConfiguration) {
 	fileutils.Mkdirs(flags.MediaDirectory)
 	fileutils.Mkdirs(flags.TemplatesDirectory)
 
-	if len(fileutils.GetFilesInDirectory(flags.TessdataDirectory)) == 0 {
-		log.Warnf("No tesseract trained data found, downloading english & french ones")
-		fileutils.Download(filepath.Join(flags.TessdataDirectory, "eng.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata")
-		fileutils.Download(filepath.Join(flags.TessdataDirectory, "rus.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata")
-		fileutils.Download(filepath.Join(flags.TessdataDirectory, "fra.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata")
-		fileutils.Download(filepath.Join(flags.TessdataDirectory, "spa.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/spa.traineddata")
-		fileutils.Download(filepath.Join(flags.TessdataDirectory, "chi_tra.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/chi_tra.traineddata")
-		fileutils.Download(filepath.Join(flags.TessdataDirectory, "chi_sim.traineddata"), "https://github.com/tesseract-ocr/tessdata/raw/main/chi_sim.traineddata")
+}
+
+func DownloadTesseractData(flags config.CommonConfiguration) {
+	langFiles := []string{
+		"eng",     // English
+		"rus",     // Russian
+		"fra",     // French
+		"spa",     // Spanish
+		"chi_tra", // Chinese Traditional
+		"chi_sim", // Chinese Simplified
+		"jpn",     // Japan
+		"ita",     // Italian
+		"kor",     // Korean
+	}
+
+	for _, lang := range langFiles {
+		path := filepath.Join(flags.TessdataDirectory, fmt.Sprintf("%v.traineddata", lang))
+		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+			_ = fileutils.Download(path, fmt.Sprintf("https://github.com/tesseract-ocr/tessdata/raw/main/%v.traineddata", lang))
+		}
 	}
 }

@@ -1,20 +1,19 @@
-package rokocr
+package ocrschema
 
 import (
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"path/filepath"
 
 	"github.com/corona10/goimagehash"
-	"github.com/rokmonster/ocr/internal/pkg/fileutils"
-	"github.com/rokmonster/ocr/internal/pkg/imgutils"
-	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	log "github.com/sirupsen/logrus"
 )
 
-func LoadTemplates(directory string) []schema.RokOCRTemplate {
-	var templates []schema.RokOCRTemplate
+func LoadTemplates(directory string) []OCRTemplate {
+	var templates []OCRTemplate
 	for _, f := range fileutils.GetFilesInDirectory(directory) {
 		if filepath.Ext(f) == ".json" {
-			template, err := schema.LoadTemplate(f)
+			template, err := LoadTemplate(f)
 			if err == nil {
 				log.Debugf("Loaded template: %s => %s, hash: %s", f, template.Title, template.Fingerprint)
 				templates = append(templates, template)
@@ -26,7 +25,7 @@ func LoadTemplates(directory string) []schema.RokOCRTemplate {
 	return templates
 }
 
-func FindTemplate(mediaDir string, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
+func FindTemplate(mediaDir string, availableTemplate []OCRTemplate) OCRTemplate {
 	for _, file := range fileutils.GetFilesInDirectory(mediaDir) {
 		img, err := imgutils.ReadImageFile(file)
 		if err != nil {
@@ -42,7 +41,7 @@ func FindTemplate(mediaDir string, availableTemplate []schema.RokOCRTemplate) sc
 	return availableTemplate[0]
 }
 
-func PickTemplate(hash *goimagehash.ImageHash, availableTemplate []schema.RokOCRTemplate) schema.RokOCRTemplate {
+func PickTemplate(hash *goimagehash.ImageHash, availableTemplate []OCRTemplate) OCRTemplate {
 	best := availableTemplate[0]
 
 	for _, t := range availableTemplate {

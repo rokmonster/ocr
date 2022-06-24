@@ -1,9 +1,14 @@
-package remote
+package server
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/opencvutils"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
+	"github.com/rokmonster/ocr/web"
 	"image"
 	"image/png"
 	"os"
@@ -14,14 +19,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/olekukonko/tablewriter"
 	"github.com/rokmonster/ocr/internal/pkg/ocrschema"
-	"github.com/rokmonster/ocr/internal/pkg/rokocr"
-	"github.com/rokmonster/ocr/internal/pkg/stringutils"
 	log "github.com/sirupsen/logrus"
 )
 
 func NewRemoteServerWS(socket *websocket.Conn, device, templates, tessdata string) *RemoteServerWS {
 	return &RemoteServerWS{
-		results:      make([]ocrschema.OCRResponse, 0),
+		results:      make([]ocrschema.OCRResult, 0),
 		templatesDir: templates,
 		tessdataDir:  tessdata,
 		device:       device,
@@ -34,14 +37,14 @@ type RemoteServerWS struct {
 	device       string
 	templatesDir string
 	tessdataDir  string
-	results      []ocrschema.OCRResponse
+	results      []ocrschema.OCRResult
 }
 
 func (c *RemoteServerWS) Disconnect() error {
 	return c.requestDisconnect()
 }
 
-func (c *RemoteServerWS) GetData() []ocrschema.OCRResponse {
+func (c *RemoteServerWS) GetData() []ocrschema.OCRResult {
 	return c.results
 }
 
@@ -65,18 +68,24 @@ func (c *RemoteServerWS) requestTap(x, y int) error {
 }
 
 func (c *RemoteServerWS) processImage(img image.Image) {
-	templates := rokocr.LoadTemplates(c.templatesDir)
-	imagehash, _ := goimagehash.DifferenceHash(img)
-	t := rokocr.PickTemplate(imagehash, templates)
+	templates := ocrschema.LoadTemplates(c.templatesDir)
+	imageHash, _ := goimagehash.DifferenceHash(img)
+	t := ocrschema.PickTemplate(imageHash, templates)
 	// TODO: Check if match???
-	res := rokocr.ParseImage(fmt.Sprintf("remoteimage_%v.png", time.Now().Format("20060102_150405")), img, t, os.TempDir(), c.tessdataDir)
+
+	fileName := fmt.Sprintf("remoteimage_%v.png", time.Now().Format("20060102_150405"))
+	res := tesseractutils.ParseImage(fileName, img, t, os.TempDir(), c.tessdataDir)
 
 	// put results
 	c.results = append(c.results, res)
 	c.printAll()
 
-	// todo where to TAP?
-	_ = c.requestTap(100, 300)
+	// find the X Button location & TAP it
+	f, _ := web.RecognitionFS.Open("recognition/close.png")
+	closeButton, _ := imgutils.ReadImage(f)
+	x, y := opencvutils.OpenCVFindCoords(img, closeButton)
+	_ = c.requestTap(x, y)
+
 	// wait a few seconds
 	time.Sleep(time.Second * 2)
 }
@@ -115,8 +124,8 @@ func (c *RemoteServerWS) printAll() {
 }
 
 func (c *RemoteServerWS) isScreenInteresting(w, h int, hash *goimagehash.ImageHash) bool {
-	templates := rokocr.LoadTemplates(c.templatesDir)
-	t := rokocr.PickTemplate(hash, templates)
+	templates := ocrschema.LoadTemplates(c.templatesDir)
+	t := ocrschema.PickTemplate(hash, templates)
 	return t.Match(hash)
 }
 

@@ -1,5 +1,5 @@
 FROM debian:11
-COPY ocr.deb /tmp/ocr.deb
-RUN apt-get update && apt-get install -y /tmp/ocr.deb
+COPY rokmonster-ocr.deb /tmp/rokmonster-ocr.deb
+RUN apt-get update && apt-get install -y /tmp/rokmonster-ocr.deb
 EXPOSE 8080
 ENTRYPOINT ["rok-server"]

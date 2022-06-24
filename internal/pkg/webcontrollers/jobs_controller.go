@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,7 +15,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rokmonster/ocr/internal/pkg/fileutils"
 	"github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
 	log "github.com/sirupsen/logrus"
@@ -31,11 +32,11 @@ func NewJobsController(db *bolt.DB) *JobsController {
 }
 
 type OCRJob struct {
-	ID       uint64                   `json:"id"`
-	Name     string                   `json:"name"`
-	Results  []ocrschema.OCRResponse  `json:"results,omitempty"`
-	Status   string                   `json:"status,omitempty"`
-	Template ocrschema.RokOCRTemplate `json:"template,omitempty"`
+	ID       uint64                `json:"id"`
+	Name     string                `json:"name"`
+	Results  []ocrschema.OCRResult `json:"results,omitempty"`
+	Status   string                `json:"status,omitempty"`
+	Template ocrschema.OCRTemplate `json:"template,omitempty"`
 }
 
 func (job *OCRJob) MediaDirectory() string {
@@ -108,14 +109,14 @@ func (controller *JobsController) updateJobStatus(id uint64, status string) erro
 	})
 }
 
-func (controller *JobsController) updateJobTemplate(id uint64, template ocrschema.RokOCRTemplate) error {
+func (controller *JobsController) updateJobTemplate(id uint64, template ocrschema.OCRTemplate) error {
 	return controller.updateJob(id, func(job *OCRJob) *OCRJob {
 		job.Template = template
 		return job
 	})
 }
 
-func (controller *JobsController) updateJobResults(id uint64, results []ocrschema.OCRResponse) error {
+func (controller *JobsController) updateJobResults(id uint64, results []ocrschema.OCRResult) error {
 	return controller.updateJob(id, func(job *OCRJob) *OCRJob {
 		job.Results = results
 		return job
@@ -203,19 +204,19 @@ func (controller *JobsController) Setup(router *gin.RouterGroup) {
 			fileCount := len(controller.getJobFiles(job.ID))
 
 			// clean results & update status
-			_ = controller.updateJobResults(job.ID, []ocrschema.OCRResponse{})
+			_ = controller.updateJobResults(job.ID, []ocrschema.OCRResult{})
 			_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
 
 			mediaDir := job.MediaDirectory()
 
-			templates := rokocr.LoadTemplates("./templates")
+			templates := ocrschema.LoadTemplates("./templates")
 			if len(templates) > 0 {
 				log.Debugf("Loaded %v templates", len(templates))
-				template := rokocr.FindTemplate(mediaDir, templates)
+				template := ocrschema.FindTemplate(mediaDir, templates)
 				_ = controller.updateJobTemplate(job.ID, template)
 
-				var data []ocrschema.OCRResponse
-				for elem := range rokocr.RunRecognitionChan(mediaDir, "./tessdata", template, false) {
+				var data []ocrschema.OCRResult
+				for elem := range tesseractutils.RunRecognitionChan(mediaDir, "./tessdata", template, false) {
 					data = append(data, elem)
 					index = index + 1
 					_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))

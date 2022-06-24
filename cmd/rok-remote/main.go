@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/rokmonster/ocr/internal/pkg/utils"
 	"net/url"
 	"sync"
 
+	"github.com/rokmonster/ocr/internal/pkg/utils"
+
 	config "github.com/rokmonster/ocr/internal/pkg/config/rokremoteconfig"
-	"github.com/rokmonster/ocr/internal/pkg/rokocr"
-	"github.com/rokmonster/ocr/internal/pkg/websocket/remote"
+	wsclient "github.com/rokmonster/ocr/internal/pkg/websocket/client"
 	log "github.com/sirupsen/logrus"
 	adb "github.com/zach-klippenstein/goadb"
 )
@@ -19,8 +19,6 @@ var (
 )
 
 func main() {
-	rokocr.Prepare(flags.CommonConfiguration)
-
 	var err error
 	client, err = adb.NewWithConfig(adb.ServerConfig{
 		Port: flags.ADBPort,
@@ -48,7 +46,7 @@ func main() {
 		log.Infof("Found device: %v - %v", serial, info.DeviceInfo)
 
 		uri := getWebsocketURI(flags.Server)
-		rc := remote.NewADBDeviceWS(uri.String(), device)
+		rc := wsclient.NewADBDeviceWS(uri.String(), device)
 
 		go func() {
 			defer wg.Done()

@@ -41,6 +41,7 @@ func main() {
 	}
 
 	rokocr.Prepare(flags.CommonConfiguration)
+	rokocr.DownloadTesseractData(flags.CommonConfiguration)
 
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()

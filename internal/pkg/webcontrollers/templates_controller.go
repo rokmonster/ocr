@@ -3,6 +3,9 @@ package webcontrollers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
+	imgutils2 "github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,16 +16,13 @@ import (
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
-	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
-	"github.com/rokmonster/ocr/internal/pkg/rokocr"
-	"github.com/rokmonster/ocr/internal/pkg/stringutils"
 	log "github.com/sirupsen/logrus"
 )
 
 type TemplateMakerSession struct {
 	imagePath   string
-	schema      map[string]schema.ROKOCRSchema
+	schema      map[string]schema.OCRSchema
 	checkpoints []schema.OCRCheckpoint
 }
 
@@ -54,11 +54,11 @@ type rokCropCoordinates struct {
 	H int `form:"h" json:"h,string" xml:"h" binding:"required"`
 }
 
-func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchema) []schema.ROKTableField {
-	var result []schema.ROKTableField
+func (controller *TemplatesController) makeTable(s map[string]schema.OCRSchema) []schema.OCRTableField {
+	var result []schema.OCRTableField
 
 	for k := range s {
-		result = append(result, schema.ROKTableField{
+		result = append(result, schema.OCRTableField{
 			Title: k,
 			Field: k,
 			Bold:  false,
@@ -69,11 +69,11 @@ func (controller *TemplatesController) makeTable(s map[string]schema.ROKOCRSchem
 	return result
 }
 
-func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) schema.RokOCRTemplate {
-	img, _ := imgutils.ReadImageFile(s.imagePath)
+func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) schema.OCRTemplate {
+	img, _ := imgutils2.ReadImageFile(s.imagePath)
 	hash, _ := goimagehash.DifferenceHash(img)
 
-	return schema.RokOCRTemplate{
+	return schema.OCRTemplate{
 		Title:       fmt.Sprintf("ROK OCR Monster Template [%s]", id),
 		Version:     "1",
 		Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
@@ -91,7 +91,7 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "templates.html", gin.H{
-			"templates": rokocr.LoadTemplates(controller.templatesDir),
+			"templates": schema.LoadTemplates(controller.templatesDir),
 		})
 	})
 
@@ -113,7 +113,7 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 		controller.sessions[sessionId] = TemplateMakerSession{
 			imagePath:   dst,
 			checkpoints: []schema.OCRCheckpoint{},
-			schema:      make(map[string]schema.ROKOCRSchema),
+			schema:      make(map[string]schema.OCRSchema),
 		}
 
 		c.Redirect(http.StatusFound, "/templates/"+sessionId)
@@ -138,12 +138,12 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 
 	router.POST("/:session/scan", func(c *gin.Context) {
 		if s, ok := controller.sessions[c.Param("session")]; ok {
-			img, _ := imgutils.ReadImageFile(s.imagePath)
+			img, _ := imgutils2.ReadImageFile(s.imagePath)
 			template := controller.buildTemplate(c.Param("session"), s)
 
 			c.JSON(http.StatusOK, gin.H{
 				"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
-				"results":     rokocr.ParseImage("test", img, template, os.TempDir(), "./tessdata").Data,
+				"results":     tesseractutils.ParseImage("test", img, template, os.TempDir(), "./tessdata").Data,
 			})
 			return
 		}
@@ -204,7 +204,7 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 
 			_ = c.MustBindWith(&postData, binding.JSON)
 
-			img, _ := imgutils.ReadImageFile(s.imagePath)
+			img, _ := imgutils2.ReadImageFile(s.imagePath)
 
 			cropArea := schema.OCRCrop{
 				X: postData.X,
@@ -213,7 +213,7 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 				H: postData.H,
 			}
 
-			sub, _ := imgutils.CropImage(img, cropArea.CropRectange())
+			sub, _ := imgutils2.CropImage(img, cropArea.CropRectangle())
 			hash, _ := goimagehash.DifferenceHash(sub)
 
 			s.checkpoints = append(s.checkpoints, schema.OCRCheckpoint{

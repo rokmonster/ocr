@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
 	"os"
 	"strings"
 	"time"
@@ -15,7 +16,7 @@ import (
 
 var flags = config.Parse()
 
-func printResultsTable(data []schema.OCRResponse, template schema.RokOCRTemplate) {
+func printResultsTable(data []schema.OCRResult, template schema.OCRTemplate) {
 	headers := []string{"Filename"}
 	for _, x := range template.Table {
 		headers = append(headers, x.Title)
@@ -36,7 +37,7 @@ func printResultsTable(data []schema.OCRResponse, template schema.RokOCRTemplate
 	table.Render()
 }
 
-func writeCSV(data []schema.OCRResponse, template schema.RokOCRTemplate) {
+func writeCSV(data []schema.OCRResult, template schema.OCRTemplate) {
 
 	fd, err := os.Create(fmt.Sprintf("%s/%v.csv", flags.OutputDirectory, time.Now().Unix()))
 	if err != nil {
@@ -50,25 +51,26 @@ func writeCSV(data []schema.OCRResponse, template schema.RokOCRTemplate) {
 
 func main() {
 	rokocr.Prepare(flags.CommonConfiguration)
+	rokocr.DownloadTesseractData(flags.CommonConfiguration)
 
 	force := false
-	var template schema.RokOCRTemplate
+	var template schema.OCRTemplate
 
 	if len(strings.TrimSpace(flags.ForceTemplate)) > 0 {
 		force = true
 		template, _ = schema.LoadTemplate(flags.ForceTemplate)
 		log.Infof("Running scanner in force mode with template: %v (%vx%v)", template.Title, template.Width, template.Height)
 	} else {
-		templates := rokocr.LoadTemplates(flags.TemplatesDirectory)
+		templates := schema.LoadTemplates(flags.TemplatesDirectory)
 		if len(templates) == 0 {
 			log.Fatalf("No templates found in: %v", flags.TemplatesDirectory)
 		}
 		log.Debugf("Loaded %v templates", len(templates))
-		template = rokocr.FindTemplate(flags.MediaDirectory, templates)
+		template = schema.FindTemplate(flags.MediaDirectory, templates)
 		log.Infof("I think this template is best match: %v (%vx%v)", template.Title, template.Width, template.Height)
 	}
 
-	data := rokocr.RunRecognition(flags.MediaDirectory, flags.TessdataDirectory, template, force)
+	data := tesseractutils.RunRecognition(flags.MediaDirectory, flags.TessdataDirectory, template, force)
 
 	printResultsTable(data, template)
 	writeCSV(data, template)

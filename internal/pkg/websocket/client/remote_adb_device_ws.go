@@ -1,17 +1,17 @@
-package remote
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"image"
 	"image/png"
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	log "github.com/sirupsen/logrus"
 	adb "github.com/zach-klippenstein/goadb"
 )

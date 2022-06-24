@@ -1,18 +1,18 @@
-package rokocr
+package tesseractutils
 
 import (
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"os"
 	"path/filepath"
 
-	"github.com/rokmonster/ocr/internal/pkg/fileutils"
-	"github.com/rokmonster/ocr/internal/pkg/imgutils"
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	log "github.com/sirupsen/logrus"
 )
 
-func RunRecognitionChan(mediaDir, tessData string, template schema.RokOCRTemplate, force bool) <-chan schema.OCRResponse {
-	out := make(chan schema.OCRResponse)
+func RunRecognitionChan(mediaDir, tessData string, template schema.OCRTemplate, force bool) <-chan schema.OCRResult {
+	out := make(chan schema.OCRResult)
 
 	go func() {
 		dir, _ := filepath.Abs(mediaDir)
@@ -32,8 +32,8 @@ func RunRecognitionChan(mediaDir, tessData string, template schema.RokOCRTemplat
 	return out
 }
 
-func RunRecognition(mediaDir, tessData string, template schema.RokOCRTemplate, force bool) []schema.OCRResponse {
-	var data []schema.OCRResponse
+func RunRecognition(mediaDir, tessData string, template schema.OCRTemplate, force bool) []schema.OCRResult {
+	var data []schema.OCRResult
 
 	for elem := range RunRecognitionChan(mediaDir, tessData, template, force) {
 		data = append(data, elem)
@@ -42,7 +42,7 @@ func RunRecognition(mediaDir, tessData string, template schema.RokOCRTemplate, f
 	return data
 }
 
-func ParseSingleFile(f, tessData string, template schema.RokOCRTemplate, force bool) (*schema.OCRResponse, error) {
+func ParseSingleFile(f, tessData string, template schema.OCRTemplate, force bool) (*schema.OCRResult, error) {
 	img, err := imgutils.ReadImageFile(f)
 	if err != nil {
 		return nil, fmt.Errorf("cant read file: %v", err)
