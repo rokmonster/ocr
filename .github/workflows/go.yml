@@ -23,6 +23,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18
+      - name: Remove github crap from ubuntu image (breaks static build of opencv)
+        run: sudo apt-get remove -y libopenexr24
       - name: Build static opencv
         run: make opencv
       - name: ghcr-login
