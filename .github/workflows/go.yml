@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Install deps (Libtesseract-dev && make)
         run: sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libtesseract-dev make
@@ -23,8 +23,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18
-      - name: Remove github crap from ubuntu image (breaks static build of opencv)
-        run: sudo apt-get remove -y libopenexr24 libjpeg-turbo8 nginx-*
       - name: Build static opencv
         run: make opencv
       - name: ghcr-login
