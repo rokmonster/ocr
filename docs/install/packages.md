@@ -6,25 +6,20 @@ permalink: /install/os-packages
 parent: Installation
 ---
 
-# Install using deb/rpm package
+# Install using deb package
 
 **This method of installing is the recommended for novice users, but only works on Linux VM's**
 
 - Download either deb/rpm package from [Latest release](https://github.com/rokmonster/ocr/releases/latest/) 
-- Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
+- Install it with package manager. (`apt install -y ./package.deb`)
 
 **Ubuntu/Debian**
 
 ```bash
-curl -Lo /tmp/ocr.deb https://github.com/rokmonster/ocr/releases/latest/download/ocr.deb
+curl -Lo /tmp/ocr.deb https://github.com/rokmonster/ocr/releases/latest/download/rokmonster-ocr_linux_amd64.deb
 sudo apt install -y /tmp/ocr.deb
 ```
 
-**Centos/Redhat**
-
-```bash
-sudo yum install -y https://github.com/rokmonster/ocr/releases/latest/download/ocr.rpm
-```
 
 ## Usage
 

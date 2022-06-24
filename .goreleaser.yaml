@@ -32,7 +32,7 @@ builds:
 
 nfpms:
   - id: remotepackage
-    package_name: rok-monster-ocr
+    package_name: rokmonster-remote
     file_name_template: "rokmonster-remote_{{ .Os }}_{{ .Arch }}"
     vendor: Julius Lisauskas
     maintainer: Julius Lisauskas <julius@lisauskas.lt>
@@ -41,10 +41,16 @@ nfpms:
     formats:
       - deb
       - rpm
-      - apk
     bindir: /usr/bin
-  - id: server_scanner_package
-    package_name: rok-monster-ocr
+    overrides:
+      deb:
+        dependencies:
+          - adb
+      rpm:
+        dependencies:
+          - android-tools
+  - id: ocr-package
+    package_name: rokmonster-ocr
     file_name_template: "rokmonster-ocr_{{ .Os }}_{{ .Arch }}"
     vendor: Julius Lisauskas
     maintainer: Julius Lisauskas <julius@lisauskas.lt>
@@ -53,7 +59,6 @@ nfpms:
       - scanner
     formats:
       - deb
-      - rpm
     bindir: /usr/bin
     overrides:
       deb:
@@ -62,15 +67,10 @@ nfpms:
           - libopencv-contrib4.5d
           - libopencv-videoio4.5d
           - libopencv-photo4.5d
-          - adb
-      rpm:
-        dependencies:
-          - tesseract
-          - opencv-contrib
 
 dockers:
   - ids:
-    - server_scanner_package
+    - ocr-package
  
     image_templates:
     - "ghcr.io/rokmonster/ocr:{{ .Tag }}"

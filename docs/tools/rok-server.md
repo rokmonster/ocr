@@ -19,16 +19,16 @@ parent: Components
 
 * Pipelines (Combine data from multiple images/jobs)
 
-## QuickStart (Linux VM / Local PC / No TLS)
+## QuickStart (Ubuntu 22.04 / No TLS)
 
 - Download either deb/rpm package from [Latest release](https://github.com/rokmonster/ocr/releases/latest/) 
-- Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
+- Install it with package manager. (`apt install -y ./package.deb`)
 - Start with a simple `rok-server` & open [http://localhost:8080](http://localhost:8080) 
 
-## QuickStart (Linux VM & TLS)
+## QuickStart (Ubuntu 22.04 & TLS)
 
 - Download either deb/rpm package from [Latest release](https://github.com/rokmonster/ocr/releases/latest/) 
-- Install it with package manager. (`apt install -y ./package.deb` or `yum install -y ./package.rpm`)
+- Install it with package manager. (`apt install -y ./package.deb`)
 - Setup automatic startup & TLS
 - Open your browser at https://${IP}.nip.io
   
