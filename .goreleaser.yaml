@@ -63,11 +63,15 @@ nfpms:
       - scanner
     formats:
       - deb
+      - rpm
     bindir: /usr/bin
     overrides:
       deb:
         dependencies:
           - libtesseract4
+      rpm:
+        dependencies:
+          - tesseract
   
 dockers:
   - ids:
