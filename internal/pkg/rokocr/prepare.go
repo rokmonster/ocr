@@ -3,9 +3,10 @@ package rokocr
 import (
 	"errors"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 	"os"
 	"path/filepath"
+
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 
 	"github.com/rokmonster/ocr/internal/pkg/config"
 	"github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
@@ -17,8 +18,15 @@ func InstallSystemD(flags serverconfig.ROKServerConfig) {
 		workingDir = "/root"
 	}
 
+	fileutils.WriteFile([]byte(fmt.Sprintf("%s=%v\n%s=%v\n",
+		"OAUTH_CLIENT_ID", flags.OAuthClientID,
+		"OAUTH_SECRET_ID", flags.OAuthSecretID,
+	)), "/etc/rokmonster.env")
+	os.Chown("/etc/rokmonster.env", 0, 0)
+	os.Chmod("/etc/rokmonster.env", 0600)
+
 	fileutils.WriteFile([]byte(fmt.Sprintf(`[Unit]
-Description=ROK OCR Server
+Description=ROKMonster OCR Server
 Requires=rokocr-server-https.socket
 Requires=rokocr-server-http.socket
 After=syslog.target
@@ -30,6 +38,7 @@ Type=simple
 User=%v
 Group=%v
 WorkingDirectory=%v
+EnvironmentFile=/etc/rokmonster.env
 ExecStart=/usr/bin/rok-server -tls -domain %v
 Restart=always
 

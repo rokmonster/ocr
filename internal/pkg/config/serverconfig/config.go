@@ -9,11 +9,13 @@ import (
 
 type ROKServerConfig struct {
 	config.CommonConfiguration
-	ListenPort  int
-	TLS         bool
-	TLSDomain   string
-	Install     bool
-	InstallUser string
+	ListenPort    int
+	TLS           bool
+	TLSDomain     string
+	Install       bool
+	InstallUser   string
+	OAuthClientID string
+	OAuthSecretID string
 }
 
 func Parse() ROKServerConfig {
@@ -29,6 +31,9 @@ func Parse() ROKServerConfig {
 	flag.BoolVar(&flags.TLS, "tls", false, "should it listen on TLS (443)")
 	flag.StringVar(&flags.TLSDomain, "domain", "", "tls domain")
 	flag.IntVar(&flags.ListenPort, "port", 8080, "port to listen on (if not tls)")
+
+	flag.StringVar(&flags.OAuthClientID, "oauth-clientid", os.Getenv("OAUTH_CLIENT_ID"), "Google OAuth Client ID")
+	flag.StringVar(&flags.OAuthSecretID, "oauth-secretid", os.Getenv("OAUTH_SECRET_ID"), "Google OAuth Secret ID")
 
 	flag.Parse()
 

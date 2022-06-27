@@ -11,7 +11,6 @@ import (
 	"github.com/rokmonster/ocr/internal/pkg/utils"
 
 	"github.com/coreos/go-systemd/v22/activation"
-	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	config "github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
@@ -73,14 +72,13 @@ func main() {
 	router.Use(static.Serve("/", web.EmbeddedFS(web.StaticFS, "static")))
 	router.SetHTMLTemplate(web.CreateTemplateEngine(web.StaticFS, "template"))
 
-	pprof.RouteRegister(router.Group("_debug"), "pprof")
+	oauth := webcontrollers.NewOAuth2Controller(router, flags.OAuthClientID, flags.OAuthSecretID, flags.TLSDomain)
 
-	// public group, not auth needed for this.
-	public := router.Group("")
+	privateGroup := router.Group("", oauth.Middleware())
 	{
-		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(public.Group("/devices"))
-		webcontrollers.NewJobsController(db, flags.TessdataDirectory).Setup(public.Group("/jobs"))
-		webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(public.Group("/templates"))
+		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(privateGroup.Group("/devices"))
+		webcontrollers.NewJobsController(db, flags.TessdataDirectory).Setup(privateGroup.Group("/jobs"))
+		webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(privateGroup.Group("/templates"))
 	}
 
 	router.NoRoute(func(c *gin.Context) {
