@@ -79,7 +79,7 @@ func main() {
 	public := router.Group("")
 	{
 		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(public.Group("/devices"))
-		webcontrollers.NewJobsController(db).Setup(public.Group("/jobs"))
+		webcontrollers.NewJobsController(db, flags.TessdataDirectory).Setup(public.Group("/jobs"))
 		webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(public.Group("/templates"))
 	}
 

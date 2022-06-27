@@ -3,14 +3,15 @@ package webcontrollers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
-	imgutils2 "github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
-	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
+	imgutils2 "github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
 
 	"github.com/gin-gonic/gin/binding"
 
@@ -143,7 +144,7 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 
 			c.JSON(http.StatusOK, gin.H{
 				"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
-				"results":     tesseractutils.ParseImage("test", img, template, os.TempDir(), "./tessdata").Data,
+				"results":     tesseractutils.ParseImage("test", img, template, os.TempDir(), controller.tessdataDir).Data,
 			})
 			return
 		}

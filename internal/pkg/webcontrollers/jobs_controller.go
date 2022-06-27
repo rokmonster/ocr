@@ -5,14 +5,15 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
-	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rokmonster/ocr/internal/pkg/ocrschema"
@@ -22,12 +23,14 @@ import (
 )
 
 type JobsController struct {
-	db *bolt.DB
+	db          *bolt.DB
+	tessdataDir string
 }
 
-func NewJobsController(db *bolt.DB) *JobsController {
+func NewJobsController(db *bolt.DB, tessdata string) *JobsController {
 	return &JobsController{
-		db: db,
+		db:          db,
+		tessdataDir: tessdata,
 	}
 }
 
@@ -216,7 +219,7 @@ func (controller *JobsController) Setup(router *gin.RouterGroup) {
 				_ = controller.updateJobTemplate(job.ID, template)
 
 				var data []ocrschema.OCRResult
-				for elem := range tesseractutils.RunRecognitionChan(mediaDir, "./tessdata", template, false) {
+				for elem := range tesseractutils.RunRecognitionChan(mediaDir, controller.tessdataDir, template, false) {
 					data = append(data, elem)
 					index = index + 1
 					_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
