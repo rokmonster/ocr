@@ -168,119 +168,116 @@ func itob(v uint64) []byte {
 	return b
 }
 
-func (controller *JobsController) Setup(router *gin.RouterGroup) {
-	// List all the jobs
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "jobs.html", gin.H{
-			"jobs":     controller.getJobs(),
-			"userdata": c.MustGet(AuthUserData),
-		})
+func (controller *JobsController) GetJobsList(c *gin.Context) {
+	c.HTML(http.StatusOK, "jobs.html", gin.H{
+		"jobs":     controller.getJobs(),
+		"userdata": c.MustGet(AuthUserData),
 	})
+}
 
-	router.GET("/create", func(c *gin.Context) {
-		id, err := controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
-		if err == nil {
-			c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v", id))
-		} else {
-			c.Redirect(http.StatusFound, "/jobs")
-		}
-	})
-
-	router.GET("/:id", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		job := controller.getJob(id)
-
-		c.HTML(http.StatusOK, "job_edit.html", gin.H{
-			"userdata": c.MustGet(AuthUserData),
-			"job":      job,
-			"files":    controller.getJobFiles(id),
-		})
-	})
-
-	router.GET("/:id/start", func(c *gin.Context) {
-		// TODO: Edit job here
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		job := controller.getJob(id)
-
-		go func(job *OCRJob) {
-			log.Debugf("Processing job: %v", job)
-
-			index := 1
-			fileCount := len(controller.getJobFiles(job.ID))
-
-			// clean results & update status
-			_ = controller.updateJobResults(job.ID, []ocrschema.OCRResult{})
-			_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
-
-			mediaDir := job.MediaDirectory()
-
-			templates := ocrschema.LoadTemplates("./templates")
-			if len(templates) > 0 {
-				log.Debugf("Loaded %v templates", len(templates))
-				template := ocrschema.FindTemplate(mediaDir, templates)
-				_ = controller.updateJobTemplate(job.ID, template)
-
-				var data []ocrschema.OCRResult
-				for elem := range tesseractutils.RunRecognitionChan(mediaDir, controller.tessdataDir, template, false) {
-					data = append(data, elem)
-					index = index + 1
-					_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
-					_ = controller.updateJobResults(job.ID, data)
-				}
-
-				_ = controller.updateJobResults(job.ID, data)
-				_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Completed: %v files", len(data)))
-			} else {
-				log.Warnf("No compatible template found")
-				_ = controller.updateJobStatus(job.ID, "Failed, no template found")
-			}
-		}(job)
-
-		c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v/results", id))
-	})
-
-	router.GET("/:id/csv", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		job := controller.getJob(id)
-
-		b := new(bytes.Buffer)
-		rokocr.WriteCSV(job.Results, job.Template, b)
-
-		c.Data(http.StatusOK, "text/plain", b.Bytes())
-	})
-
-	router.GET("/:id/results", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		job := controller.getJob(id)
-
-		c.HTML(http.StatusOK, "job_results.html", gin.H{
-			"userdata": c.MustGet(AuthUserData),
-			"job":      job,
-			"files":    controller.getJobFiles(id),
-		})
-	})
-
-	router.POST("/:id/upload", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		job := controller.getJob(id)
-
-		_ = os.MkdirAll(job.MediaDirectory(), os.ModePerm)
-
-		// move uploaded file
-		file, _ := c.FormFile("file")
-		dst := filepath.Join(job.MediaDirectory(), filepath.Base(file.Filename))
-		_ = c.SaveUploadedFile(file, dst)
-
-		c.JSON(http.StatusOK, gin.H{
-			"userdata":    c.MustGet(AuthUserData),
-			"destination": dst,
-		})
-	})
-
-	router.GET("/:id/delete", func(c *gin.Context) {
-		id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
-		controller.deleteJob(id)
+func (controller *JobsController) CreateJobForm(c *gin.Context) {
+	id, err := controller.createJob(fmt.Sprintf("Job: %v", time.Now().Format("2006-01-02 15:04:05")))
+	if err == nil {
+		c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v", id))
+	} else {
 		c.Redirect(http.StatusFound, "/jobs")
-	})
+	}
+}
 
+func (controller *JobsController) GetJobByID(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	job := controller.getJob(id)
+
+	c.HTML(http.StatusOK, "job_edit.html", gin.H{
+		"userdata": c.MustGet(AuthUserData),
+		"job":      job,
+		"files":    controller.getJobFiles(id),
+	})
+}
+
+func (controller *JobsController) StartJobByID(c *gin.Context) {
+
+	// TODO: Edit job here
+	id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	job := controller.getJob(id)
+
+	go func(job *OCRJob) {
+		log.Debugf("Processing job: %v", job)
+
+		index := 1
+		fileCount := len(controller.getJobFiles(job.ID))
+
+		// clean results & update status
+		_ = controller.updateJobResults(job.ID, []ocrschema.OCRResult{})
+		_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
+
+		mediaDir := job.MediaDirectory()
+
+		templates := ocrschema.LoadTemplates("./templates")
+		if len(templates) > 0 {
+			log.Debugf("Loaded %v templates", len(templates))
+			template := ocrschema.FindTemplate(mediaDir, templates)
+			_ = controller.updateJobTemplate(job.ID, template)
+
+			var data []ocrschema.OCRResult
+			for elem := range tesseractutils.RunRecognitionChan(mediaDir, controller.tessdataDir, template, false) {
+				data = append(data, elem)
+				index = index + 1
+				_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
+				_ = controller.updateJobResults(job.ID, data)
+			}
+
+			_ = controller.updateJobResults(job.ID, data)
+			_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Completed: %v files", len(data)))
+		} else {
+			log.Warnf("No compatible template found")
+			_ = controller.updateJobStatus(job.ID, "Failed, no template found")
+		}
+	}(job)
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/jobs/%v/results", id))
+}
+
+func (controller *JobsController) ExportJobAsCSV(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	job := controller.getJob(id)
+
+	b := new(bytes.Buffer)
+	rokocr.WriteCSV(job.Results, job.Template, b)
+
+	c.Data(http.StatusOK, "text/plain", b.Bytes())
+}
+
+func (controller *JobsController) ExportJobResultsHTML(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	job := controller.getJob(id)
+
+	c.HTML(http.StatusOK, "job_results.html", gin.H{
+		"userdata": c.MustGet(AuthUserData),
+		"job":      job,
+		"files":    controller.getJobFiles(id),
+	})
+}
+
+func (controller *JobsController) UploadFilesForJob(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	job := controller.getJob(id)
+
+	_ = os.MkdirAll(job.MediaDirectory(), os.ModePerm)
+
+	// move uploaded file
+	file, _ := c.FormFile("file")
+	dst := filepath.Join(job.MediaDirectory(), filepath.Base(file.Filename))
+	_ = c.SaveUploadedFile(file, dst)
+
+	c.JSON(http.StatusOK, gin.H{
+		"userdata":    c.MustGet(AuthUserData),
+		"destination": dst,
+	})
+}
+
+func (controller *JobsController) DeleteJobByID(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 0, 64)
+	controller.deleteJob(id)
+	c.Redirect(http.StatusFound, "/jobs")
 }

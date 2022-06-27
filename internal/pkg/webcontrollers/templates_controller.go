@@ -88,154 +88,141 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 	}
 }
 
-func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
+func (controller *TemplatesController) ListTemplates(c *gin.Context) {
+	c.HTML(http.StatusOK, "templates.html", gin.H{
+		"userdata":  c.MustGet(AuthUserData),
+		"templates": schema.LoadTemplates(controller.templatesDir),
+	})
+}
+func (controller *TemplatesController) NewTemplateForm(c *gin.Context) {
+	c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{
+		"userdata": c.MustGet(AuthUserData),
+	})
+}
+func (controller *TemplatesController) NewTemplatePost(c *gin.Context) {
+	// create session id
+	sessionId := stringutils.Random(12)
+	// handle file upload...
+	file, _ := c.FormFile("image")
+	dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
+	_ = c.SaveUploadedFile(file, dst)
 
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "templates.html", gin.H{
+	log.Debugf("Uploaded file: %s", dst)
+
+	controller.sessions[sessionId] = TemplateMakerSession{
+		imagePath:   dst,
+		checkpoints: []schema.OCRCheckpoint{},
+		schema:      make(map[string]schema.OCRSchema),
+	}
+
+	c.Redirect(http.StatusFound, "/templates/"+sessionId)
+}
+func (controller *TemplatesController) EditTemplateByID(c *gin.Context) {
+	if _, ok := controller.sessions[c.Param("session")]; ok {
+		// check if session exists;
+		c.HTML(http.StatusOK, "templatemaker.html", gin.H{
 			"userdata":  c.MustGet(AuthUserData),
-			"templates": schema.LoadTemplates(controller.templatesDir),
+			"sessionId": c.Param("session"),
 		})
-	})
+		return
+	}
+	c.Redirect(http.StatusFound, "/templates")
+}
+func (controller *TemplatesController) GetTemplateImage(c *gin.Context) {
+	imagePath := controller.sessions[c.Param("session")].imagePath
+	c.File(imagePath)
+}
+func (controller *TemplatesController) TestTemplateByID(c *gin.Context) {
+	if s, ok := controller.sessions[c.Param("session")]; ok {
+		img, _ := imgutils2.ReadImageFile(s.imagePath)
+		template := controller.buildTemplate(c.Param("session"), s)
 
-	router.GET("/new", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{
-			"userdata": c.MustGet(AuthUserData),
+		c.JSON(http.StatusOK, gin.H{
+			"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
+			"results":     tesseractutils.ParseImage("test", img, template, os.TempDir(), controller.tessdataDir).Data,
 		})
-	})
+		return
+	}
 
-	// create new session, and redirect
-	router.POST("/new", func(c *gin.Context) {
-		// create session id
-		sessionId := stringutils.Random(12)
-		// handle file upload...
-		file, _ := c.FormFile("image")
-		dst := os.TempDir() + "/" + sessionId + filepath.Ext(file.Filename)
-		_ = c.SaveUploadedFile(file, dst)
-
-		log.Debugf("Uploaded file: %s", dst)
-
-		controller.sessions[sessionId] = TemplateMakerSession{
-			imagePath:   dst,
-			checkpoints: []schema.OCRCheckpoint{},
-			schema:      make(map[string]schema.OCRSchema),
-		}
-
-		c.Redirect(http.StatusFound, "/templates/"+sessionId)
-	})
-
-	router.GET("/:session", func(c *gin.Context) {
-		if _, ok := controller.sessions[c.Param("session")]; ok {
-			// check if session exists;
-			c.HTML(http.StatusOK, "templatemaker.html", gin.H{
-				"userdata":  c.MustGet(AuthUserData),
-				"sessionId": c.Param("session"),
-			})
-			return
-		}
+	c.JSON(http.StatusNotFound, gin.H{})
+}
+func (controller *TemplatesController) ExportTemplateByID(c *gin.Context) {
+	if s, ok := controller.sessions[c.Param("session")]; ok {
+		template := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
+		bytes, _ := json.MarshalIndent(template, "", "    ")
+		_ = os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
 		c.Redirect(http.StatusFound, "/templates")
+		return
+	}
 
-	})
+	c.JSON(http.StatusNotFound, gin.H{})
+}
+func (controller *TemplatesController) AddAreaOnTemplate(c *gin.Context) {
+	if s, ok := controller.sessions[c.Param("session")]; ok {
+		var postData rokTemplateArea
 
-	router.GET("/:session/image", func(c *gin.Context) {
-		imagePath := controller.sessions[c.Param("session")].imagePath
-		c.File(imagePath)
-	})
+		_ = c.MustBindWith(&postData, binding.JSON)
 
-	router.POST("/:session/scan", func(c *gin.Context) {
-		if s, ok := controller.sessions[c.Param("session")]; ok {
-			img, _ := imgutils2.ReadImageFile(s.imagePath)
-			template := controller.buildTemplate(c.Param("session"), s)
-
-			c.JSON(http.StatusOK, gin.H{
-				"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
-				"results":     tesseractutils.ParseImage("test", img, template, os.TempDir(), controller.tessdataDir).Data,
-			})
-			return
-		}
-
-		c.JSON(http.StatusNotFound, gin.H{})
-	})
-
-	router.GET("/:session/export", func(c *gin.Context) {
-		if s, ok := controller.sessions[c.Param("session")]; ok {
-			template := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
-			bytes, _ := json.MarshalIndent(template, "", "    ")
-			_ = os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
-			c.Redirect(http.StatusFound, "/templates")
-			return
-		}
-
-		c.JSON(http.StatusNotFound, gin.H{})
-	})
-
-	router.POST("/:session/add-area", func(c *gin.Context) {
-		if s, ok := controller.sessions[c.Param("session")]; ok {
-			var postData rokTemplateArea
-
-			_ = c.MustBindWith(&postData, binding.JSON)
-
-			if len(strings.TrimSpace(postData.Name)) > 0 {
-				if postData.Type == "number" {
-					s.schema[postData.Name] = schema.NewNumberField(&schema.OCRCrop{
-						X: postData.X,
-						Y: postData.Y,
-						W: postData.W,
-						H: postData.H,
-					})
-				} else {
-					s.schema[postData.Name] = schema.NewTextField(&schema.OCRCrop{
-						X: postData.X,
-						Y: postData.Y,
-						W: postData.W,
-						H: postData.H,
-					}, "eng")
-				}
+		if len(strings.TrimSpace(postData.Name)) > 0 {
+			if postData.Type == "number" {
+				s.schema[postData.Name] = schema.NewNumberField(&schema.OCRCrop{
+					X: postData.X,
+					Y: postData.Y,
+					W: postData.W,
+					H: postData.H,
+				})
+			} else {
+				s.schema[postData.Name] = schema.NewTextField(&schema.OCRCrop{
+					X: postData.X,
+					Y: postData.Y,
+					W: postData.W,
+					H: postData.H,
+				}, "eng")
 			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"schema":      s.schema,
-				"checkpoints": s.checkpoints,
-			})
-			return
 		}
 
-		c.JSON(http.StatusNotFound, gin.H{})
-	})
+		c.JSON(http.StatusOK, gin.H{
+			"schema":      s.schema,
+			"checkpoints": s.checkpoints,
+		})
+		return
+	}
 
-	router.POST("/:session/add-checkpoint", func(c *gin.Context) {
-		sessionId := c.Param("session")
-		if s, ok := controller.sessions[sessionId]; ok {
-			var postData rokCropCoordinates
+	c.JSON(http.StatusNotFound, gin.H{})
+}
+func (controller *TemplatesController) AddCheckpointOnTemplate(c *gin.Context) {
+	sessionId := c.Param("session")
+	if s, ok := controller.sessions[sessionId]; ok {
+		var postData rokCropCoordinates
 
-			_ = c.MustBindWith(&postData, binding.JSON)
+		_ = c.MustBindWith(&postData, binding.JSON)
 
-			img, _ := imgutils2.ReadImageFile(s.imagePath)
+		img, _ := imgutils2.ReadImageFile(s.imagePath)
 
-			cropArea := schema.OCRCrop{
-				X: postData.X,
-				Y: postData.Y,
-				W: postData.W,
-				H: postData.H,
-			}
-
-			sub, _ := imgutils2.CropImage(img, cropArea.CropRectangle())
-			hash, _ := goimagehash.DifferenceHash(sub)
-
-			s.checkpoints = append(s.checkpoints, schema.OCRCheckpoint{
-				Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
-				Crop:        &cropArea,
-			})
-
-			controller.sessions[sessionId] = s
-
-			c.JSON(http.StatusOK, gin.H{
-				"schema":      s.schema,
-				"checkpoints": s.checkpoints,
-			})
-
-			return
+		cropArea := schema.OCRCrop{
+			X: postData.X,
+			Y: postData.Y,
+			W: postData.W,
+			H: postData.H,
 		}
 
-		c.JSON(http.StatusNotFound, gin.H{})
-	})
+		sub, _ := imgutils2.CropImage(img, cropArea.CropRectangle())
+		hash, _ := goimagehash.DifferenceHash(sub)
+
+		s.checkpoints = append(s.checkpoints, schema.OCRCheckpoint{
+			Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
+			Crop:        &cropArea,
+		})
+
+		controller.sessions[sessionId] = s
+
+		c.JSON(http.StatusOK, gin.H{
+			"schema":      s.schema,
+			"checkpoints": s.checkpoints,
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusNotFound, gin.H{})
 }

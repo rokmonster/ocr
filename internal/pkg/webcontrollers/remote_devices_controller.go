@@ -43,75 +43,74 @@ func NewRemoteDevicesController(templates, tessdata string) *RemoteDevicesContro
 	}
 }
 
-func (controller *RemoteDevicesController) Setup(router *gin.RouterGroup, public *gin.RouterGroup) {
-	router.GET("/", func(c *gin.Context) {
-		switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEHTML) {
-		case gin.MIMEHTML:
-			c.HTML(http.StatusOK, "devices.html", gin.H{
-				"userdata": c.MustGet(AuthUserData),
-				"devices":  controller.getRemoteDevices(),
-			})
-		case gin.MIMEJSON:
-			c.JSON(http.StatusOK, gin.H{
-				"devices": controller.getRemoteDevices(),
-			})
+func (controller *RemoteDevicesController) GetListOfDevices(c *gin.Context) {
+	switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEHTML) {
+	case gin.MIMEHTML:
+		c.HTML(http.StatusOK, "devices.html", gin.H{
+			"userdata": c.MustGet(AuthUserData),
+			"devices":  controller.getRemoteDevices(),
+		})
+	case gin.MIMEJSON:
+		c.JSON(http.StatusOK, gin.H{
+			"devices": controller.getRemoteDevices(),
+		})
+	}
+}
+
+func (controller *RemoteDevicesController) Disconnect(ctx *gin.Context) {
+	id := uuid.MustParse(ctx.Param("id"))
+	if c, ok := controller.clients[id]; ok {
+		c.Handler.Disconnect()
+	}
+
+	ctx.Redirect(http.StatusFound, "/devices/")
+}
+
+func (controller *RemoteDevicesController) Data(ctx *gin.Context) {
+	id := uuid.MustParse(ctx.Param("id"))
+	if c, ok := controller.clients[id]; ok {
+		ctx.JSON(http.StatusOK, c.Handler.GetData())
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, "/devices/")
+
+}
+
+func (controller *RemoteDevicesController) Websocket(c *gin.Context) {
+	ws, _ := controller.upgrader.Upgrade(c.Writer, c.Request, nil)
+
+	// don't forget to close the connection & remove client
+	defer ws.Close()
+
+	// first message on WS should be our hello
+	var deviceInfo struct {
+		Serial string `json:"serial"`
+	}
+	err := ws.ReadJSON(&deviceInfo)
+
+	if err != nil {
+		log.Errorf("I don't like this WS Client: %v", err)
+		_ = ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "I expect you to behave nicely"))
+		return
+	} else {
+		log.Infof("[%v] connected from: %v", deviceInfo.Serial, ws.RemoteAddr())
+
+		sessionId := uuid.New()
+
+		// register handler && start the loop
+		handler := wsserver.NewRemoteServerWS(ws, sessionId.String(), controller.templatesDir, controller.tessdataDir)
+		device := ServerClient{
+			Address: ws.RemoteAddr().String(),
+			Name:    deviceInfo.Serial,
+			Handler: handler,
 		}
-	})
 
-	router.GET("/:id/disconnect", func(ctx *gin.Context) {
-		id := uuid.MustParse(ctx.Param("id"))
-		if c, ok := controller.clients[id]; ok {
-			c.Handler.Disconnect()
-		}
+		// put the client into active clients...
+		controller.clients[sessionId] = device
+		defer delete(controller.clients, sessionId)
 
-		ctx.Redirect(http.StatusFound, "/devices/")
-	})
-
-	router.GET("/:id/data", func(ctx *gin.Context) {
-		id := uuid.MustParse(ctx.Param("id"))
-		if c, ok := controller.clients[id]; ok {
-			ctx.JSON(http.StatusOK, c.Handler.GetData())
-			return
-		}
-
-		ctx.Redirect(http.StatusFound, "/devices/")
-	})
-
-	public.GET("/ws", func(c *gin.Context) {
-		ws, _ := controller.upgrader.Upgrade(c.Writer, c.Request, nil)
-
-		// don't forget to close the connection & remove client
-		defer ws.Close()
-
-		// first message on WS should be our hello
-		var deviceInfo struct {
-			Serial string `json:"serial"`
-		}
-		err := ws.ReadJSON(&deviceInfo)
-
-		if err != nil {
-			log.Errorf("I don't like this WS Client: %v", err)
-			_ = ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "I expect you to behave nicely"))
-			return
-		} else {
-			log.Infof("[%v] connected from: %v", deviceInfo.Serial, ws.RemoteAddr())
-
-			sessionId := uuid.New()
-
-			// register handler && start the loop
-			handler := wsserver.NewRemoteServerWS(ws, sessionId.String(), controller.templatesDir, controller.tessdataDir)
-			device := ServerClient{
-				Address: ws.RemoteAddr().String(),
-				Name:    deviceInfo.Serial,
-				Handler: handler,
-			}
-
-			// put the client into active clients...
-			controller.clients[sessionId] = device
-			defer delete(controller.clients, sessionId)
-
-			// handle the command / send actions
-			handler.Loop()
-		}
-	})
+		// handle the command / send actions
+		handler.Loop()
+	}
 }

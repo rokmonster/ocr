@@ -74,14 +74,51 @@ func main() {
 
 	oauth := webcontrollers.NewOAuth2Controller(router, flags.OAuthClientID, flags.OAuthSecretID, flags.TLSDomain)
 
-	privateGroup := router.Group("", oauth.Middleware())
+	www := router.Group("")
 	{
-		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(
-			privateGroup.Group("/devices"),
-			router.Group("/devices"), // public one for /ws
-		)
-		webcontrollers.NewJobsController(db, flags.TessdataDirectory).Setup(privateGroup.Group("/jobs"))
-		webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(privateGroup.Group("/templates"))
+		devices := www.Group("/devices")
+		{
+			controller := webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory)
+
+			// websocket - no-auth (different auth in future)
+			devices.GET("/ws", controller.Websocket)
+			// everything else - requires auth-middleware
+			devicesSecure := devices.Group("", oauth.Middleware())
+			{
+				devicesSecure.GET("/", controller.GetListOfDevices)
+				devicesSecure.GET("/:id/disconnect", controller.Disconnect)
+				devicesSecure.GET("/:id/data", controller.Data)
+			}
+		}
+
+		// all job's API's require auth
+		jobs := www.Group("/jobs", oauth.Middleware())
+		{
+			controller := webcontrollers.NewJobsController(db, flags.TessdataDirectory)
+			jobs.GET("/", controller.GetJobsList)
+			jobs.GET("/create", controller.CreateJobForm)
+			jobs.GET("/:id", controller.GetJobByID)
+			jobs.GET("/:id/start", controller.StartJobByID)
+			jobs.GET("/:id/csv", controller.ExportJobAsCSV)
+			jobs.GET("/:id/results", controller.ExportJobResultsHTML)
+			jobs.GET("/:id/delete", controller.DeleteJobByID)
+			jobs.POST("/:id/upload", controller.UploadFilesForJob)
+		}
+
+		// all templates API's require auth
+		templates := www.Group("/templates", oauth.Middleware())
+		{
+			controller := webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory)
+			templates.GET("/", controller.ListTemplates)
+			templates.GET("/new", controller.NewTemplateForm)
+			templates.POST("/new", controller.NewTemplatePost)
+			templates.GET("/:session", controller.EditTemplateByID)
+			templates.GET("/:session/image", controller.GetTemplateImage)
+			templates.POST("/:session/scan", controller.TestTemplateByID)
+			templates.GET("/:session/export", controller.ExportTemplateByID)
+			templates.POST("/:session/add-area", controller.AddAreaOnTemplate)
+			templates.POST("/:session/add-checkpoint", controller.AddCheckpointOnTemplate)
+		}
 	}
 
 	router.NoRoute(func(c *gin.Context) {
