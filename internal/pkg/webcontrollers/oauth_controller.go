@@ -82,11 +82,12 @@ func (ctrl *oAuth2Controller) GetLoginURL(state string) string {
 func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *oAuth2Controller {
 	gob.Register(OAuthClientInfo{})
 
-	tlsDomains := strings.Split(domains, ",")
 	sessionStore := memstore.NewStore([]byte("Gisooshei6eitiQu2coe7ohze2phuuQu"))
+	engine.Use(sessions.Sessions("session_id", sessionStore))
 
 	ctrl := &oAuth2Controller{conf: nil, enabled: false, store: sessionStore}
 
+	tlsDomains := strings.Split(domains, ",")
 	if len(tlsDomains) > 0 && len(clientId) > 0 && len(secret) > 0 {
 		redirectUrl := fmt.Sprintf("https://%s/oauth", tlsDomains[0])
 		logrus.Infof("Initiliazing OAuth2 with redirect url: %v", redirectUrl)
@@ -109,8 +110,6 @@ func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *
 	} else {
 		logrus.Warn("No OAuth2 setup found")
 	}
-
-	engine.Use(sessions.Sessions("session_id", ctrl.store))
 
 	return ctrl
 }
