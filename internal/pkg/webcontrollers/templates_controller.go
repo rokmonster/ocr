@@ -92,12 +92,15 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "templates.html", gin.H{
+			"userdata":  c.MustGet(AuthUserData),
 			"templates": schema.LoadTemplates(controller.templatesDir),
 		})
 	})
 
 	router.GET("/new", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{})
+		c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{
+			"userdata": c.MustGet(AuthUserData),
+		})
 	})
 
 	// create new session, and redirect
@@ -124,6 +127,7 @@ func (controller *TemplatesController) Setup(router *gin.RouterGroup) {
 		if _, ok := controller.sessions[c.Param("session")]; ok {
 			// check if session exists;
 			c.HTML(http.StatusOK, "templatemaker.html", gin.H{
+				"userdata":  c.MustGet(AuthUserData),
 				"sessionId": c.Param("session"),
 			})
 			return

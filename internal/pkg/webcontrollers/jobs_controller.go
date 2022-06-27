@@ -172,7 +172,8 @@ func (controller *JobsController) Setup(router *gin.RouterGroup) {
 	// List all the jobs
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "jobs.html", gin.H{
-			"jobs": controller.getJobs(),
+			"jobs":     controller.getJobs(),
+			"userdata": c.MustGet(AuthUserData),
 		})
 	})
 
@@ -190,8 +191,9 @@ func (controller *JobsController) Setup(router *gin.RouterGroup) {
 		job := controller.getJob(id)
 
 		c.HTML(http.StatusOK, "job_edit.html", gin.H{
-			"job":   job,
-			"files": controller.getJobFiles(id),
+			"userdata": c.MustGet(AuthUserData),
+			"job":      job,
+			"files":    controller.getJobFiles(id),
 		})
 	})
 
@@ -252,8 +254,9 @@ func (controller *JobsController) Setup(router *gin.RouterGroup) {
 		job := controller.getJob(id)
 
 		c.HTML(http.StatusOK, "job_results.html", gin.H{
-			"job":   job,
-			"files": controller.getJobFiles(id),
+			"userdata": c.MustGet(AuthUserData),
+			"job":      job,
+			"files":    controller.getJobFiles(id),
 		})
 	})
 
@@ -269,6 +272,7 @@ func (controller *JobsController) Setup(router *gin.RouterGroup) {
 		_ = c.SaveUploadedFile(file, dst)
 
 		c.JSON(http.StatusOK, gin.H{
+			"userdata":    c.MustGet(AuthUserData),
 			"destination": dst,
 		})
 	})

@@ -27,6 +27,20 @@
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
             <a href="/">ROKMonster OCR</a>
           </h1>
+          <div class="navbar-nav flex-row order-md-last">
+            <div class="nav-item dropdown">
+              <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+                <span class="avatar avatar-sm" style="background-image: url({{ .userdata.Picture }})"></span>
+                <div class="d-none d-xl-block ps-2">
+                  <div>{{ .userdata.Name }}</div>
+                  <div class="mt-1 small text-muted">{{ .userdata.Email }}</div>
+                </div>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <a href="/logout/" class="dropdown-item">Logout</a>
+              </div>
+            </div>
+          </div>
           <div class="collapse navbar-collapse" id="navbar-menu">
             <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
               <ul class="navbar-nav">
@@ -58,20 +72,7 @@
               </ul>
             </div>
           </div>
-          <div class="navbar-nav flex-row order-md-last">
-            <div class="nav-item dropdown">
-              <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-                <span class="avatar avatar-sm" style="background-image: url(./static/avatars/000m.jpg)"></span>
-                <div class="d-none d-xl-block ps-2">
-                  <div>Username</div>
-                  <div class="mt-1 small text-muted">User</div>
-                </div>
-              </a>
-              <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <a href="#" class="dropdown-item">Logout</a>
-              </div>
-            </div>
-          </div>
+
         </div>
       </header>
       <div class="page-wrapper">

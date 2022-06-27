@@ -76,7 +76,10 @@ func main() {
 
 	privateGroup := router.Group("", oauth.Middleware())
 	{
-		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(privateGroup.Group("/devices"))
+		webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(
+			privateGroup.Group("/devices"),
+			router.Group("/devices"), // public one for /ws
+		)
 		webcontrollers.NewJobsController(db, flags.TessdataDirectory).Setup(privateGroup.Group("/jobs"))
 		webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory).Setup(privateGroup.Group("/templates"))
 	}
