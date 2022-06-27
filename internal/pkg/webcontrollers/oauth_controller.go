@@ -83,14 +83,17 @@ func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *
 	gob.Register(OAuthClientInfo{})
 
 	tlsDomains := strings.Split(domains, ",")
+	sessionStore := memstore.NewStore([]byte("Gisooshei6eitiQu2coe7ohze2phuuQu"))
 
-	ctrl := &oAuth2Controller{conf: nil, enabled: false}
+	ctrl := &oAuth2Controller{conf: nil, enabled: false, store: sessionStore}
+
 	if len(tlsDomains) > 0 && len(clientId) > 0 && len(secret) > 0 {
 		redirectUrl := fmt.Sprintf("https://%s/oauth", tlsDomains[0])
 		logrus.Infof("Initiliazing OAuth2 with redirect url: %v", redirectUrl)
 
 		ctrl = &oAuth2Controller{
-			store: memstore.NewStore([]byte("Gisooshei6eitiQu2coe7ohze2phuuQu")),
+			enabled: true,
+			store:   sessionStore,
 			conf: &oauth2.Config{
 				ClientID:     clientId,
 				ClientSecret: secret,
@@ -102,17 +105,18 @@ func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *
 			},
 		}
 
-		engine.Use(sessions.Sessions("session_id", ctrl.store))
 		engine.GET("/oauth", ctrl.authHandler)
 	} else {
 		logrus.Warn("No OAuth2 setup found")
 	}
 
+	engine.Use(sessions.Sessions("session_id", ctrl.store))
+
 	return ctrl
 }
 
 func (ctrl *oAuth2Controller) Middleware() func(ctx *gin.Context) {
-	if ctrl.enabled {
+	if !ctrl.enabled {
 		return func(ctx *gin.Context) {
 			ctx.Next()
 		}
@@ -120,7 +124,7 @@ func (ctrl *oAuth2Controller) Middleware() func(ctx *gin.Context) {
 
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
-		data := session.Get("userdata").(*OAuthClientInfo)
+		data := session.Get("userdata")
 		if data == nil {
 			state := randToken()
 			session.Set("state", state)
