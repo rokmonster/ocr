@@ -19,6 +19,10 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+const (
+	AuthUserData = "rokmonster.dev/auth/userdata"
+)
+
 func randToken() string {
 	b := make([]byte, 32)
 	rand.Read(b)
@@ -31,9 +35,10 @@ type OAuthCredentions struct {
 }
 
 type OAuthClientInfo struct {
-	ID    string `json:"sub"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID      string `json:"sub"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Picture string `json:"picture"`
 }
 
 type oAuth2Controller struct {
@@ -69,7 +74,7 @@ func (ctrl *oAuth2Controller) authHandler(c *gin.Context) {
 	var clientDetails OAuthClientInfo
 	json.Unmarshal(data, &clientDetails)
 
-	session.Set("userdata", clientDetails)
+	session.Set(AuthUserData, clientDetails)
 	session.Save()
 
 	c.Redirect(http.StatusFound, "/")
@@ -82,11 +87,20 @@ func (ctrl *oAuth2Controller) GetLoginURL(state string) string {
 func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *oAuth2Controller {
 	gob.Register(OAuthClientInfo{})
 
-	tlsDomains := strings.Split(domains, ",")
 	sessionStore := memstore.NewStore([]byte("Gisooshei6eitiQu2coe7ohze2phuuQu"))
+	engine.Use(sessions.Sessions("session_id", sessionStore))
+
+	engine.GET("/logout", func(ctx *gin.Context) {
+		sess := sessions.Default(ctx)
+		sess.Clear()
+		sess.Save()
+
+		ctx.Redirect(http.StatusFound, "/")
+	})
 
 	ctrl := &oAuth2Controller{conf: nil, enabled: false, store: sessionStore}
 
+	tlsDomains := strings.Split(domains, ",")
 	if len(tlsDomains) > 0 && len(clientId) > 0 && len(secret) > 0 {
 		redirectUrl := fmt.Sprintf("https://%s/oauth", tlsDomains[0])
 		logrus.Infof("Initiliazing OAuth2 with redirect url: %v", redirectUrl)
@@ -106,32 +120,39 @@ func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *
 		}
 
 		engine.GET("/oauth", ctrl.authHandler)
+		engine.GET("/login", ctrl.Login)
 	} else {
 		logrus.Warn("No OAuth2 setup found")
 	}
 
-	engine.Use(sessions.Sessions("session_id", ctrl.store))
-
 	return ctrl
+}
+
+func (ctrl *oAuth2Controller) Login(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+
+	state := randToken()
+	session.Set("state", state)
+	session.Save()
+	ctx.Redirect(http.StatusFound, ctrl.GetLoginURL(state))
 }
 
 func (ctrl *oAuth2Controller) Middleware() func(ctx *gin.Context) {
 	if !ctrl.enabled {
 		return func(ctx *gin.Context) {
+			ctx.Set(AuthUserData, OAuthClientInfo{})
 			ctx.Next()
 		}
 	}
 
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
-		data := session.Get("userdata")
+		data := session.Get(AuthUserData)
 		if data == nil {
-			state := randToken()
-			session.Set("state", state)
-			session.Save()
-			ctx.Redirect(http.StatusFound, ctrl.GetLoginURL(state))
+			ctx.HTML(200, "auth.html", gin.H{})
+			ctx.Abort()
 		} else {
-			ctx.Set("userdata", data)
+			ctx.Set(AuthUserData, data)
 			ctx.Next()
 		}
 	}

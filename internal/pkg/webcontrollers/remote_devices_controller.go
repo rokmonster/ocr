@@ -43,17 +43,18 @@ func NewRemoteDevicesController(templates, tessdata string) *RemoteDevicesContro
 	}
 }
 
-func (controller *RemoteDevicesController) Setup(router *gin.RouterGroup) {
+func (controller *RemoteDevicesController) Setup(router *gin.RouterGroup, public *gin.RouterGroup) {
 	router.GET("/", func(c *gin.Context) {
-		data := gin.H{
-			"devices": controller.getRemoteDevices(),
-		}
-
 		switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEHTML) {
 		case gin.MIMEHTML:
-			c.HTML(http.StatusOK, "devices.html", data)
+			c.HTML(http.StatusOK, "devices.html", gin.H{
+				"userdata": c.MustGet(AuthUserData),
+				"devices":  controller.getRemoteDevices(),
+			})
 		case gin.MIMEJSON:
-			c.JSON(http.StatusOK, data)
+			c.JSON(http.StatusOK, gin.H{
+				"devices": controller.getRemoteDevices(),
+			})
 		}
 	})
 
@@ -76,7 +77,7 @@ func (controller *RemoteDevicesController) Setup(router *gin.RouterGroup) {
 		ctx.Redirect(http.StatusFound, "/devices/")
 	})
 
-	router.GET("/ws", func(c *gin.Context) {
+	public.GET("/ws", func(c *gin.Context) {
 		ws, _ := controller.upgrader.Upgrade(c.Writer, c.Request, nil)
 
 		// don't forget to close the connection & remove client
