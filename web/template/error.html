@@ -1,0 +1,11 @@
+{{template "partials/head.html" .}}
+
+<div class="container-tight py-4">
+    <div class="empty">
+        <div class="empty-header">500</div>
+        <p class="empty-title">Oops…</p>
+        <p class="empty-subtitle text-muted">{{ .err }}</p>
+    </div>
+</div>
+
+{{template "partials/foot.html" .}}

@@ -70,11 +70,18 @@ func (controller *TemplatesController) makeTable(s map[string]schema.OCRSchema) 
 	return result
 }
 
-func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) schema.OCRTemplate {
-	img, _ := imgutils2.ReadImageFile(s.imagePath)
-	hash, _ := goimagehash.DifferenceHash(img)
+func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) (*schema.OCRTemplate, error) {
+	img, err := imgutils2.ReadImageFile(s.imagePath)
+	if err != nil {
+		return nil, err
+	}
 
-	return schema.OCRTemplate{
+	hash, err := goimagehash.DifferenceHash(img)
+	if err != nil {
+		return nil, err
+	}
+
+	return &schema.OCRTemplate{
 		Title:       fmt.Sprintf("ROK OCR Monster Template [%s]", id),
 		Version:     "1",
 		Fingerprint: fmt.Sprintf("%x", hash.GetHash()),
@@ -85,7 +92,7 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 		OCRSchema:   s.schema,
 		Table:       controller.makeTable(s.schema),
 		Checkpoints: s.checkpoints,
-	}
+	}, nil
 }
 
 func (controller *TemplatesController) ListTemplates(c *gin.Context) {
@@ -94,11 +101,13 @@ func (controller *TemplatesController) ListTemplates(c *gin.Context) {
 		"templates": schema.LoadTemplates(controller.templatesDir),
 	})
 }
+
 func (controller *TemplatesController) NewTemplateForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{
 		"userdata": c.MustGet(AuthUserData),
 	})
 }
+
 func (controller *TemplatesController) NewTemplatePost(c *gin.Context) {
 	// create session id
 	sessionId := stringutils.Random(12)
@@ -117,6 +126,7 @@ func (controller *TemplatesController) NewTemplatePost(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/templates/"+sessionId)
 }
+
 func (controller *TemplatesController) EditTemplateByID(c *gin.Context) {
 	if _, ok := controller.sessions[c.Param("session")]; ok {
 		// check if session exists;
@@ -128,28 +138,53 @@ func (controller *TemplatesController) EditTemplateByID(c *gin.Context) {
 	}
 	c.Redirect(http.StatusFound, "/templates")
 }
+
 func (controller *TemplatesController) GetTemplateImage(c *gin.Context) {
 	imagePath := controller.sessions[c.Param("session")].imagePath
 	c.File(imagePath)
 }
+
 func (controller *TemplatesController) TestTemplateByID(c *gin.Context) {
 	if s, ok := controller.sessions[c.Param("session")]; ok {
-		img, _ := imgutils2.ReadImageFile(s.imagePath)
-		template := controller.buildTemplate(c.Param("session"), s)
+		img, err := imgutils2.ReadImageFile(s.imagePath)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"err": err,
+			})
+			return
+		}
+
+		template, err := controller.buildTemplate(c.Param("session"), s)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"err": err,
+			})
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{
 			"fingerprint": fmt.Sprintf("%x", template.Hash().GetHash()),
-			"results":     tesseractutils.ParseImage("test", img, template, os.TempDir(), controller.tessdataDir).Data,
+			"results":     tesseractutils.ParseImage("test", img, *template, os.TempDir(), controller.tessdataDir).Data,
 		})
 		return
 	}
 
 	c.JSON(http.StatusNotFound, gin.H{})
 }
+
 func (controller *TemplatesController) ExportTemplateByID(c *gin.Context) {
 	if s, ok := controller.sessions[c.Param("session")]; ok {
-		template := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
-		bytes, _ := json.MarshalIndent(template, "", "    ")
+
+		template, err := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+				"err": err,
+			})
+			c.Abort()
+			return
+		}
+
+		bytes, _ := json.MarshalIndent(template, "", "  ")
 		_ = os.WriteFile(fmt.Sprintf("%s/builder_%s.json", controller.templatesDir, c.Param("session")), bytes, 0644)
 		c.Redirect(http.StatusFound, "/templates")
 		return
@@ -157,6 +192,7 @@ func (controller *TemplatesController) ExportTemplateByID(c *gin.Context) {
 
 	c.JSON(http.StatusNotFound, gin.H{})
 }
+
 func (controller *TemplatesController) AddAreaOnTemplate(c *gin.Context) {
 	if s, ok := controller.sessions[c.Param("session")]; ok {
 		var postData rokTemplateArea
@@ -190,6 +226,7 @@ func (controller *TemplatesController) AddAreaOnTemplate(c *gin.Context) {
 
 	c.JSON(http.StatusNotFound, gin.H{})
 }
+
 func (controller *TemplatesController) AddCheckpointOnTemplate(c *gin.Context) {
 	sessionId := c.Param("session")
 	if s, ok := controller.sessions[sessionId]; ok {

@@ -3,8 +3,9 @@ package imgutils
 import (
 	"fmt"
 	"image"
-	"image/jpeg"
-	"image/png"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"os"
 )
@@ -22,13 +23,7 @@ func ReadImageFile(filename string) (image.Image, error) {
 
 func ReadImage(reader io.Reader) (image.Image, error) {
 	// try to decode as PNG
-	img, err := png.Decode(reader)
-	if err == nil {
-		return img, nil
-	}
-
-	// try to decode as PNG
-	img, err = jpeg.Decode(reader)
+	img, _, err := image.Decode(reader)
 	if err == nil {
 		return img, nil
 	}
