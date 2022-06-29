@@ -1,10 +1,11 @@
-package webcontrollers
+package www
 
 import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -171,7 +172,7 @@ func itob(v uint64) []byte {
 func (controller *JobsController) GetJobsList(c *gin.Context) {
 	c.HTML(http.StatusOK, "jobs.html", gin.H{
 		"jobs":     controller.getJobs(),
-		"userdata": c.MustGet(AuthUserData),
+		"userdata": c.MustGet(middlewares.AuthUserData),
 	})
 }
 
@@ -189,7 +190,7 @@ func (controller *JobsController) GetJobByID(c *gin.Context) {
 	job := controller.getJob(id)
 
 	c.HTML(http.StatusOK, "job_edit.html", gin.H{
-		"userdata": c.MustGet(AuthUserData),
+		"userdata": c.MustGet(middlewares.AuthUserData),
 		"job":      job,
 		"files":    controller.getJobFiles(id),
 	})
@@ -253,7 +254,7 @@ func (controller *JobsController) ExportJobResultsHTML(c *gin.Context) {
 	job := controller.getJob(id)
 
 	c.HTML(http.StatusOK, "job_results.html", gin.H{
-		"userdata": c.MustGet(AuthUserData),
+		"userdata": c.MustGet(middlewares.AuthUserData),
 		"job":      job,
 		"files":    controller.getJobFiles(id),
 	})
@@ -271,7 +272,7 @@ func (controller *JobsController) UploadFilesForJob(c *gin.Context) {
 	_ = c.SaveUploadedFile(file, dst)
 
 	c.JSON(http.StatusOK, gin.H{
-		"userdata":    c.MustGet(AuthUserData),
+		"userdata":    c.MustGet(middlewares.AuthUserData),
 		"destination": dst,
 	})
 }

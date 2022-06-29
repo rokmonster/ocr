@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/www"
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 	"os"
 	"strings"
@@ -15,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 	config "github.com/rokmonster/ocr/internal/pkg/config/serverconfig"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
-	"github.com/rokmonster/ocr/internal/pkg/webcontrollers"
 	"github.com/rokmonster/ocr/web"
 	log "github.com/sirupsen/logrus"
 	bolt "go.etcd.io/bbolt"
@@ -72,13 +73,13 @@ func main() {
 	router.Use(static.Serve("/", web.EmbeddedFS(web.StaticFS, "static")))
 	router.SetHTMLTemplate(web.CreateTemplateEngine(web.StaticFS, "template"))
 
-	oauth := webcontrollers.NewOAuth2Controller(router, flags.OAuthClientID, flags.OAuthSecretID, flags.TLSDomain)
+	oauth := middlewares.NewOAuth2Middleware(router, flags.OAuthClientID, flags.OAuthSecretID, flags.TLSDomain)
 
-	www := router.Group("")
+	rootRouter := router.Group("")
 	{
-		devices := www.Group("/devices")
+		devices := rootRouter.Group("/devices")
 		{
-			controller := webcontrollers.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory)
+			controller := www.NewRemoteDevicesController(flags.TemplatesDirectory, flags.TessdataDirectory)
 
 			// websocket - no-auth (different auth in future)
 			devices.GET("/ws", controller.Websocket)
@@ -92,9 +93,9 @@ func main() {
 		}
 
 		// all job's API's require auth
-		jobs := www.Group("/jobs", oauth.Middleware())
+		jobs := rootRouter.Group("/jobs", oauth.Middleware())
 		{
-			controller := webcontrollers.NewJobsController(db, flags.TessdataDirectory)
+			controller := www.NewJobsController(db, flags.TessdataDirectory)
 			jobs.GET("/", controller.GetJobsList)
 			jobs.GET("/create", controller.CreateJobForm)
 			jobs.GET("/:id", controller.GetJobByID)
@@ -106,9 +107,9 @@ func main() {
 		}
 
 		// all templates API's require auth
-		templates := www.Group("/templates", oauth.Middleware())
+		templates := rootRouter.Group("/templates", oauth.Middleware())
 		{
-			controller := webcontrollers.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory)
+			controller := www.NewTemplatesController(flags.TemplatesDirectory, flags.TessdataDirectory)
 			templates.GET("/", controller.ListTemplates)
 			templates.GET("/new", controller.NewTemplateForm)
 			templates.POST("/new", controller.NewTemplatePost)

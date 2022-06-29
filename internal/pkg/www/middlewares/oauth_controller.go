@@ -1,4 +1,4 @@
-package webcontrollers
+package middlewares
 
 import (
 	"context"
@@ -41,13 +41,13 @@ type OAuthClientInfo struct {
 	Picture string `json:"picture"`
 }
 
-type oAuth2Controller struct {
+type oauth2Middleware struct {
 	conf    *oauth2.Config
 	store   sessions.Store
 	enabled bool
 }
 
-func (ctrl *oAuth2Controller) authHandler(c *gin.Context) {
+func (ctrl *oauth2Middleware) authHandler(c *gin.Context) {
 	// Handle the exchange code to initiate a transport.
 	session := sessions.Default(c)
 	retrievedState := session.Get("state")
@@ -80,11 +80,11 @@ func (ctrl *oAuth2Controller) authHandler(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 }
 
-func (ctrl *oAuth2Controller) GetLoginURL(state string) string {
+func (ctrl *oauth2Middleware) GetLoginURL(state string) string {
 	return ctrl.conf.AuthCodeURL(state, oauth2.ApprovalForce)
 }
 
-func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *oAuth2Controller {
+func NewOAuth2Middleware(engine *gin.Engine, clientId, secret, domains string) *oauth2Middleware {
 	gob.Register(OAuthClientInfo{})
 
 	sessionStore := memstore.NewStore([]byte("Gisooshei6eitiQu2coe7ohze2phuuQu"))
@@ -93,19 +93,19 @@ func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *
 	engine.GET("/logout", func(ctx *gin.Context) {
 		sess := sessions.Default(ctx)
 		sess.Clear()
-		sess.Save()
+		_ = sess.Save()
 
 		ctx.Redirect(http.StatusFound, "/")
 	})
 
-	ctrl := &oAuth2Controller{conf: nil, enabled: false, store: sessionStore}
+	ctrl := &oauth2Middleware{conf: nil, enabled: false, store: sessionStore}
 
 	tlsDomains := strings.Split(domains, ",")
 	if len(tlsDomains) > 0 && len(clientId) > 0 && len(secret) > 0 {
 		redirectUrl := fmt.Sprintf("https://%s/oauth", tlsDomains[0])
 		logrus.Infof("Initiliazing OAuth2 with redirect url: %v", redirectUrl)
 
-		ctrl = &oAuth2Controller{
+		ctrl = &oauth2Middleware{
 			enabled: true,
 			store:   sessionStore,
 			conf: &oauth2.Config{
@@ -128,7 +128,7 @@ func NewOAuth2Controller(engine *gin.Engine, clientId, secret, domains string) *
 	return ctrl
 }
 
-func (ctrl *oAuth2Controller) Login(ctx *gin.Context) {
+func (ctrl *oauth2Middleware) Login(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 
 	state := randToken()
@@ -137,7 +137,7 @@ func (ctrl *oAuth2Controller) Login(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, ctrl.GetLoginURL(state))
 }
 
-func (ctrl *oAuth2Controller) Middleware() func(ctx *gin.Context) {
+func (ctrl *oauth2Middleware) Middleware() func(ctx *gin.Context) {
 	if !ctrl.enabled {
 		return func(ctx *gin.Context) {
 			ctx.Set(AuthUserData, OAuthClientInfo{})

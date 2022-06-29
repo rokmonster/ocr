@@ -1,8 +1,9 @@
-package webcontrollers
+package www
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -97,14 +98,14 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 
 func (controller *TemplatesController) ListTemplates(c *gin.Context) {
 	c.HTML(http.StatusOK, "templates.html", gin.H{
-		"userdata":  c.MustGet(AuthUserData),
+		"userdata":  c.MustGet(middlewares.AuthUserData),
 		"templates": schema.LoadTemplates(controller.templatesDir),
 	})
 }
 
 func (controller *TemplatesController) NewTemplateForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "templatemaker_upload.html", gin.H{
-		"userdata": c.MustGet(AuthUserData),
+		"userdata": c.MustGet(middlewares.AuthUserData),
 	})
 }
 
@@ -131,7 +132,7 @@ func (controller *TemplatesController) EditTemplateByID(c *gin.Context) {
 	if _, ok := controller.sessions[c.Param("session")]; ok {
 		// check if session exists;
 		c.HTML(http.StatusOK, "templatemaker.html", gin.H{
-			"userdata":  c.MustGet(AuthUserData),
+			"userdata":  c.MustGet(middlewares.AuthUserData),
 			"sessionId": c.Param("session"),
 		})
 		return

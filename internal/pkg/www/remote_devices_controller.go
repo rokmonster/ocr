@@ -1,6 +1,7 @@
-package webcontrollers
+package www
 
 import (
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -47,7 +48,7 @@ func (controller *RemoteDevicesController) GetListOfDevices(c *gin.Context) {
 	switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEHTML) {
 	case gin.MIMEHTML:
 		c.HTML(http.StatusOK, "devices.html", gin.H{
-			"userdata": c.MustGet(AuthUserData),
+			"userdata": c.MustGet(middlewares.AuthUserData),
 			"devices":  controller.getRemoteDevices(),
 		})
 	case gin.MIMEJSON:
