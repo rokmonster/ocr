@@ -3,6 +3,8 @@ package rokocr
 import (
 	"errors"
 	"fmt"
+	"github.com/rokmonster/ocr/templates"
+	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 
@@ -70,6 +72,20 @@ func Prepare(flags config.CommonConfiguration) {
 	fileutils.Mkdirs(flags.MediaDirectory)
 	fileutils.Mkdirs(flags.TemplatesDirectory)
 
+}
+
+func PreloadTemplates(flags config.CommonConfiguration) {
+	files, _ := templates.FS.ReadDir(".")
+	base, _ := filepath.Abs(flags.TemplatesDirectory)
+
+	for _, r := range files {
+		path := filepath.Join(base, r.Name())
+		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+			logrus.Infof("Preloading template: %v => %v", r.Name(), path)
+			b, _ := templates.FS.ReadFile(r.Name())
+			_ = fileutils.WriteFile(b, path)
+		}
+	}
 }
 
 func DownloadTesseractData(flags config.CommonConfiguration) {

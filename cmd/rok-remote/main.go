@@ -1,13 +1,13 @@
 package main
 
 import (
+	wsclient "github.com/rokmonster/ocr/internal/pkg/www/websocket/client"
 	"net/url"
 	"sync"
 
 	"github.com/rokmonster/ocr/internal/pkg/utils"
 
 	config "github.com/rokmonster/ocr/internal/pkg/config/rokremoteconfig"
-	wsclient "github.com/rokmonster/ocr/internal/pkg/websocket/client"
 	log "github.com/sirupsen/logrus"
 	adb "github.com/zach-klippenstein/goadb"
 )

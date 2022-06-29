@@ -52,6 +52,7 @@ func writeCSV(data []schema.OCRResult, template schema.OCRTemplate) {
 func main() {
 	rokocr.Prepare(flags.CommonConfiguration)
 	rokocr.DownloadTesseractData(flags.CommonConfiguration)
+	rokocr.PreloadTemplates(flags.CommonConfiguration)
 
 	force := false
 	var template schema.OCRTemplate

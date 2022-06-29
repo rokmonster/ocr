@@ -2,12 +2,12 @@ package www
 
 import (
 	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
+	wsserver "github.com/rokmonster/ocr/internal/pkg/www/websocket/server"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	wsserver "github.com/rokmonster/ocr/internal/pkg/websocket/server"
 	log "github.com/sirupsen/logrus"
 )
 
