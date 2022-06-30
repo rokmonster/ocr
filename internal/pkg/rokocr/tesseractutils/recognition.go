@@ -2,30 +2,40 @@ package tesseractutils
 
 import (
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
-	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
+	"github.com/sirupsen/logrus"
 
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
-	log "github.com/sirupsen/logrus"
 )
 
 func RunRecognitionChan(mediaDir, tessData string, template schema.OCRTemplate, force bool) <-chan schema.OCRResult {
 	out := make(chan schema.OCRResult)
 
 	go func() {
+		var wg sync.WaitGroup
 		dir, _ := filepath.Abs(mediaDir)
 		files := fileutils.GetFilesInDirectory(dir)
 		for i, f := range files {
-			log.Infof("[%04d/%04d] Parsing image: %v", i+1, len(files), filepath.Base(f))
-			result, err := ParseSingleFile(f, tessData, template, force)
-			if err != nil {
-				log.Warnf("[%s] %v", filepath.Base(f), err)
-				continue
-			}
-			out <- *result
+			wg.Add(1)
+			go func(index, total int, f string) {
+				defer wg.Done()
+				start := time.Now()
+				result, err := ParseSingleFile(f, tessData, template, force)
+				if err != nil {
+					logrus.Printf("[%04d/%04d] %v - %v", index, total, filepath.Base(f), err)
+					return
+				}
+				logrus.Printf("[%04d/%04d] %v Took: %v ms", index, total, filepath.Base(f), time.Since(start).Milliseconds())
+				out <- *result
+			}(i+1, len(files), f)
 		}
+		wg.Wait()
 		close(out)
 	}()
 
