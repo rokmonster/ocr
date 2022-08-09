@@ -1,41 +1,52 @@
 {{template "partials/head.html" .}}
 
-
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">Template Builder</div>
-
-
-        <div class="card-body p-0">
-            <div class="row p-0 m-0">
-                <div class="col-8 p-0 m-0">
-                    <img src="/templates/{{.sessionId}}/image" alt="" id="image">
-                </div>
-                <div class="col-4">
-                    <div id="results"></div>
-                    <div id="areas-table"></div>
-
-                    <div class="input-group mb-3">
-                        <select id="area-type-select" class="form-select" style="max-width: 100px;">
-                            <option value="number">Number</option>
-                            <option value="text">Text</option>
-                        </select>
-                        <input type="text" id="area-name-input" class="form-control" placeholder="name of area">
-                        <button class="btn btn-outline-secondary" type="button" onClick="addArea()">Add area</button>
+<form method="POST">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">Template Builder</div>
+            <div class="card-body p-0">
+                <div class="row p-0 m-0">
+                    <div class="col-8 p-0 m-0">
+                        <img src="/templates/{{.sessionId}}/image" alt="" id="image">
                     </div>
+                    <div class="col-4">
+                        <div id="results my-2"></div>
+                        <div id="areas-table"></div>
 
-                    <button class="btn btn-outline-secondary" type="button" onClick="addCheckpoint()">Add
-                        checkpoint</button>
-                    <button class="btn btn-outline-primary" type="button" onClick="doScanTest()">Scan test</button>
+                        <div class="input-group mb-3">
+                            <select id="area-type-select" class="form-select" style="max-width: 100px;">
+                                <option value="number">Number</option>
+                                <option value="text">Text</option>
+                            </select>
+                            <input type="text" id="area-name-input" class="form-control" placeholder="name of area">
+                            <button class="btn btn-outline-secondary" type="button" onClick="addArea()">Add
+                                area</button>
+                        </div>
 
-                    <a href="/templates/{{.sessionId}}/export" class="btn btn-primary">Export</a>
+                        <div class="mb-3">
 
+                            <button class="btn btn-outline-secondary" type="button" onClick="addCheckpoint()">Add
+                                checkpoint</button>
+                            <button class="btn btn-outline-primary" type="button" onClick="doScanTest()">Scan
+                                test</button>
+                        </div>
+
+
+                        <label for="threshold"><b>Threshold</b></label>
+                        <div class="input-group mb-3">
+                            <input type="number" min="1" step="1" value="1" name="threshold" id="threshold" class="form-control"
+                                placeholder="Threshold">
+                            <input type="hidden" value="{{.sessionId}}" name="sessionId" />
+                            <button class="btn btn-outline-secondary" type="submit">Export</button>
+                        </div>
+
+                    </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
-</div>
+</form>
 
 <script type="text/javascript">
     const jsSessionId = "{{ .sessionId }}";

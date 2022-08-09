@@ -51,6 +51,11 @@ type rokTemplateArea struct {
 	Type string `json:"type" binding:"required"`
 }
 
+type rokExportSettings struct {
+	Threshold int    `json:"threshold" form:"threshold" binding:"required"`
+	SessionID string `json:"sessionId" form:"sessionId" binding:"required"`
+}
+
 type rokCropCoordinates struct {
 	X int `form:"x" json:"x,string" xml:"x"  binding:"required"`
 	Y int `form:"y" json:"y,string" xml:"y" binding:"required"`
@@ -73,7 +78,7 @@ func (controller *TemplatesController) makeTable(s map[string]schema.OCRSchema) 
 	return result
 }
 
-func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerSession) (*schema.OCRTemplate, error) {
+func (controller *TemplatesController) buildTemplate(id string, threshold int, s TemplateMakerSession) (*schema.OCRTemplate, error) {
 	img, err := imgutils2.ReadImageFile(s.imagePath)
 	if err != nil {
 		return nil, err
@@ -91,7 +96,7 @@ func (controller *TemplatesController) buildTemplate(id string, s TemplateMakerS
 		Width:       img.Bounds().Dx(),
 		Height:      img.Bounds().Dy(),
 		Author:      "ROK OCR Template Maker",
-		Threshold:   1,
+		Threshold:   threshold,
 		OCRSchema:   s.schema,
 		Table:       controller.makeTable(s.schema),
 		Checkpoints: s.checkpoints,
@@ -157,7 +162,7 @@ func (controller *TemplatesController) TestTemplateByID(c *gin.Context) {
 			return
 		}
 
-		template, err := controller.buildTemplate(c.Param("session"), s)
+		template, err := controller.buildTemplate(c.Param("session"), 1, s)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"err": err,
@@ -178,7 +183,18 @@ func (controller *TemplatesController) TestTemplateByID(c *gin.Context) {
 func (controller *TemplatesController) ExportTemplateByID(c *gin.Context) {
 	if s, ok := controller.sessions[c.Param("session")]; ok {
 
-		template, err := controller.buildTemplate(time.Now().Format("20060102_150405"), s)
+		var postData rokExportSettings
+		err := c.MustBindWith(&postData, binding.FormPost)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+				"err": err,
+			})
+			c.Abort()
+		}
+
+		name := time.Now().Format("20060102_150405")
+
+		template, err := controller.buildTemplate(name, postData.Threshold, s)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 				"err": err,

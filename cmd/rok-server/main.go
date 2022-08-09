@@ -3,12 +3,13 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/www"
-	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/www"
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 
 	"github.com/rokmonster/ocr/internal/pkg/utils"
 
@@ -115,9 +116,9 @@ func main() {
 			templates.GET("/new", controller.NewTemplateForm)
 			templates.POST("/new", controller.NewTemplatePost)
 			templates.GET("/:session", controller.EditTemplateByID)
+			templates.POST("/:session", controller.ExportTemplateByID)
 			templates.GET("/:session/image", controller.GetTemplateImage)
 			templates.POST("/:session/scan", controller.TestTemplateByID)
-			templates.GET("/:session/export", controller.ExportTemplateByID)
 			templates.POST("/:session/add-area", controller.AddAreaOnTemplate)
 			templates.POST("/:session/add-checkpoint", controller.AddCheckpointOnTemplate)
 		}
