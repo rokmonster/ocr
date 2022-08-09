@@ -3,10 +3,11 @@ package rokocr
 import (
 	"errors"
 	"fmt"
-	"github.com/rokmonster/ocr/templates"
-	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+
+	"github.com/rokmonster/ocr/templates"
+	"github.com/sirupsen/logrus"
 
 	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 
@@ -104,7 +105,7 @@ func DownloadTesseractData(flags config.CommonConfiguration) {
 	for _, lang := range langFiles {
 		path := filepath.Join(flags.TessdataDirectory, fmt.Sprintf("%v.traineddata", lang))
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			_ = fileutils.Download(path, fmt.Sprintf("https://github.com/tesseract-ocr/tessdata/raw/main/%v.traineddata", lang))
+			_ = fileutils.Download(path, fmt.Sprintf("https://raw.githubusercontent.com/tesseract-ocr/tessdata/main/%v.traineddata", lang))
 		}
 	}
 }
