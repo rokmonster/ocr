@@ -3,12 +3,14 @@ package www
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/rokocr"
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 
 	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
 	imgutils2 "github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
@@ -214,7 +216,7 @@ func (controller *TemplatesController) AddAreaOnTemplate(c *gin.Context) {
 					Y: postData.Y,
 					W: postData.W,
 					H: postData.H,
-				}, "eng")
+				}, rokocr.AvailableLanguages(controller.tessdataDir)...)
 			}
 		}
 

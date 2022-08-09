@@ -1,6 +1,6 @@
 module github.com/rokmonster/ocr
 
-go 1.18
+go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
@@ -17,9 +17,9 @@ require (
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	go.etcd.io/bbolt v1.3.6
 	gocv.io/x/gocv v0.31.0
-	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
-	golang.org/x/image v0.0.0-20220617043117-41969df76e82
-	golang.org/x/oauth2 v0.0.0-20220628200809-02e64fa58f26
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539
+	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7
 )
 
 require (
@@ -30,7 +30,7 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
-	github.com/goccy/go-json v0.9.8 // indirect
+	github.com/goccy/go-json v0.9.10 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
@@ -48,14 +48,14 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.3.4 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
-	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
-	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
+	golang.org/x/net v0.0.0-20220809012201-f428fae20770 // indirect
+	golang.org/x/sys v0.0.0-20220808155132-1c4a2a72c664 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
