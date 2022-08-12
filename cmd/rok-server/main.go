@@ -94,6 +94,12 @@ func main() {
 			}
 		}
 
+		api := rootRouter.Group("/api")
+		{
+			apiController := www.NewAPIController(flags.TessdataDirectory)
+			api.POST("/hoh", apiController.ScanHOH)
+		}
+
 		// all job's API's require auth
 		jobs := rootRouter.Group("/jobs", oauth.Middleware())
 		{

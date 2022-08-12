@@ -2,10 +2,11 @@ package ocrschema
 
 import (
 	"encoding/json"
-	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"image"
 	"io/ioutil"
 	"strconv"
+
+	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 
 	"github.com/corona10/goimagehash"
 	log "github.com/sirupsen/logrus"

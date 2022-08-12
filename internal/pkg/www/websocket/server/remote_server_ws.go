@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/png"
+	"os"
+	"time"
+
 	"github.com/rokmonster/ocr/internal/pkg/rokocr/opencvutils"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
 	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
 	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
 	"github.com/rokmonster/ocr/web"
-	"image"
-	"image/png"
-	"os"
-	"time"
 
 	"github.com/corona10/goimagehash"
 	"github.com/gin-gonic/gin"
@@ -83,7 +84,7 @@ func (c *RemoteServerWS) processImage(img image.Image) {
 	// find the X Button location & TAP it
 	f, _ := web.RecognitionFS.Open("recognition/close.png")
 	closeButton, _ := imgutils.ReadImage(f)
-	x, y := opencvutils.OpenCVFindCoords(img, closeButton)
+	x, y := opencvutils.OpenCVFindCenterCoords(img, closeButton)
 	_ = c.requestTap(x, y)
 
 	// wait a few seconds
