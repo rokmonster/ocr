@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Install deps (Libtesseract-dev && make)
         run: sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libtesseract-dev make
