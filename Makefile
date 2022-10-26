@@ -40,7 +40,7 @@ snapshot: deps
 
 # start a dev env (for building linux binary from mac/win)
 dev:
-	docker run -p8080:8080 -v ~/.ssh:/root/.ssh --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.18
+	docker run -p8080:8080 -v ~/.ssh:/root/.ssh --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.19
 
 
 .PHONY: check deps build
