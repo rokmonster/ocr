@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	go.etcd.io/bbolt v1.3.6
-	gocv.io/x/gocv v0.31.0
+	gocv.io/x/gocv v0.32.1
 	golang.org/x/crypto v0.4.0
 	golang.org/x/image v0.2.0
 	golang.org/x/oauth2 v0.3.0
