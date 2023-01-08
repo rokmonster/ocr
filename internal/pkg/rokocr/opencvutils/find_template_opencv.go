@@ -1,21 +1,11 @@
+//go:build opencv
+
 package opencvutils
 
 import (
-	"image"
-	"image/color"
-
 	"gocv.io/x/gocv"
+	"image"
 )
-
-func OpenCVFindCenterCoords(img, search image.Image) (int, int) {
-	return OpenCVFindCenterCoordsWithDebug(img, search, false)
-}
-
-func OpenCVFindCenterCoordsWithDebug(img, search image.Image, debug bool) (int, int) {
-	x, y, w, h, _ := OpenCVFindCoordsWithDebug(img, search, debug)
-	return x + (w / 2), y + (h / 2)
-
-}
 
 func OpenCVFindCoordsWithDebug(img, search image.Image, debug bool) (int, int, int, int, float32) {
 	mat, _ := gocv.ImageToMatRGB(img)
@@ -24,9 +14,6 @@ func OpenCVFindCoordsWithDebug(img, search image.Image, debug bool) (int, int, i
 	result := gocv.NewMat()
 
 	gocv.MatchTemplate(mat, tpl, &result, gocv.TmCcorrNormed, gocv.NewMat())
-
-	// newResult := gocv.NewMat()
-	// gocv.Normalize(result, &newResult, 1, 0, gocv.NormMinMax)
 
 	_, maxConfidence, _, maxLoc := gocv.MinMaxLoc(result)
 
