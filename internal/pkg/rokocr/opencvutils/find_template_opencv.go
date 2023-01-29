@@ -5,6 +5,7 @@ package opencvutils
 import (
 	"gocv.io/x/gocv"
 	"image"
+	"image/color"
 )
 
 func OpenCVFindCoordsWithDebug(img, search image.Image, debug bool) (int, int, int, int, float32) {
