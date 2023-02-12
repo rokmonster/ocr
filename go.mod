@@ -17,7 +17,7 @@ require (
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	go.etcd.io/bbolt v1.3.7
 	gocv.io/x/gocv v0.32.1
-	golang.org/x/crypto v0.5.0
+	golang.org/x/crypto v0.6.0
 	golang.org/x/image v0.4.0
 	golang.org/x/oauth2 v0.5.0
 )
