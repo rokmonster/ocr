@@ -22,7 +22,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.20
+          go-version: "1.20"
       # - name: Build static opencv
       #   run: make opencv
       - name: ghcr-login
@@ -37,7 +37,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           DISCORD_WEBHOOK_ID: ${{ secrets.DD_ID }}
           DISCORD_WEBHOOK_TOKEN: ${{ secrets.DD_TOKEN }}
