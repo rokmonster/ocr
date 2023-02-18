@@ -10,6 +10,7 @@ import (
 
 	"github.com/rokmonster/ocr/internal/pkg/www"
 	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
 
 	"github.com/rokmonster/ocr/internal/pkg/utils"
 
@@ -54,6 +55,10 @@ func main() {
 	defer db.Close()
 
 	router := gin.New()
+
+	p := ginprometheus.NewPrometheus("rokmonster")
+	p.Use(router)
+
 	_ = router.SetTrustedProxies([]string{})
 
 	// just reuse same logger
