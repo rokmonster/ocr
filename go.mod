@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/otiai10/gosseract/v2 v2.4.0
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.1
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.etcd.io/bbolt v1.3.7
