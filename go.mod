@@ -17,7 +17,7 @@ require (
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.etcd.io/bbolt v1.3.7
-	gocv.io/x/gocv v0.32.1
+	gocv.io/x/gocv v0.33.0
 	golang.org/x/crypto v0.9.0
 	golang.org/x/image v0.7.0
 	golang.org/x/oauth2 v0.8.0
