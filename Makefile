@@ -21,6 +21,9 @@ dockerdeps: dockerclient
 deps: 
 	go install github.com/goreleaser/goreleaser@latest
 
+update-deps: ## Update direct golang dependencies
+	go get $(shell go list -f '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}' -m all) && go mod tidy
+
 opencv:
 	go mod vendor
 	(cd vendor/gocv.io/x/gocv/ && make deps download sudo_pre_install_clean build_static sudo_install clean)
@@ -40,7 +43,7 @@ snapshot: deps
 
 # start a dev env (for building linux binary from mac/win)
 dev:
-	docker run -p8080:8080 -v ~/.ssh:/root/.ssh --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.20
+	docker run -p8080:8080 -v ~/.ssh:/root/.ssh --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd):$(shell pwd) -w $(shell pwd) golang:1.21
 
 
 .PHONY: check deps build
