@@ -9,14 +9,14 @@ require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/otiai10/gosseract/v2 v2.4.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	github.com/zsais/go-gin-prometheus v0.1.0
-	go.etcd.io/bbolt v1.3.7
+	go.etcd.io/bbolt v1.3.8
 	gocv.io/x/gocv v0.35.0
 	golang.org/x/crypto v0.14.0
 	golang.org/x/image v0.13.0
