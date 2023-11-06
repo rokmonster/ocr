@@ -10,7 +10,7 @@ require (
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.4.0
-	github.com/gorilla/websocket v1.5.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/otiai10/gosseract/v2 v2.4.1
 	github.com/sirupsen/logrus v1.9.3
