@@ -19,7 +19,7 @@ require (
 	go.etcd.io/bbolt v1.3.8
 	gocv.io/x/gocv v0.35.0
 	golang.org/x/crypto v0.17.0
-	golang.org/x/image v0.14.0
+	golang.org/x/image v0.15.0
 	golang.org/x/oauth2 v0.15.0
 )
 
