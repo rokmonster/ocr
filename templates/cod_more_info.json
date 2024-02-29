@@ -1,0 +1,203 @@
+{
+  "title": "Call of Dragons (More Info) / Android / Samsung S23 Ultra",
+  "version": "1",
+  "author": "Julius Lisauskas",
+  "width": 3088,
+  "height": 1440,
+  "ocr_schema": {
+    "farming": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        1993,
+        1218,
+        607,
+        70
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "healed": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        2001,
+        1057,
+        607,
+        70
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "high_power": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        1999,
+        477,
+        607,
+        64
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "kills": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        2014,
+        915,
+        607,
+        64
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "name": {
+      "callback": [],
+      "lang": [
+        "eng",
+        "chi_sim",
+        "chi_tra",
+        "fra",
+        "ita",
+        "jpn",
+        "kor",
+        "rus",
+        "spa"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        468,
+        914,
+        476,
+        61
+      ]
+    },
+    "power": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        414,
+        1070,
+        607,
+        64
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  "fingerprint": "e8d4d8f8f8d0d8d8",
+  "threshold": 15,
+  "table": [
+    [
+      "high_power",
+      "high_power",
+      false,
+      ""
+    ],
+    [
+      "kills",
+      "kills",
+      false,
+      ""
+    ],
+    [
+      "healed",
+      "healed",
+      false,
+      ""
+    ],
+    [
+      "farming",
+      "farming",
+      false,
+      ""
+    ],
+    [
+      "name",
+      "name",
+      false,
+      ""
+    ],
+    [
+      "power",
+      "power",
+      false,
+      ""
+    ]
+  ],
+  "checkpoints": [
+  ]
+}
