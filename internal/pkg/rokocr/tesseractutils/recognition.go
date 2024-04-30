@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
 	"github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
@@ -12,17 +11,6 @@ import (
 
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 )
-
-// func processSingleFile(index, total int, f string) *schema.OCRResult {
-// 	start := time.Now()
-// 	result, err := ParseSingleFile(f, tessData, template, force)
-// 	if err != nil {
-// 		logrus.Printf("[%04d/%04d] %v - %v", index, total, filepath.Base(f), err)
-// 		return
-// 	}
-// 	logrus.Printf("[%04d/%04d] %v Took: %v ms", index, total, filepath.Base(f), time.Since(start).Milliseconds())
-// 	return result
-// }
 
 func RunRecognitionChan(mediaDir, tessData string, template schema.OCRTemplate, force bool) <-chan schema.OCRResult {
 
@@ -33,13 +21,11 @@ func RunRecognitionChan(mediaDir, tessData string, template schema.OCRTemplate, 
 		total := len(files)
 
 		for index, f := range files {
-			start := time.Now()
 			result, err := ParseSingleFile(f, tessData, template, force)
 			if err != nil {
-				logrus.Printf("[%04d/%04d] %v - %v", index, total, filepath.Base(f), err)
+				logrus.Errorf("[%04d/%04d] %v - %v", index, total, filepath.Base(f), err)
 				continue
 			}
-			logrus.Printf("[%04d/%04d] %v Took: %v ms", index, total, filepath.Base(f), time.Since(start).Milliseconds())
 			out <- *result
 		}
 		close(out)
@@ -69,5 +55,5 @@ func ParseSingleFile(f, tessData string, template schema.OCRTemplate, force bool
 		return &result, nil
 	}
 
-	return nil, fmt.Errorf("image doesn't match the template")
+	return nil, fmt.Errorf("image doesn't match the template: Template: %s @ %s", template.Title, template.Version)
 }

@@ -1,0 +1,244 @@
+{
+  "title": "Call of Dragons (More Info) / iPhone 13 Pro",
+  "version": "1",
+  "author": "Julius Lisauskas",
+  "width": 2532,
+  "height": 1170,
+  "ocr_schema": {
+    "high_power": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        1843,
+        384,
+        272,
+        61
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "merits": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        441,
+        1013,
+        272,
+        61
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "name": {
+      "callback": [],
+      "lang": [
+        "eng",
+        "chi_sim",
+        "chi_tra",
+        "fra",
+        "ita",
+        "jpn",
+        "kor",
+        "rus",
+        "spa"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        445,
+        738,
+        223,
+        61
+      ]
+    },
+    "power": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        441,
+        869,
+        272,
+        61
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "units_dead": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        1837,
+        806,
+        272,
+        61
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "units_killed": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        1840,
+        742,
+        272,
+        61
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "victories": {
+      "callback": [],
+      "lang": [
+        "eng"
+      ],
+      "oem": 1,
+      "psm": 7,
+      "crop": [
+        1842,
+        505,
+        272,
+        61
+      ],
+      "allowlist": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  "fingerprint": "c2f0d8f8f8d0d8d8",
+  "threshold": 6,
+  "table": [
+    [
+      "units_killed",
+      "units_killed",
+      false,
+      ""
+    ],
+    [
+      "units_dead",
+      "units_dead",
+      false,
+      ""
+    ],
+    [
+      "name",
+      "name",
+      false,
+      ""
+    ],
+    [
+      "power",
+      "power",
+      false,
+      ""
+    ],
+    [
+      "merits",
+      "merits",
+      false,
+      ""
+    ],
+    [
+      "high_power",
+      "high_power",
+      false,
+      ""
+    ],
+    [
+      "victories",
+      "victories",
+      false,
+      ""
+    ]
+  ],
+  "checkpoints": [
+    {
+      "crop": [
+        167,
+        19,
+        370,
+        70
+      ],
+      "fingerprint": "9be4e4ecccf0f0f1"
+    }
+  ]
+}

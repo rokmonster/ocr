@@ -1,11 +1,13 @@
 package tesseractutils
 
 import (
-	imgutils2 "github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
-	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
 	"image"
 	"os"
 	"path/filepath"
+	"time"
+
+	imgutils2 "github.com/rokmonster/ocr/internal/pkg/utils/imgutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/stringutils"
 
 	log "github.com/sirupsen/logrus"
 
@@ -14,6 +16,7 @@ import (
 
 func ParseImage(name string, img image.Image, template schema.OCRTemplate, tmpdir, tessdata string) schema.OCRResult {
 	log.Debugf("[%s] Processing with template: %s", filepath.Base(name), template.Title)
+	start := time.Now()
 
 	results := make(map[string]interface{})
 
@@ -35,5 +38,6 @@ func ParseImage(name string, img image.Image, template schema.OCRTemplate, tmpdi
 	return schema.OCRResult{
 		Filename: filepath.Base(name),
 		Data:     results,
+		Took:     time.Since(start),
 	}
 }

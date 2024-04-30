@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
 
 	"github.com/olekukonko/tablewriter"
 	config "github.com/rokmonster/ocr/internal/pkg/config/scannerconfig"
@@ -50,6 +51,7 @@ func writeCSV(data []schema.OCRResult, template schema.OCRTemplate) {
 }
 
 func main() {
+
 	rokocr.Prepare(flags.CommonConfiguration)
 	rokocr.DownloadTesseractData(flags.CommonConfiguration)
 	rokocr.PreloadTemplates(flags.CommonConfiguration)

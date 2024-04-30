@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
-	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
+	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
+	"github.com/rokmonster/ocr/internal/pkg/utils/fileutils"
+	"github.com/rokmonster/ocr/internal/pkg/www/middlewares"
 	log "github.com/sirupsen/logrus"
 	bolt "go.etcd.io/bbolt"
 )
@@ -218,11 +217,13 @@ func (controller *JobsController) StartJobByID(c *gin.Context) {
 		if len(templates) > 0 {
 			log.Debugf("Loaded %v templates", len(templates))
 			template := ocrschema.FindTemplate(mediaDir, templates)
+			log.Infof("[Job: %04d] Picked template: %s by %s", job.ID, template.Title, template.Author)
 			_ = controller.updateJobTemplate(job.ID, template)
 
 			var data []ocrschema.OCRResult
-			for elem := range tesseractutils.RunRecognitionChan(mediaDir, controller.tessdataDir, template, false) {
+			for elem := range tesseractutils.RunRecognitionChan(mediaDir, controller.tessdataDir, template, true) {
 				data = append(data, elem)
+				log.Printf("[Job: %04d][%04d/%04d] %v Took: %v ms", job.ID, index, fileCount, elem.Filename, elem.Took.Milliseconds())
 				index = index + 1
 				_ = controller.updateJobStatus(job.ID, fmt.Sprintf("Processing: %v/%v", index, fileCount))
 				_ = controller.updateJobResults(job.ID, data)

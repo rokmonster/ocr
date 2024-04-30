@@ -23,8 +23,8 @@ curl -LO https://go.dev/dl/go1.19.2.darwin-amd64.pkg && open ./go1.19.2.darwin-a
 # install tesseract & opencv
 brew install tesseract opencv
 # You might need these
-# export CPATH="/opt/homebrew/include"
-# export LIBRARY_PATH="/opt/homebrew/lib"
+export CPATH="/opt/homebrew/include"
+export LIBRARY_PATH="/opt/homebrew/lib"
 ```
 
 ### PLEASE CHECK FOR ERRORS!!!
