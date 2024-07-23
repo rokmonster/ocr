@@ -74,25 +74,25 @@ nfpms:
         dependencies:
           - tesseract
           - libjpeg-turbo
-  
+
 dockers:
   - ids:
-    - ocr-package
- 
-    image_templates:
-    - "ghcr.io/rokmonster/ocr:{{ .Tag }}"
-    - "ghcr.io/rokmonster/ocr:latest"
+      - ocr-package
 
-    dockerfile: 'Dockerfile.debian'
+    image_templates:
+      - "ghcr.io/rokmonster/ocr:{{ .Tag }}"
+      - "ghcr.io/rokmonster/ocr:latest"
+
+    dockerfile: "Dockerfile.debian"
     use: docker
 
     build_flag_templates:
-    - "--pull"
-    - "--label=org.opencontainers.image.created={{.Date}}"
-    - "--label=org.opencontainers.image.title={{.ProjectName}}"
-    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-    - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--platform=linux/amd64"
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
 
 archives:
   - id: rokmonster-ocr
@@ -102,14 +102,14 @@ archives:
       - scanner
     format: tar.gz
     files:
-    - src: license*
-    - src: LICENSE*
-    - src: readme*
-    - src: README*
-    - src: changelog*
-    - src: CHANGELOG*   
-    - media/*.png
-    - templates/*.json
+      - src: license*
+      - src: LICENSE*
+      - src: readme*
+      - src: README*
+      - src: changelog*
+      - src: CHANGELOG*
+      - media/*.png
+      - templates/*.json
   - id: rokmonster-remote
     name_template: "rokmonster-remote_{{ .Os }}_{{ .Arch }}"
     builds:
@@ -119,16 +119,16 @@ archives:
 announce:
   discord:
     enabled: true
-    message_template: 'ROK Monster OCR {{.Tag}} is out! Check it out at {{ .ReleaseURL }}'
-    
+    message_template: "ROK Monster OCR {{.Tag}} is out! Check it out at {{ .ReleaseURL }}"
+
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^ci:'
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
