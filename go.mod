@@ -20,7 +20,7 @@ require (
 	gocv.io/x/gocv v0.37.0
 	golang.org/x/crypto v0.25.0
 	golang.org/x/image v0.18.0
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.22.0
 )
 
 require (
