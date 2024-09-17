@@ -3,7 +3,7 @@ module github.com/rokmonster/ocr
 go 1.22
 
 require (
-	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/corona10/goimagehash v1.1.0
 	github.com/gin-contrib/sessions v1.0.1
@@ -17,16 +17,17 @@ require (
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.etcd.io/bbolt v1.3.11
-	gocv.io/x/gocv v0.37.0
-	golang.org/x/crypto v0.26.0
-	golang.org/x/image v0.19.0
-	golang.org/x/oauth2 v0.22.0
+	gocv.io/x/gocv v0.38.0
+	golang.org/x/crypto v0.27.0
+	golang.org/x/image v0.20.0
+	golang.org/x/oauth2 v0.23.0
 )
 
 require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.2.1 // indirect
+	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
@@ -42,8 +43,7 @@ require (
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect
-	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/imdario/mergo v0.3.16 // indirect
+	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -62,13 +62,13 @@ require (
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/spf13/cast v1.6.0 // indirect
+	github.com/spf13/cast v1.7.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
