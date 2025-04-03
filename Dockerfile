@@ -1,4 +1,4 @@
-FROM golang:1.22-bookworm as build
+FROM golang:1.24-bookworm as build
 RUN apt update && apt install -y libtesseract-dev
 ADD . /app
 WORKDIR /app
