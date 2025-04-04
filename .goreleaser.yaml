@@ -75,25 +75,6 @@ nfpms:
           - tesseract
           - libjpeg-turbo
 
-dockers:
-  - ids:
-      - ocr-package
-
-    image_templates:
-      - "ghcr.io/rokmonster/ocr:{{ .Tag }}"
-      - "ghcr.io/rokmonster/ocr:latest"
-
-    dockerfile: "Dockerfile.debian"
-    use: docker
-
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--platform=linux/amd64,linux/arm64"
-
 archives:
   - id: rokmonster-ocr
     name_template: "rokmonster-ocr_{{ .Os }}_{{ .Arch }}"
