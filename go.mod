@@ -6,8 +6,8 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/corona10/goimagehash v1.1.0
-	github.com/gin-contrib/sessions v1.0.2
-	github.com/gin-contrib/static v1.1.3
+	github.com/gin-contrib/sessions v1.0.3
+	github.com/gin-contrib/static v1.1.5
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
@@ -18,9 +18,9 @@ require (
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.etcd.io/bbolt v1.4.0
 	gocv.io/x/gocv v0.41.0
-	golang.org/x/crypto v0.36.0
-	golang.org/x/image v0.25.0
-	golang.org/x/oauth2 v0.28.0
+	golang.org/x/crypto v0.37.0
+	golang.org/x/image v0.26.0
+	golang.org/x/oauth2 v0.29.0
 )
 
 require (
@@ -66,10 +66,10 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	golang.org/x/arch v0.15.0 // indirect
+	golang.org/x/arch v0.16.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
