@@ -156,8 +156,8 @@ github.com/ugorji/go/codec v1.3.0 h1:Qd2W2sQawAfG8XSvzwhBeoGq71zXOC/Q1E9y/wUcsUA
 github.com/ugorji/go/codec v1.3.0/go.mod h1:pRBVtBSKl77K30Bv8R2P+cLSGaTtex6fsA2Wjqmfxj4=
 github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7 h1:xwmuUst0P21SJmJlIOPPq/geECy23t+DUxgnRSqt6Hg=
 github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7/go.mod h1:Drd+klC4FSDx0vKNEQDsSpWX5so04NA7l0vzHqkH8AQ=
-github.com/zsais/go-gin-prometheus v1.0.0 h1:ucg4uqyIg/Q2vFaKYirVH+WKAGD8NZR8pB6uW4odXHk=
-github.com/zsais/go-gin-prometheus v1.0.0/go.mod h1:BLzchNYsehhyPNY31G0YgK/Q6BaDbKpoGQe7OAcLMVU=
+github.com/zsais/go-gin-prometheus v1.0.1 h1:PtTa1rQhbXEAx0gNQkXr4+SGcElSF1YR/NmO3f5s3o4=
+github.com/zsais/go-gin-prometheus v1.0.1/go.mod h1:iKBYSOHzvGfe2FyGSOC8JSwUA0MITdnYzI6v+aAbw1Q=
 go.etcd.io/bbolt v1.4.2 h1:IrUHp260R8c+zYx/Tm8QZr04CX+qWS5PGfPdevhdm1I=
 go.etcd.io/bbolt v1.4.2/go.mod h1:Is8rSHO/b4f3XigBC0lL0+4FwAQv3HXEEIgFMuKHceM=
 gocv.io/x/gocv v0.41.0 h1:KM+zRXUP28b6dHfhy+4JxDODbCNQNtLg8kio+YE7TqA=
