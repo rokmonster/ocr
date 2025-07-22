@@ -15,7 +15,7 @@ require (
 	github.com/otiai10/gosseract/v2 v2.4.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
-	github.com/zsais/go-gin-prometheus v1.0.0
+	github.com/zsais/go-gin-prometheus v1.0.1
 	go.etcd.io/bbolt v1.4.2
 	gocv.io/x/gocv v0.41.0
 	golang.org/x/crypto v0.40.0
