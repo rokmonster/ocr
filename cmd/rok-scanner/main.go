@@ -9,6 +9,7 @@ import (
 	"github.com/rokmonster/ocr/internal/pkg/rokocr/tesseractutils"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 	config "github.com/rokmonster/ocr/internal/pkg/config/scannerconfig"
 	schema "github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	"github.com/rokmonster/ocr/internal/pkg/rokocr"
@@ -24,8 +25,11 @@ func printResultsTable(data []schema.OCRResult, template schema.OCRTemplate) {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader(headers)
+	table.Configure(func(cfg *tablewriter.Config) {
+		cfg.Header.Formatting.AutoFormat = tw.Off
+		cfg.Header.Alignment.Global = tw.AlignLeft
+	})
+	table.Header(headers)
 	for _, row := range data {
 		rowData := []string{row.Filename}
 

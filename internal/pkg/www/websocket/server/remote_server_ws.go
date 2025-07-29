@@ -19,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/rokmonster/ocr/internal/pkg/ocrschema"
 	log "github.com/sirupsen/logrus"
 )
@@ -104,8 +105,10 @@ func (c *RemoteServerWS) printAll() {
 	output := new(bytes.Buffer)
 
 	table := tablewriter.NewWriter(output)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader(headers)
+	table.Configure(func(cfg *tablewriter.Config) {
+		cfg.Header.Formatting.AutoFormat = tw.Off
+		cfg.Header.Alignment.Global = tw.AlignLeft
+	})
 	for _, row := range c.results {
 		var rowData []string
 
