@@ -19,7 +19,7 @@ require (
 	go.etcd.io/bbolt v1.4.2
 	gocv.io/x/gocv v0.42.0
 	golang.org/x/crypto v0.40.0
-	golang.org/x/image v0.29.0
+	golang.org/x/image v0.30.0
 	golang.org/x/oauth2 v0.30.0
 )
 
@@ -72,7 +72,7 @@ require (
 	golang.org/x/arch v0.19.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
