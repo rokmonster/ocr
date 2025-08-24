@@ -4,7 +4,7 @@ go 1.24.3
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/coreos/go-systemd/v22 v22.5.0
+	github.com/coreos/go-systemd/v22 v22.6.0
 	github.com/corona10/goimagehash v1.1.0
 	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-contrib/static v1.1.5
