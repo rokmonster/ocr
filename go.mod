@@ -6,8 +6,8 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/coreos/go-systemd/v22 v22.7.0
 	github.com/corona10/goimagehash v1.1.0
-	github.com/gin-contrib/sessions v1.0.4
-	github.com/gin-contrib/static v1.1.5
+	github.com/gin-contrib/sessions v1.1.0
+	github.com/gin-contrib/static v1.1.6
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
@@ -16,10 +16,10 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/zach-klippenstein/goadb v0.0.0-20201208042340-620e0e950ed7
 	github.com/zsais/go-gin-prometheus v1.0.3
-	go.etcd.io/bbolt v1.4.3
+	go.etcd.io/bbolt v1.5.0
 	gocv.io/x/gocv v0.43.0
-	golang.org/x/crypto v0.48.0
-	golang.org/x/image v0.37.0
+	golang.org/x/crypto v0.53.0
+	golang.org/x/image v0.43.0
 	golang.org/x/oauth2 v0.36.0
 )
 
@@ -77,8 +77,8 @@ require (
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	golang.org/x/arch v0.22.0 // indirect
-	golang.org/x/net v0.51.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
